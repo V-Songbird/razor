@@ -24,7 +24,7 @@ razor teaches Claude a simple habit: **don't build what isn't needed, reuse what
 Inside Claude Code, run:
 
 ```
-/plugin marketplace add V-Songbird/claude-plugins
+/plugin marketplace add V-Songbird/foundry
 /plugin install razor
 ```
 
