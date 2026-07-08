@@ -32,7 +32,7 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put razor up against plain Claude Code and the popular "keep it lean" plugin — same real coding jobs, three setups — and measured the bill and the code.
+We put razor up against plain Claude Code and the popular "keep it lean" plugin on real engineering work — full agent sessions that read, write, and run code, not a single generated reply — same coding jobs, three setups, and measured the bill and the code.
 
 <p align="center"><img src="assets/bench-cost.svg" alt="Cost of a coding task vs no plugin: the lean plugin is 9% cheaper, razor is 26% cheaper" width="540"></p>
 
@@ -40,13 +40,17 @@ We put razor up against plain Claude Code and the popular "keep it lean" plugin 
 
 <p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: without razor the needless dependency was added every time, with razor never" width="540"></p>
 
-**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time. With razor on, Claude used the platform's own tools instead and moved on.
+**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time, and open-source registries logged over 454,000 new malicious packages last year alone, up 75% on the year before. Every dependency you don't add is one fewer of those to worry about. With razor on, Claude used the platform's own tools instead and moved on.
 
 And it never cut a corner to do it: **every job still came out correct.**
 
-*How we tested: we ran each setup on the same real coding tasks several times in a fresh, throwaway workspace and read the real cost straight from the API — no guesswork. Figures are averages on the smaller, cheaper model, and the headline results hold on the bigger one too.*
+> [!NOTE]
+> On a task with nothing to trim — no stray dependency to reach for, no sprawl, a build that's already lean — razor and no plugin land in the same place. The wins above are real, they're just not universal.
 
-*Good to know:* razor never blocks you. If you genuinely want that library, just say so again and it steps aside — it's a nudge for second thoughts, not a wall.
+*How we tested: we ran each setup on the same real coding tasks several times in a fresh, throwaway workspace — full agent sessions, never a single generated reply — and read the real cost straight from the API — no guesswork. Figures are averages on the smaller, cheaper model, and the headline results hold on the bigger one too.*
+
+> [!TIP]
+> razor never blocks you. If you genuinely want that library, just say so again and it steps aside — it's a nudge for second thoughts, not a wall.
 
 *Curious whether this holds up?* You can reproduce it yourself — see [benchmarks/](benchmarks/).
 

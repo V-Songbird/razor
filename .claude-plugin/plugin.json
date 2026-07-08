@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI enforcement at the harness level — nudges toward the simplest solution and gates against unnecessary dependencies, file sprawl, and unchecked build growth.",
+  "description": "YAGNI enforcement at the harness level for real engineering work — nudges toward the simplest solution and gates against unnecessary dependencies, file sprawl, and unchecked build growth.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",

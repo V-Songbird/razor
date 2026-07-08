@@ -2,7 +2,7 @@
 
 Curious whether the numbers on razor's front page hold up? This is the actual harness — run it yourself.
 
-It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed coding tasks, once with no plugin and once with razor, and reads the true cost and token counts straight out of the API's own usage JSON. No mocks, no estimates. Each session is scored on the code it leaves behind, and correctness is checked mechanically — the harness runs the produced code with `node` — so a lean answer that breaks the task scores as a *failure*, not a win.
+It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed coding tasks, once with no plugin and once with razor, and reads the true cost and token counts straight out of the API's own usage JSON. No mocks, no estimates, and no single-shot prompts — a canned reply can't tell you what a plugin costs across a real multi-turn session, so we don't measure it that way. Each session is scored on the code it leaves behind, and correctness is checked mechanically — the harness runs the produced code with `node` — so a lean answer that breaks the task scores as a *failure*, not a win.
 
 ## Before you start
 
@@ -12,9 +12,13 @@ It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed
 
 ## The honest disclaimer, up front
 
-- **It costs real money.** The cheap default run is roughly **$1–3 on the small model (Haiku)** and takes a few minutes. The full suite, or running on the bigger model, costs more.
-- **The numbers move between runs.** This is a handful of reps against a live model, not a powered experiment — Haiku is high-variance, and a small sweep is a small sample. Add reps for steadier numbers (`--runs 4`).
-- **What you should see:** razor landing **at or below baseline on cost and code size**, with **no new dependencies added** and every task still passing — the same *shape* as our published charts. You will **not** reproduce our exact figures, and that's expected. If razor is leaner and no pricier with correctness intact, the claim holds.
+> [!WARNING]
+> This costs real money. The cheap default run is roughly **$1–3 on the small model (Haiku)** and takes a few minutes. The full suite, or running on the bigger model, costs more.
+
+> [!NOTE]
+> The numbers move between runs — a handful of reps against a live model, not a powered experiment. Haiku is high-variance, and a small sweep is a small sample; add reps for steadier numbers (`--runs 4`).
+
+**What you should see:** razor landing **at or below baseline on cost and code size**, with **no new dependencies added** and every task still passing — the same *shape* as our published charts. You will **not** reproduce our exact figures, and that's expected. If razor is leaner and no pricier with correctness intact, the claim holds.
 
 ## Run it
 
