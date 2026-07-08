@@ -25,8 +25,9 @@ const TIERS = {
   'sprawl trap (Bash on, git)': ['sprawl-todo'],
   'injection overhead (no code)': ['oh-question', 'oh-typo'],
 };
-const ARM_ORDER = ['baseline', 'razor', 'rival'];
-const COLORS = { baseline: '#9aa0a6', razor: '#4a7bc9', rival: '#c96f4a' };
+const ARM_ORDER = ['baseline', 'razor'];
+const COLORS = { baseline: '#9aa0a6', razor: '#4a7bc9' };
+const RIVAL_COLOR = '#c96f4a';
 
 function median(xs) {
   const v = xs.slice().sort((a, b) => a - b);
@@ -89,14 +90,14 @@ function barChart(title, groups, series, values, unit = '%', width = 760) {
         return;
       }
       const bh = 200 * (v / top);
-      out.push(`<rect x="${x.toFixed(0)}" y="${(baseY - bh).toFixed(0)}" width="${(bw - 4).toFixed(0)}" height="${bh.toFixed(0)}" fill="${COLORS[arm] || '#888'}" rx="2"/>`);
+      out.push(`<rect x="${x.toFixed(0)}" y="${(baseY - bh).toFixed(0)}" width="${(bw - 4).toFixed(0)}" height="${bh.toFixed(0)}" fill="${COLORS[arm] || RIVAL_COLOR}" rx="2"/>`);
       out.push(`<text x="${(x + bw / 2 - 2).toFixed(0)}" y="${(baseY - bh - 5).toFixed(0)}" text-anchor="middle" fill="#333">${v.toFixed(0)}</text>`);
     });
     out.push(`<text x="${(gx + (nS * bw) / 2).toFixed(0)}" y="${baseY + 18}" text-anchor="middle" font-weight="bold">${g}</text>`);
   });
   let lx = 70;
   for (const arm of series) {
-    out.push(`<rect x="${lx}" y="${h - 22}" width="12" height="12" fill="${COLORS[arm] || '#888'}" rx="2"/>`);
+    out.push(`<rect x="${lx}" y="${h - 22}" width="12" height="12" fill="${COLORS[arm] || RIVAL_COLOR}" rx="2"/>`);
     out.push(`<text x="${lx + 16}" y="${h - 12}">${arm}</text>`);
     lx += 16 + 8 * arm.length + 30;
   }
@@ -147,6 +148,7 @@ function main() {
   if (!runDir || !fs.existsSync(runDir)) runDir = path.join(RUNS_BASE, path.basename(process.argv[2] || ''));
   const { rows, byTask } = load(runDir);
   const arms = ARM_ORDER.filter((a) => rows.some((r) => r.arm === a));
+  for (const r of rows) if (!arms.includes(r.arm)) arms.push(r.arm); // any --rival-name label
   const model = rows.length ? rows[0].model : '?';
   const n = rows.length ? rows[0].n : 0;
   const md = [`# razor benchmark — run \`${path.basename(runDir)}\``,

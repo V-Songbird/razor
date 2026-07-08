@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.2.6-alpha — 2026-07-08
+
+Fixed the benchmarks harness's report generator so a custom `--rival-dir`/`--rival-name` arm is shown in the report table and chart instead of being silently dropped.
+
 ## 0.2.5-alpha — 2026-07-08
 
 Doc-only: plugin.json's description now matches the marketplace listing text. No behavior change.
