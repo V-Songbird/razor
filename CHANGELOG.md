@@ -15,48 +15,42 @@ Documented a known limitation when pairing razor with [hush](../hush) on hard de
 
 ## 0.2.2-alpha — 2026-07-07
 
-Ladder wording fix, no hook logic changed. Rung 5 now states that importing/requiring a package
-not in the manifest *is* adding a dependency — even when the user names the library.
-
-- The PreToolUse dependency guard watches the Bash/PowerShell surface (`pip install`, etc.), but
-  agents usually introduce a dependency by writing an `import`/`require` line — a Write, not an
-  install — so on casual prompts that name a library ("let's just use axios for it") the guard
-  never saw it. The one-sentence rung-5 adjunct closes the gap at the prompt level, where the
-  decision is actually made.
-- Deliberately no new hook: an import-surface mechanical gate was considered and deferred as
-  YAGNI — the prompt fix is sufficient and adds no per-Write noise. It stays available as a
-  backstop.
+Fixed a gap in the dependency guidance: naming a new library in a request ("let's just use axios
+for it") could add it via an `import`/`require` statement without ever tripping the guard, which
+only watches for install commands. The guidance now covers that case too, so introducing an
+undeclared dependency is flagged no matter how it's added into the code.
 
 ## 0.2.1-alpha — 2026-07-06
 
-Two ladder wording fixes, no hook logic changed.
-
-- The "never skip comprehension" clause fired even with nothing to read, costing wasted
-  explore-tool round-trips on greenfield ("write me X" into an empty dir) tasks. Now scoped to
-  skip when the target is a genuinely new file.
-- "Stop at the first rung that holds" didn't stop the agent verifying rungs below the one that
-  already applied — an exhaustive one-by-one sweep of every dependency-manifest format
-  (`requirements.txt`, `setup.py`, `pyproject.toml`, `poetry.lock`) before writing a stdlib-only
-  implementation. Now explicit: act on the first rung without checking further down.
-- Added a permanent regression case: a stdlib-covered TOML-parsing task where the dep guard must
-  still catch an unnecessary dependency if one is attempted via `pip install`.
-- 94 tests (up from 93).
+- Fixed unnecessary file-reading being triggered on greenfield tasks (writing into an empty
+  directory) even when there was nothing to read yet.
+- Fixed the guidance continuing to double-check lower-priority rules after a higher-priority one
+  already applied — for example, still walking through every dependency-manifest format before
+  writing a plain, dependency-free implementation. It now acts on the first applicable rule
+  without further checking.
 
 ## 0.2.0-alpha — 2026-07-05
 
-Evidence-carrying gates: the deny reasons stop quoting philosophy and start presenting repo facts.
+Evidence-carrying gates: deny reasons now present repo facts instead of general guidance.
 
-- Dependency soft gate now walks up from the working directory to the nearest ecosystem manifest (`package.json`, `pyproject.toml` PEP 621 + poetry / `requirements.txt`, `Cargo.toml`, `go.mod`, `composer.json`, `Gemfile`, `*.csproj`/`*.fsproj`) and lists the actual installed dependencies in the deny reason (capped at 30, with count). Line-scan extraction, no parser dependencies. No manifest → 0.1.0 generic wording.
-- Build ledger: `SessionStart` snapshots the git baseline (base commit + untracked count, once per session — resume/compact keep it); a `Stop` hook fires one question, once per session, when the tree shows sprawl — net growth > `RAZOR_LEDGER_LOC` (default 500) with deletions < 10% of insertions, or > `RAZOR_LEDGER_FILES` (default 8) new files. Insertion-heavy refactors with real deletions never trip it. Not a git repo → inert. `RAZOR_LEDGER=off` disables.
-- 93 tests (up from 71).
+- The dependency guard's deny message now lists the project's actual installed dependencies, so
+  you can see at a glance what's already available before adding something new.
+- Added a build ledger: razor now asks once per session if the working tree has grown unusually
+  large (a lot of new files, or a lot of added code with little removed), as a nudge to check for
+  unnecessary sprawl. Insertion-heavy refactors that also remove code won't trigger it. Tune with
+  `RAZOR_LEDGER_LOC` / `RAZOR_LEDGER_FILES`, or disable with `RAZOR_LEDGER=off`.
 
 ## 0.1.0-alpha — 2026-07-05
 
 Initial release. YAGNI enforcement at the harness level.
 
-- Compact first-rung-that-holds ladder (~300 tokens) injected at `SessionStart`, with an explicit no-rung-deliberation clause for reasoning models.
-- `SubagentStart` re-injection gated by agent type: read-only built-ins (`Explore`, `Plan`, `claude-code-guide`, `statusline-setup`, `output-style-setup`) are skipped; unknown types fail safe to injected. `RAZOR_AGENT_SKIP` / `RAZOR_AGENT_INJECT` to tune.
-- Dependency soft gate (`PreToolUse` on Bash/PowerShell): first install of a new named package across 13 managers is denied with a reuse-first reason; the retry passes (keyed by manager + sorted package names). Lockfile restores and system package managers ignored. `RAZOR_DEP_GUARD=off` to disable.
-- New-file meter (`PreToolUse` on Write): the Write crossing the per-turn new-file budget (default 4) is denied once with a rung-2 reason, then self-clears. Existing files, temp, and scratchpad paths exempt. Turn detection via transcript tail, human prompts only. `RAZOR_FILE_BUDGET` to tune, `0` disables.
-- Session-scoped boolean toggle via `UserPromptSubmit`: `/razor on|off`, "stop razor". No intensity levels.
-- 71 tests (`node --test razor/tests/*.test.js`).
+- Injects a compact "use the simplest solution that already works" checklist at the start of each
+  session, and again for subagents (read-only built-ins are skipped). Tune with
+  `RAZOR_AGENT_SKIP` / `RAZOR_AGENT_INJECT`.
+- Dependency guard: denies the first install of a new package with a reuse-first reason; retrying
+  the same install goes through. Lockfile restores and system package managers are ignored.
+  Disable with `RAZOR_DEP_GUARD=off`.
+- New-file meter: denies once when a single turn writes more new files than the budget (default
+  4), then clears. Existing files and temp/scratchpad paths are exempt. Tune with
+  `RAZOR_FILE_BUDGET`, or set to `0` to disable.
+- Toggle razor on or off for the session with `/razor on|off` or "stop razor".
