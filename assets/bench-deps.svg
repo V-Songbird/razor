@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 160" font-family="Segoe UI,-apple-system,Helvetica,Arial,sans-serif">
+  <text x="8" y="24" font-size="14.5" font-weight="600" fill="#8b949e">You said "just use axios." Did it add the needless dependency?</text>
+  <rect x="230" y="50" width="390" height="30" rx="3" fill="#e0653f"/>
+  <text x="8" y="70" font-size="13" fill="#8b949e">Without razor</text>
+  <text x="612" y="70" text-anchor="end" font-size="13" font-weight="700" fill="#ffffff">100%</text>
+  <rect x="230" y="96" width="5" height="30" rx="2" fill="#16a34a"/>
+  <text x="8" y="116" font-size="13" font-weight="700" fill="#16a34a">With razor</text>
+  <text x="243" y="116" font-size="13" font-weight="700" fill="#16a34a">0% — used the built-in instead</text>
+  <text x="8" y="150" font-size="11" fill="#8b949e">Fewer surprise dependencies = less to maintain, less to break</text>
+</svg>
