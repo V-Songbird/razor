@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI enforcement at the harness level, not the prompt level. Injects a compact first-rung-that-holds ladder (skip it / reuse it / stdlib / platform / installed dep / one line / minimum that works) into the main thread and — gated by agent type — into code-writing subagents only, so read-only Explore/Plan spawns never pay the injection tax. Backs the prompt with evidence-carrying soft gates: a PreToolUse dependency guard that denies the first install of a new package and lists the project's actual installed dependencies in the reason (the retry passes — one forced reconsideration, never a hard block), a per-turn new-file meter that challenges file sprawl once, then self-clears, and a git-grounded build ledger that asks one question, once per session, when the diff grows large with nothing deleted. Boolean on/off (/razor off), no intensity dial. Pairs with hush: hush governs how the agent talks, razor governs what it builds. Tune via RAZOR_DISABLE, RAZOR_DEP_GUARD, RAZOR_FILE_BUDGET, RAZOR_LEDGER_LOC/FILES, RAZOR_AGENT_SKIP/INJECT.",
+  "description": "YAGNI enforcement at the harness level — nudges toward the simplest solution and gates against unnecessary dependencies, file sprawl, and unchecked build growth.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",

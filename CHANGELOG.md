@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.2.5-alpha — 2026-07-08
+
+Doc-only: plugin.json's description now matches the marketplace listing text. No behavior change.
+
 ## 0.2.4-alpha — 2026-07-07
 
 Doc-only: the pairing limitation noted in 0.2.3 is resolved by [hush](../hush) 0.3.6. Razor's behavior is unchanged.
