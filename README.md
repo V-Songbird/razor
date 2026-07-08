@@ -52,7 +52,7 @@ And it never cut a corner to do it: **every job still came out correct.**
 
 ## Under the hood
 
-If you're curious, it's all a handful of gentle, one-time nudges — never a nag, never a wall — and it's all there to read in the plugin's files. Pairs naturally with [hush](../hush): razor cuts the code and the cost, hush cuts the noise — and measured together, they add no overhead to each other.
+If you're curious, it's all a handful of gentle, one-time nudges — never a nag, never a wall — and it's all there to read in the plugin's files. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor cuts the code and the cost, hush cuts the noise — and measured together, they add no overhead to each other.
 
 ## Settings
 
