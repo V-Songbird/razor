@@ -40,7 +40,7 @@ We put razor up against plain Claude Code and the popular "keep it lean" plugin 
 
 <p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: without razor the needless dependency was added every time, with razor never" width="540"></p>
 
-**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time, and open-source registries logged over 454,000 new malicious packages last year alone, up 75% on the year before. Every dependency you don't add is one fewer of those to worry about. With razor on, Claude used the platform's own tools instead and moved on.
+**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time, and open-source registries have already blocked more than 1.2 million malicious packages, with new ones showing up faster every year. Every dependency you don't add is one fewer of those to worry about. With razor on, Claude used the platform's own tools instead and moved on.
 
 And it never cut a corner to do it: **every job still came out correct.**
 

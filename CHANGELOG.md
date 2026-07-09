@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.2.8-alpha — 2026-07-08
+
+Doc-only: the supply-chain stakes line now leads with the bigger, still-accurate cumulative figure (1.2 million malicious packages blocked to date) instead of the smaller annual one. No behavior change.
+
 ## 0.2.7-alpha — 2026-07-08
 
 Doc-only: the README now cites real supply-chain risk data next to the dependency-avoidance chart, states plainly that every benchmark number comes from a real multi-turn agent session, and adds an honest note for tasks where razor and no plugin land in the same place. No behavior change.
