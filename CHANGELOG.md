@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.2.9-alpha — 2026-07-08
+
+Doc-only: the cost chart now carries a "+35%" badge (what skipping razor costs on top), and the supply-chain stat gets its own chart instead of sitting only in prose. No new numbers, no behavior change.
+
 ## 0.2.8-alpha — 2026-07-08
 
 Doc-only: the supply-chain stakes line now leads with the bigger, still-accurate cumulative figure (1.2 million malicious packages blocked to date) instead of the smaller annual one. No behavior change.
