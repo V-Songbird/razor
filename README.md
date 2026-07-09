@@ -34,15 +34,15 @@ It's active from your next session — nothing to configure.
 
 We put razor up against plain Claude Code and the popular "keep it lean" plugin on real engineering work — full agent sessions that read, write, and run code, not a single generated reply — same coding jobs, three setups, and measured the bill and the code.
 
-<p align="center"><img src="assets/bench-cost.svg" alt="Cost of a coding task vs no plugin: the lean plugin is 9% cheaper, razor is 26% cheaper — skipping razor costs 35% more on top" width="540"></p>
+<p align="center"><img src="assets/bench-cost.svg" alt="Cost of a coding task vs no plugin: the lean plugin is 9% cheaper, razor is 26% cheaper — skipping razor costs 35% more on top" width="640"></p>
 
 **razor got the job done for about a quarter less — cheaper than running no plugin at all.** It writes the least code to get there, so there's less for you to read, less to review, and less that can quietly break later.
 
-<p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: without razor the needless dependency was added every time, with razor never" width="540"></p>
+<p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: without razor the needless dependency was added every time, with razor never" width="640"></p>
 
 **Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time. With razor on, Claude used the platform's own tools instead and moved on.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="540"></p>
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="640"></p>
 
 **That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, with new ones showing up faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
 
