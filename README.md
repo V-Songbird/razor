@@ -12,6 +12,8 @@ AI assistants love to add things. Ask for one small feature and you might get a 
 
 razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.** And it backs the habit with real checks — when Claude reaches for a new dependency (whether as an install command or an `import` line), starts spawning files, or keeps searching instead of shipping, razor makes it stop and reconsider once. If Claude still thinks it's right, it goes ahead. A speed bump for second thoughts, never a wall.
 
+It's built for real engineering sessions — the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
+
 ## Why you'd want it
 
 - **Leaner projects.** Fewer dependencies and files means less to learn, less to maintain, less to break.
@@ -38,9 +40,9 @@ We put razor up against plain Claude Code and the popular "keep it lean" plugin 
 
 **razor got the job done for about a quarter less — cheaper than running no plugin at all.** It writes the least code to get there, so there's less for you to read, less to review, and less that can quietly break later.
 
-<p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: without razor the needless dependency was added every time, with razor never" width="640"></p>
+<p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: with no plugin the needless dependency shipped every time, the popular lean plugin let it through almost every time, razor never — on both models" width="640"></p>
 
-**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line would otherwise ship a real dependency you now have to keep updated and secure — every time. With razor on, Claude used the platform's own tools instead and moved on.
+**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line ships a real dependency you now have to keep updated and secure — with no plugin it shipped every time, and the popular lean plugin let it through almost every time too. razor never did, on the small model and the big one alike.
 
 <p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="640"></p>
 
@@ -57,6 +59,10 @@ And it never cut a corner to do it: **every job still came out correct.**
 > razor never blocks you. If you genuinely want that library, just say so again and it steps aside — it's a nudge for second thoughts, not a wall.
 
 *Curious whether this holds up?* You can reproduce it yourself — see [benchmarks/](benchmarks/).
+
+<p align="center"><img src="assets/guards.svg" alt="A session timeline — understand, search, write, install, wrap up — with razor's checks marked at the moment each one fires" width="640"></p>
+
+**Made for the long session.** The longer a session digs, the less a start-of-session reminder holds — razor's nudges fire at the moment of action instead, all session long.
 
 ## Under the hood
 
