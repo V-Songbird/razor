@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.0-alpha — 2026-07-09
+
+razor now catches a needless dependency at the moment it's written as an `import`/`require` line — not just when it's installed — and ships the lean version in the same response instead of pausing to ask. It also stops sooner when a search has already answered the question. Two new settings: `RAZOR_IMPORT_GUARD=off` and `RAZOR_SEARCH_BUDGET`.
+
 ## 0.2.10-alpha — 2026-07-08
 
 Doc-only: Benchmarks charts now display larger (640px instead of 540px). No behavior change.

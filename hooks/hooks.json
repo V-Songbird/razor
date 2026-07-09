@@ -47,6 +47,28 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "^(Grep|Glob|Read|Edit|Write|Bash|PowerShell)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/search-meter.js\"",
+            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\search-meter.js\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/import-guard.js\"",
+            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\import-guard.js\"",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [

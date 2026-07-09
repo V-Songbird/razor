@@ -71,11 +71,13 @@ function selfcheckSplit(text) {
   }
   if (start === null) {
     const [t, c] = cnt(lines);
-    return { total: t, code: c, scTotal: 0, scCode: 0 };
+    return { total: t, code: c, scTotal: 0, scCode: 0, scRaw: 0 };
   }
   const [t, c] = cnt(lines.slice(0, start));
   const [st, sc] = cnt(lines.slice(start));
-  return { total: t, code: c, scTotal: st, scCode: sc };
+  // scRaw: raw line count of the block incl. blanks — what a git numstat
+  // "added lines" figure would have counted for it.
+  return { total: t, code: c, scTotal: st, scCode: sc, scRaw: lines.length - start };
 }
 
 function walk(dir, base = dir, out = []) {

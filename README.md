@@ -10,7 +10,7 @@
 
 AI assistants love to add things. Ask for one small feature and you might get a new library installed, five helper files, and an abstraction layer for a future that never comes — all of it stuff you now have to understand, maintain, and eventually delete.
 
-razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.** And it backs the habit with real checks — when Claude reaches for a new dependency or starts spawning files, razor makes it stop and reconsider once. If Claude still thinks it's right, it goes ahead. A speed bump for second thoughts, never a wall.
+razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.** And it backs the habit with real checks — when Claude reaches for a new dependency (whether as an install command or an `import` line), starts spawning files, or keeps searching instead of shipping, razor makes it stop and reconsider once. If Claude still thinks it's right, it goes ahead. A speed bump for second thoughts, never a wall.
 
 ## Why you'd want it
 
@@ -69,8 +69,10 @@ Most people never touch these, but a few environment variables tune it or turn p
 | Variable | What it does |
 | --- | --- |
 | `RAZOR_DISABLE=1` | Turns everything off |
-| `RAZOR_DEP_GUARD=off` | Stops the new-dependency nudge |
+| `RAZOR_DEP_GUARD=off` | Stops the new-dependency nudge for install commands |
+| `RAZOR_IMPORT_GUARD=off` | Stops the new-dependency nudge for `import`/`require` lines |
 | `RAZOR_FILE_BUDGET=4` | New files allowed in one turn before it speaks up |
+| `RAZOR_SEARCH_BUDGET=1` | Extra searches allowed after the code is written before it speaks up |
 | `RAZOR_LEDGER=off` | Turns off the end-of-session "is all this needed?" check |
 
 ## License

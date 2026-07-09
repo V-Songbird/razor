@@ -31,6 +31,7 @@ const { spawn, spawnSync } = require('node:child_process');
 const { RAZOR_TASKS } = require('./tasks.js');
 const {
   codeStats, gitSnapshot, gitDiffStats, gitNewFiles, pkgAddAttempts, chatCodeLoc, extractResult,
+  selfcheckSplit,
 } = require('./metrics.js');
 
 const HERE = __dirname;
@@ -194,6 +195,19 @@ async function scoreCell(taskId, arm, model, ws) {
   } else if (task.fixture || task.git) {
     stats = gitDiffStats(ws);
     stats.new_files = gitNewFiles(ws);
+    // Same reclassification codeStats does for surgical tasks: an inline
+    // self-check block is a runnable check, not source bloat — git numstat
+    // can't tell the difference, so split it out here.
+    if (surgical && task.file) {
+      try {
+        const { scTotal, scRaw } = selfcheckSplit(fs.readFileSync(path.join(ws, task.file), 'utf8'));
+        if (scRaw) {
+          stats.total_loc = Math.max(0, stats.total_loc - scRaw);
+          stats.src_loc = Math.max(0, stats.src_loc - scRaw);
+          stats.test_loc += scTotal;
+        }
+      } catch { /* primary file missing — the scorer fails the cell anyway */ }
+    }
   } else {
     stats = codeStats(ws, surgical);
     stats.new_files = stats.src_files || 0;
