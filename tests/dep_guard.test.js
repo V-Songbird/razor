@@ -30,6 +30,11 @@ describe('unit: parseInstallCommand', () => {
     ['sudo npm install -g http-server', 'npm', ['http-server']],
     ['cd api && npm i express', 'npm', ['express']],
     ['git pull; pip install requests', 'pip', ['requests']],
+    // shell redirects are not package names
+    ['cargo add serde 2>&1', 'cargo', ['serde']],
+    ['npm install lodash > install.log 2>&1', 'npm', ['lodash']],
+    ['pip install requests 2>$null', 'pip', ['requests']],
+    ['npm i axios >> build.log', 'npm', ['axios']],
   ];
   for (const [cmd, manager, packages] of adds) {
     test(`add: ${cmd}`, () => {
@@ -57,6 +62,8 @@ describe('unit: parseInstallCommand', () => {
     'brew install ripgrep',
     'winget install nodejs',
     'echo "npm is great"',
+    'npm install > build.log', // bare restore, redirect target is not a package
+    'npm install 2>&1',
   ];
   for (const cmd of passes) {
     test(`pass: ${cmd}`, () => {
@@ -81,40 +88,40 @@ describe('integration: soft gate', () => {
 
   test('first install denied with reason, identical retry passes', () => {
     const session = freshSession();
-    const first = hookOutput(runHook('dep-guard.js', input(session, 'npm install lodash')));
+    const first = hookOutput(runHook('pre-tool-use.js', input(session, 'npm install lodash')));
     assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /razor:/);
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /lodash/);
 
-    const retry = hookOutput(runHook('dep-guard.js', input(session, 'npm install lodash')));
+    const retry = hookOutput(runHook('pre-tool-use.js', input(session, 'npm install lodash')));
     assert.strictEqual(retry, null);
   });
 
   test('reworded retry with same packages passes too', () => {
     const session = freshSession();
-    runHook('dep-guard.js', input(session, 'npm i lodash'));
-    const retry = hookOutput(runHook('dep-guard.js', input(session, 'npm install --save lodash')));
+    runHook('pre-tool-use.js', input(session, 'npm i lodash'));
+    const retry = hookOutput(runHook('pre-tool-use.js', input(session, 'npm install --save lodash')));
     assert.strictEqual(retry, null);
   });
 
   test('a different package is a fresh gate', () => {
     const session = freshSession();
-    runHook('dep-guard.js', input(session, 'npm i lodash'));
-    const other = hookOutput(runHook('dep-guard.js', input(session, 'npm i axios')));
+    runHook('pre-tool-use.js', input(session, 'npm i lodash'));
+    const other = hookOutput(runHook('pre-tool-use.js', input(session, 'npm i axios')));
     assert.strictEqual(other.hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('non-install commands stay silent', () => {
-    assert.strictEqual(hookOutput(runHook('dep-guard.js', input(freshSession(), 'git status'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(freshSession(), 'git status'))), null);
   });
 
   test('RAZOR_DEP_GUARD=off disables the gate', () => {
-    const r = runHook('dep-guard.js', input(freshSession(), 'npm i lodash'), { RAZOR_DEP_GUARD: 'off' });
+    const r = runHook('pre-tool-use.js', input(freshSession(), 'npm i lodash'), { RAZOR_DEP_GUARD: 'off' });
     assert.strictEqual(hookOutput(r), null);
   });
 
   test('RAZOR_DISABLE=1 disables the gate', () => {
-    const r = runHook('dep-guard.js', input(freshSession(), 'npm i lodash'), { RAZOR_DISABLE: '1' });
+    const r = runHook('pre-tool-use.js', input(freshSession(), 'npm i lodash'), { RAZOR_DISABLE: '1' });
     assert.strictEqual(hookOutput(r), null);
   });
 });

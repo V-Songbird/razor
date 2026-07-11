@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\session-start.js\"",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/session-start.js"],
             "timeout": 5
           }
         ]
@@ -18,8 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\subagent-start.js\"",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.js"],
             "timeout": 5
           }
         ]
@@ -27,46 +27,13 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^(Bash|PowerShell)$",
+        "matcher": "^(Bash|PowerShell|Grep|Glob|Read|Edit|Write)$",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/dep-guard.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\dep-guard.js\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "^Write$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/file-meter.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\file-meter.js\"",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.js"],
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "^(Grep|Glob|Read|Edit|Write|Bash|PowerShell)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/search-meter.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\search-meter.js\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "^(Write|Edit)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/import-guard.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\import-guard.js\"",
-            "timeout": 5
           }
         ]
       }
@@ -76,8 +43,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/build-ledger.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\build-ledger.js\"",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/build-ledger.js"],
             "timeout": 10
           }
         ]
@@ -88,8 +55,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js\"",
-            "commandWindows": "node \"$env:CLAUDE_PLUGIN_ROOT\\hooks\\mode-toggle.js\"",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js"],
             "timeout": 5
           }
         ]

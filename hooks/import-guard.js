@@ -1,7 +1,7 @@
-#!/usr/bin/env node
 'use strict';
 
-// PreToolUse (Write|Edit) — soft gate on new dependencies entering as code.
+// Gate (Write|Edit, via pre-tool-use.js) — soft gate on new dependencies
+// entering as code.
 //
 // Agents rarely run `npm install axios`; they write
 // `const axios = require('axios')` and move on — the install is a later or
@@ -28,7 +28,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { readInput, readState, writeState, isActive } = require('./razor-lib');
 const { installedDeps } = require('./dep-guard');
 
 // Node core modules — importing one is never a new dependency.
@@ -211,52 +210,39 @@ function denyReason(tool, roots, eco, manifestName, deps) {
     + tail;
 }
 
-function main() {
-  if (process.env.RAZOR_IMPORT_GUARD === 'off') return;
-  const data = readInput();
-  if (!isActive(readState(data.session_id))) return;
+// Dispatcher entry: mutates gate state, returns the deny reason or null.
+function check(data, state) {
+  if (process.env.RAZOR_IMPORT_GUARD === 'off') return null;
+  if (data.tool_name !== 'Write' && data.tool_name !== 'Edit') return null;
 
   const input = data.tool_input || {};
   const filePath = input.file_path;
-  if (!filePath || /node_modules/.test(filePath) || isTestFile(filePath)) return;
+  if (!filePath || /node_modules/.test(filePath) || isTestFile(filePath)) return null;
   const eco = ecosystemOf(filePath);
-  if (!eco) return;
+  if (!eco) return null;
 
   const incoming = data.tool_name === 'Write' ? input.content : input.new_string;
-  if (!incoming) return;
+  if (!incoming) return null;
 
   const fileDir = path.dirname(path.resolve(filePath));
   const manifest = findManifest(eco, fileDir);
-  if (!manifest) return; // greenfield: no declared-deps baseline, stay silent
+  if (!manifest) return null; // greenfield: no declared-deps baseline, stay silent
 
-  // Full current on-disk content (the hook runs before the write lands), so
+  // Full current on-disk content (the gate runs before the write lands), so
   // anything the file already imports — via any earlier edit — never re-fires.
   let existing = '';
   try { existing = fs.readFileSync(path.resolve(filePath), 'utf-8'); } catch { /* new file */ }
 
   const deps = installedDeps(eco === 'node' ? 'npm' : 'pip', fileDir);
   const fresh = newImports(eco, incoming, existing, deps);
-  if (!fresh.length) return;
+  if (!fresh.length) return null;
 
-  const state = readState(data.session_id);
   state.deniedImports = state.deniedImports || {};
   const unseen = fresh.filter((r) => !state.deniedImports[`${eco}:${r}`]);
-  if (!unseen.length) return; // all already reconsidered — pass silently
+  if (!unseen.length) return null; // all already reconsidered — pass silently
 
   for (const r of unseen) state.deniedImports[`${eco}:${r}`] = true;
-  writeState(data.session_id, state);
-
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: denyReason(data.tool_name, unseen, eco, manifest.name, deps),
-      },
-    })
-  );
+  return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 
-if (require.main === module) main();
-
-module.exports = { jsImportRoots, pyImportRoots, newImports, isDeclared, isTestFile, ecosystemOf, findManifest };
+module.exports = { check, jsImportRoots, pyImportRoots, newImports, isDeclared, isTestFile, ecosystemOf, findManifest };

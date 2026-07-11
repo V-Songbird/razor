@@ -1,7 +1,7 @@
-#!/usr/bin/env node
 'use strict';
 
-// PreToolUse (Grep|Glob|Read|Edit|Write) — post-edit search debounce.
+// Gate (Grep|Glob|Read|Edit|Write|Bash|PowerShell, via pre-tool-use.js) —
+// post-edit search debounce.
 //
 // Searching before the first Edit/Write of the session is normal diligence
 // (understanding the problem, checking for reuse) and is never metered here
@@ -24,8 +24,6 @@
 // acting on the work (usually verifying it), so a search that follows starts
 // a fresh streak — erring permissive keeps the gate's false-positive surface
 // near zero.
-
-const { readInput, readState, writeState, isActive } = require('./razor-lib');
 
 const BUDGET = (() => {
   const n = parseInt(process.env.RAZOR_SEARCH_BUDGET || '', 10);
@@ -52,34 +50,22 @@ function stepPhase(phase, toolName, budget) {
   return { next: { hasEdited: true, count, fired: s.fired || deny }, deny };
 }
 
-function main() {
-  if (BUDGET <= 0) return; // 0 or negative disables the meter
-  const data = readInput();
-  if (!isActive(readState(data.session_id))) return;
+// Dispatcher entry: mutates gate state, returns the deny reason or null.
+function check(data, state) {
+  if (BUDGET <= 0) return null; // 0 or negative disables the meter
 
   const tool = data.tool_name;
-  if (!SEARCH_TOOLS.has(tool) && !RESET_TOOLS.has(tool)) return;
+  if (!SEARCH_TOOLS.has(tool) && !RESET_TOOLS.has(tool)) return null;
 
-  const state = readState(data.session_id);
   const { next, deny } = stepPhase(state.searchPhase, tool, BUDGET);
   state.searchPhase = next;
-  writeState(data.session_id, state);
 
-  if (!deny) return;
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason:
-          `razor: another search after you'd already started implementing (post-edit budget ${BUDGET}). ` +
-          "If you're deciding how to leave a check behind, inline is enough — no need to find a convention. " +
-          'If a genuinely different area of the codebase needs checking, re-issue the search.',
-      },
-    })
+  if (!deny) return null;
+  return (
+    `razor: another search after you'd already started implementing (post-edit budget ${BUDGET}). ` +
+    "If you're deciding how to leave a check behind, inline is enough — no need to find a convention. " +
+    'If a genuinely different area of the codebase needs checking, re-issue the search.'
   );
 }
 
-if (require.main === module) main();
-
-module.exports = { stepPhase, BUDGET };
+module.exports = { check, stepPhase, BUDGET };

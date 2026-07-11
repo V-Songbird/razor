@@ -1,7 +1,7 @@
-#!/usr/bin/env node
 'use strict';
 
-// PreToolUse (Bash|PowerShell) — soft gate on new-dependency installs.
+// Gate (Bash|PowerShell, via pre-tool-use.js) — soft gate on new-dependency
+// installs.
 //
 // The first attempt to install a named package is denied with the
 // reuse-first reason (rungs 3–5); re-running the same install passes. One
@@ -15,7 +15,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { readInput, readState, writeState, isActive } = require('./razor-lib');
 
 // manager → subcommands that add a named package
 const ADD_SUBCOMMANDS = {
@@ -37,8 +36,25 @@ const ADD_SUBCOMMANDS = {
 // pip args that mean "restore/develop", not "add a new dependency"
 const PIP_RESTORE_FLAGS = new Set(['-r', '--requirement', '-e', '--editable']);
 
+// Flags, `.`, and shell redirects are not package names. A bare redirect
+// operator (`>`, `2>`) also consumes the following token — its target.
 function packageArgs(args) {
-  return args.filter((a) => a && !a.startsWith('-') && a !== '.');
+  const out = [];
+  let skipNext = false;
+  for (const a of args) {
+    if (skipNext) {
+      skipNext = false;
+      continue;
+    }
+    if (!a || a === '.' || a.startsWith('-')) continue;
+    const redirect = a.match(/^\d*(?:>>?|<<?|&>>?)(.*)$/);
+    if (redirect) {
+      if (!redirect[1]) skipNext = true;
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
 }
 
 // Parse one shell segment; returns {manager, packages} when it adds a new
@@ -311,33 +327,20 @@ function denyReason(hit, deps) {
   return head + 'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first. ' + tail;
 }
 
-function main() {
-  if (process.env.RAZOR_DEP_GUARD === 'off') return;
-  const data = readInput();
-  if (!isActive(readState(data.session_id))) return;
+// Dispatcher entry: mutates gate state, returns the deny reason or null.
+function check(data, state) {
+  if (process.env.RAZOR_DEP_GUARD === 'off') return null;
+  if (data.tool_name !== 'Bash' && data.tool_name !== 'PowerShell') return null;
 
   const hit = parseInstallCommand(data.tool_input && data.tool_input.command);
-  if (!hit) return;
+  if (!hit) return null;
 
-  const state = readState(data.session_id);
   const key = depKey(hit);
-  if (state.deniedDeps && state.deniedDeps[key]) return; // already reconsidered — normal permission flow applies
+  if (state.deniedDeps && state.deniedDeps[key]) return null; // already reconsidered — normal permission flow applies
 
   state.deniedDeps = state.deniedDeps || {};
   state.deniedDeps[key] = true;
-  writeState(data.session_id, state);
-
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: denyReason(hit, installedDeps(hit.manager, data.cwd)),
-      },
-    })
-  );
+  return denyReason(hit, installedDeps(hit.manager, data.cwd));
 }
 
-if (require.main === module) main();
-
-module.exports = { parseInstallCommand, depKey, installedDeps, denyReason };
+module.exports = { check, parseInstallCommand, depKey, installedDeps, denyReason };

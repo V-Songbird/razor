@@ -53,16 +53,16 @@ describe('integration: per-turn budget', () => {
     const session = freshSession();
     const t1 = writeTranscript('turn-uuid-1');
     for (let i = 1; i <= 4; i++) {
-      assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t1, newFile(i)))), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t1, newFile(i)))), null);
     }
-    const fifth = hookOutput(runHook('file-meter.js', input(session, t1, newFile(5))));
+    const fifth = hookOutput(runHook('pre-tool-use.js', input(session, t1, newFile(5))));
     assert.strictEqual(fifth.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(fifth.hookSpecificOutput.permissionDecisionReason, /razor: new file #5/);
-    assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t1, newFile(6)))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t1, newFile(6)))), null);
 
     const t2 = writeTranscript('turn-uuid-2');
     for (let i = 1; i <= 4; i++) {
-      assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t2, newFile(10 + i)))), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t2, newFile(10 + i)))), null);
     }
   });
 
@@ -70,7 +70,7 @@ describe('integration: per-turn budget', () => {
     const session = freshSession();
     const t = writeTranscript('turn-uuid-3');
     for (let i = 0; i < 6; i++) {
-      assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t, __filename))), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t, __filename))), null);
     }
   });
 
@@ -79,7 +79,7 @@ describe('integration: per-turn budget', () => {
     const t = writeTranscript('turn-uuid-4');
     for (let i = 0; i < 6; i++) {
       const p = path.join(os.tmpdir(), 'razor-nope', `f${i}.js`);
-      assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t, p))), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t, p))), null);
     }
   });
 
@@ -87,7 +87,7 @@ describe('integration: per-turn budget', () => {
     const session = freshSession();
     const t = writeTranscript('turn-uuid-5');
     for (let i = 0; i < 3; i++) {
-      const r = runHook('file-meter.js', input(session, t, newFile(20 + i)), { RAZOR_FILE_BUDGET: '0' });
+      const r = runHook('pre-tool-use.js', input(session, t, newFile(20 + i)), { RAZOR_FILE_BUDGET: '0' });
       assert.strictEqual(hookOutput(r), null);
     }
   });
@@ -96,8 +96,8 @@ describe('integration: per-turn budget', () => {
     const session = freshSession();
     const t = writeTranscript('turn-uuid-6');
     const env = { RAZOR_FILE_BUDGET: '1' };
-    assert.strictEqual(hookOutput(runHook('file-meter.js', input(session, t, newFile(30)), env)), null);
-    const second = hookOutput(runHook('file-meter.js', input(session, t, newFile(31)), env));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, t, newFile(30)), env)), null);
+    const second = hookOutput(runHook('pre-tool-use.js', input(session, t, newFile(31)), env));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
   });
 });

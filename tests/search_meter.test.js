@@ -67,67 +67,67 @@ describe('integration: post-edit search budget', () => {
   test('unlimited searches pass before the first Edit', () => {
     const session = freshSession();
     for (let i = 0; i < 5; i++) {
-      assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Glob'))), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'))), null);
     }
   });
 
   test('after an Edit, the 2nd search is denied, the 3rd passes, Read resets it', () => {
     const session = freshSession();
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Edit'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'))), null);
-    const second = hookOutput(runHook('search-meter.js', input(session, 'Glob')));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Edit'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'))), null);
+    const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Glob')));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(second.hookSpecificOutput.permissionDecisionReason, /post-edit budget 1/);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'))), null);
 
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Read'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Glob'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Read'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'))), null);
   });
 
   test('Write also starts the metered phase', () => {
     const session = freshSession();
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Write'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'))), null);
-    const second = hookOutput(runHook('search-meter.js', input(session, 'Glob')));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Write'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'))), null);
+    const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Glob')));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('unrelated tools are ignored, not counted or reset', () => {
     const session = freshSession();
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Edit'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'WebFetch'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'))), null);
-    const second = hookOutput(runHook('search-meter.js', input(session, 'Glob')));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Edit'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'WebFetch'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'))), null);
+    const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Glob')));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('shell commands reset the streak — running a check is acting, not searching', () => {
     const session = freshSession();
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Edit'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'))), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'PowerShell'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Edit'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'PowerShell'))), null);
     // streak reset by the shell call — this search is #1 again, not #2
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Glob'))), null);
-    const second = hookOutput(runHook('search-meter.js', input(session, 'Grep')));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'))), null);
+    const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Grep')));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('RAZOR_SEARCH_BUDGET=0 disables the meter', () => {
     const session = freshSession();
     const env = { RAZOR_SEARCH_BUDGET: '0' };
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Edit'), env)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Edit'), env)), null);
     for (let i = 0; i < 5; i++) {
-      assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Glob'), env)), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'), env)), null);
     }
   });
 
   test('RAZOR_SEARCH_BUDGET=2 allows two post-edit searches before denying the third', () => {
     const session = freshSession();
     const env = { RAZOR_SEARCH_BUDGET: '2' };
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Edit'), env)), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Grep'), env)), null);
-    assert.strictEqual(hookOutput(runHook('search-meter.js', input(session, 'Glob'), env)), null);
-    const third = hookOutput(runHook('search-meter.js', input(session, 'Grep'), env));
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Edit'), env)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'), env)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'), env)), null);
+    const third = hookOutput(runHook('pre-tool-use.js', input(session, 'Grep'), env));
     assert.strictEqual(third.hookSpecificOutput.permissionDecision, 'deny');
   });
 });

@@ -1,7 +1,6 @@
-#!/usr/bin/env node
 'use strict';
 
-// PreToolUse (Write) — per-turn new-file budget.
+// Gate (Write, via pre-tool-use.js) — per-turn new-file budget.
 //
 // Counts files the Write tool is about to create (the path doesn't exist
 // yet). When the count crosses the budget, that one Write is denied with a
@@ -16,7 +15,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { readInput, readState, writeState, isActive, currentTurnKey } = require('./razor-lib');
+const { turnKey } = require('./razor-lib');
 
 const BUDGET = (() => {
   const n = parseInt(process.env.RAZOR_FILE_BUDGET || '', 10);
@@ -44,35 +43,24 @@ function stepTurn(turn, turnKey, budget) {
   return { next, deny };
 }
 
-function main() {
-  if (BUDGET <= 0) return; // 0 or negative disables the meter
-  const data = readInput();
-  if (!isActive(readState(data.session_id))) return;
+// Dispatcher entry: mutates gate state, returns the deny reason or null.
+function check(data, state) {
+  if (BUDGET <= 0) return null; // 0 or negative disables the meter
+  if (data.tool_name !== 'Write') return null;
 
   const filePath = data.tool_input && data.tool_input.file_path;
-  if (!filePath || isExemptPath(filePath)) return;
-  if (fs.existsSync(filePath)) return; // overwrite/edit, not a new file
+  if (!filePath || isExemptPath(filePath)) return null;
+  if (fs.existsSync(filePath)) return null; // overwrite/edit, not a new file
 
-  const state = readState(data.session_id);
-  const { next, deny } = stepTurn(state.turn, currentTurnKey(data.transcript_path), BUDGET);
+  const { next, deny } = stepTurn(state.turn, turnKey(data), BUDGET);
   state.turn = next;
-  writeState(data.session_id, state);
 
-  if (!deny) return;
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason:
-          `razor: new file #${next.count} this turn (budget ${BUDGET}). ` +
-          'Rung 2 — check whether existing files or modules already cover this before creating more. ' +
-          'If every new file is genuinely needed, re-issue the Write unchanged; this gate fires once per turn.',
-      },
-    })
+  if (!deny) return null;
+  return (
+    `razor: new file #${next.count} this turn (budget ${BUDGET}). ` +
+    'Rung 2 — check whether existing files or modules already cover this before creating more. ' +
+    'If every new file is genuinely needed, re-issue the Write unchanged; this gate fires once per turn.'
   );
 }
 
-if (require.main === module) main();
-
-module.exports = { stepTurn, isExemptPath, BUDGET };
+module.exports = { check, stepTurn, isExemptPath, BUDGET };

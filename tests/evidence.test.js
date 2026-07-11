@@ -179,7 +179,7 @@ describe('integration: evidence-carrying deny', () => {
       'package.json': JSON.stringify({ dependencies: { 'date-fns': '^3', lodash: '^4' } }),
     });
     const out = hookOutput(
-      runHook('dep-guard.js', {
+      runHook('pre-tool-use.js', {
         session_id: freshSession(),
         cwd: dir,
         tool_name: 'Bash',
@@ -193,7 +193,7 @@ describe('integration: evidence-carrying deny', () => {
   test('deny falls back to generic wording without a manifest', () => {
     const dir = fixtureDir({});
     const out = hookOutput(
-      runHook('dep-guard.js', {
+      runHook('pre-tool-use.js', {
         session_id: freshSession(),
         cwd: dir,
         tool_name: 'Bash',
@@ -210,7 +210,7 @@ describe('integration: evidence-carrying deny', () => {
   test('catches a stdlib-covered pip install (tomli fallback) with evidence', () => {
     const dir = fixtureDir({ 'requirements.txt': 'flask==3.0.3\nrequests==2.32.3\nrich==13.7.1\n' });
     const out = hookOutput(
-      runHook('dep-guard.js', {
+      runHook('pre-tool-use.js', {
         session_id: freshSession(),
         cwd: dir,
         tool_name: 'Bash',

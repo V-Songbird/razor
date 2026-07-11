@@ -106,13 +106,13 @@ describe('integration: import gate', () => {
       file_path: path.join(ws, 'http_client.js'),
       content: "const axios = require('axios');\nasync function fetchJson(url) {}\nmodule.exports = { fetchJson };\n",
     });
-    const first = hookOutput(runHook('import-guard.js', write));
+    const first = hookOutput(runHook('pre-tool-use.js', write));
     assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /adds a new node dependency/);
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /`axios`/);
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /express, lodash/);
 
-    assert.strictEqual(hookOutput(runHook('import-guard.js', write)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
 
   test('Edit whose new_string imports an undeclared package is gated the same way', () => {
@@ -123,9 +123,9 @@ describe('integration: import gate', () => {
       old_string: 'async function fetchJson(url) {}',
       new_string: "const axios = require('axios');\nasync function fetchJson(url) {}",
     });
-    const first = hookOutput(runHook('import-guard.js', edit));
+    const first = hookOutput(runHook('pre-tool-use.js', edit));
     assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
-    assert.strictEqual(hookOutput(runHook('import-guard.js', edit)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit)), null);
   });
 
   test('declared deps, builtins, and local imports pass silently', () => {
@@ -134,7 +134,7 @@ describe('integration: import gate', () => {
       file_path: path.join(ws, 'http_client.js'),
       content: "const _ = require('lodash');\nconst fs = require('node:fs');\nconst u = require('./util');\nmodule.exports = {};\n",
     });
-    assert.strictEqual(hookOutput(runHook('import-guard.js', write)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
 
   test('an import the file already has on disk is grandfathered', () => {
@@ -144,7 +144,7 @@ describe('integration: import gate', () => {
       file_path: path.join(ws, 'http_client.js'),
       content: "const axios = require('axios');\nasync function fetchJson(url) { return (await axios.get(url)).data; }\nmodule.exports = { fetchJson };\n",
     });
-    assert.strictEqual(hookOutput(runHook('import-guard.js', write)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
 
   test('test files are exempt', () => {
@@ -153,7 +153,7 @@ describe('integration: import gate', () => {
       file_path: path.join(ws, 'http_client.test.js'),
       content: "const request = require('supertest');\n",
     });
-    assert.strictEqual(hookOutput(runHook('import-guard.js', write)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
 
   test('python: vibe-named dep denied, dotenv suppressed when python-dotenv is declared', () => {
@@ -164,13 +164,13 @@ describe('integration: import gate', () => {
       file_path: path.join(dir, 'env.py'),
       content: 'import dotenv\n',
     });
-    assert.strictEqual(hookOutput(runHook('import-guard.js', declared)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', declared)), null);
 
     const undeclared = input(session, 'Write', {
       file_path: path.join(dir, 'env.py'),
       content: 'import requests\n',
     });
-    const deny = hookOutput(runHook('import-guard.js', undeclared));
+    const deny = hookOutput(runHook('pre-tool-use.js', undeclared));
     assert.strictEqual(deny.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(deny.hookSpecificOutput.permissionDecisionReason, /adds a new python dependency/);
   });
@@ -184,7 +184,7 @@ describe('integration: import gate', () => {
       file_path: path.join(deep, 'app.js'),
       content: "const axios = require('axios');\n",
     });
-    assert.strictEqual(hookOutput(runHook('import-guard.js', write)), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
 
   test('RAZOR_IMPORT_GUARD=off disables the gate', () => {
@@ -193,7 +193,7 @@ describe('integration: import gate', () => {
       file_path: path.join(ws, 'http_client.js'),
       content: "const axios = require('axios');\n",
     });
-    const r = runHook('import-guard.js', write, { RAZOR_IMPORT_GUARD: 'off' });
+    const r = runHook('pre-tool-use.js', write, { RAZOR_IMPORT_GUARD: 'off' });
     assert.strictEqual(hookOutput(r), null);
   });
 });

@@ -97,7 +97,7 @@ describe('integration: injection lifecycle', () => {
     const sessionStart = runHook('session-start.js', { session_id: session, hook_event_name: 'SessionStart' });
     assert.strictEqual(sessionStart.stdout.trim(), '');
 
-    const dep = runHook('dep-guard.js', {
+    const dep = runHook('pre-tool-use.js', {
       session_id: session,
       tool_name: 'Bash',
       tool_input: { command: 'npm i lodash' },
@@ -108,7 +108,7 @@ describe('integration: injection lifecycle', () => {
     assert.match(on.stdout, /RAZOR ACTIVE/);
 
     const dep2 = hookOutput(
-      runHook('dep-guard.js', {
+      runHook('pre-tool-use.js', {
         session_id: session,
         tool_name: 'Bash',
         tool_input: { command: 'npm i axios' },

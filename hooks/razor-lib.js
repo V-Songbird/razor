@@ -139,6 +139,22 @@ function currentTurnKey(transcriptPath) {
   return 'window-start';
 }
 
+// Turn key for per-turn budgets: the harness provides prompt_id on tool
+// events (one uuid per user turn); the transcript tail is the fallback for
+// older versions that don't send it.
+function turnKey(data) {
+  return data.prompt_id || currentTurnKey(data.transcript_path);
+}
+
+// Gate state is namespaced per subagent: tool calls made inside a subagent
+// carry agent_id, and its budgets must not share the main thread's meters —
+// an exploration agent's searches aren't the main session's re-verification
+// reflex. The /razor toggle stays session-wide (read from the plain
+// session_id state).
+function gateStateId(data) {
+  return data.agent_id ? `${data.session_id || 'unknown'}--${data.agent_id}` : data.session_id;
+}
+
 module.exports = {
   RULESET,
   readInput,
@@ -148,5 +164,7 @@ module.exports = {
   isActive,
   isRealUserPrompt,
   currentTurnKey,
+  turnKey,
+  gateStateId,
   git,
 };
