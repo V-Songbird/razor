@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.4-alpha — 2026-07-11
+
+Fixed an issue in multi-turn sessions where the post-edit search check treated every turn after the session's first edit as "already implementing" — exploration at the start of a new request could be interrupted. The check now starts fresh each turn and only arms after that turn's first edit.
+
 ## 0.3.3-alpha — 2026-07-11
 
 razor's settings (budgets, guard toggles, the end-of-session check) can now be set when enabling the plugin instead of through environment variables — the variables still work and take precedence. Session state moved to the plugin's persistent data directory and is cleaned up when the session ends; leftovers from crashed sessions are swept automatically after a week.

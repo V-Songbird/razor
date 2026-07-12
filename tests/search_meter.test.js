@@ -35,6 +35,28 @@ describe('unit: stepPhase', () => {
     assert.strictEqual(phase.hasEdited, true);
   });
 
+  test('a new turn key resets the phase — fresh diligence window', () => {
+    let phase = stepPhase(undefined, 'Edit', 1, 'turn-a').next;
+    phase = stepPhase(phase, 'Grep', 1, 'turn-a').next;
+    ({ next: phase } = stepPhase(phase, 'Grep', 1, 'turn-a')); // denied, fired
+    assert.strictEqual(phase.fired, true);
+
+    // Next user turn: searching is pre-edit diligence again, unmetered.
+    const results = [];
+    for (let i = 0; i < 3; i++) {
+      const { next, deny } = stepPhase(phase, 'Grep', 1, 'turn-b');
+      phase = next;
+      results.push(deny);
+    }
+    assert.deepStrictEqual(results, [false, false, false]);
+    assert.strictEqual(phase.hasEdited, false);
+
+    // An edit in the new turn re-arms the meter for that turn.
+    phase = stepPhase(phase, 'Write', 1, 'turn-b').next;
+    phase = stepPhase(phase, 'Glob', 1, 'turn-b').next;
+    assert.strictEqual(stepPhase(phase, 'Glob', 1, 'turn-b').deny, true);
+  });
+
   test('Read resets the post-edit count but not the phase itself', () => {
     let phase = stepPhase(undefined, 'Edit', 1).next;
     phase = stepPhase(phase, 'Glob', 1).next;
@@ -110,6 +132,25 @@ describe('integration: post-edit search budget', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob'))), null);
     const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Grep')));
     assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
+  });
+
+  test('a new prompt_id unmeters searching until that turn edits', () => {
+    const session = freshSession();
+    const turn = (toolName, promptId) => ({ ...input(session, toolName), prompt_id: promptId });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', turn('Edit', 'p1'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', turn('Grep', 'p1'))), null);
+    const denied = hookOutput(runHook('pre-tool-use.js', turn('Glob', 'p1')));
+    assert.strictEqual(denied.hookSpecificOutput.permissionDecision, 'deny');
+
+    // New user turn: opening exploration passes freely.
+    for (let i = 0; i < 3; i++) {
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', turn('Grep', 'p2'))), null);
+    }
+    // Until this turn writes — then the meter arms again.
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', turn('Edit', 'p2'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', turn('Grep', 'p2'))), null);
+    const again = hookOutput(runHook('pre-tool-use.js', turn('Glob', 'p2')));
+    assert.strictEqual(again.hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('RAZOR_SEARCH_BUDGET=0 disables the meter', () => {
