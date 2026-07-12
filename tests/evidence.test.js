@@ -171,6 +171,15 @@ describe('unit: denyReason', () => {
     assert.match(denyReason(hit, null), /Rungs 3-5/);
     assert.match(denyReason(hit, []), /Rungs 3-5/);
   });
+
+  test('carries automated provenance and the retry contract, with or without evidence', () => {
+    for (const deps of [null, ['lodash', 'axios']]) {
+      const reason = denyReason(hit, deps);
+      assert.match(reason, /automated checkpoint, not the user declining/);
+      assert.match(reason, /re-issue the exact same command/);
+      assert.match(reason, /the retry passes; nothing here needs the user/);
+    }
+  });
 });
 
 describe('integration: evidence-carrying deny', () => {

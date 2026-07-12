@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.6-alpha — 2026-07-12
+
+razor's checkpoint messages now say plainly that they're an automated reconsideration — not a denial from you — and that re-running the exact same command, write, or search is what clears them.
+
 ## 0.3.5-alpha — 2026-07-12
 
 razor now also catches a new dependency added by editing `package.json` or `requirements.txt` directly — not just installs and `import` lines. Whichever way a package first tries to enter, razor prompts one reconsideration; once you've confirmed it through any path, the others stay silent. New setting: `RAZOR_MANIFEST_GUARD=off`.

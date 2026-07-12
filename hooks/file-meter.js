@@ -16,6 +16,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { turnKey, settingNumber } = require('./razor-lib');
+const { PROVENANCE, retryContract } = require('./dep-guard');
 
 const BUDGET = settingNumber('FILE_BUDGET', 4);
 
@@ -56,7 +57,9 @@ function check(data, state) {
   return (
     `razor: new file #${next.count} this turn (budget ${BUDGET}). ` +
     'Rung 2 — check whether existing files or modules already cover this before creating more. ' +
-    'If every new file is genuinely needed, re-issue the Write unchanged; this gate fires once per turn.'
+    PROVENANCE +
+    'If every new file is genuinely needed, ' +
+    retryContract('Write')
   );
 }
 

@@ -313,19 +313,39 @@ function installedDeps(manager, startDir) {
 
 const LIST_CAP = 30;
 
+// The retry contract is spelled out as the base prompt's own "adjustment":
+// the harness tells the model a denied call means the user declined and to
+// adjust rather than retry verbatim — so the reason declares its automated
+// provenance and frames the unchanged re-run AS the correct adjustment.
+const PROVENANCE = "This is razor's automated checkpoint, not the user declining. ";
+
+function retryContract(what) {
+  return (
+    `the correct adjustment is to re-issue the exact same ${what} — ` +
+    'razor asks once and the retry passes; nothing here needs the user.'
+  );
+}
+
 function denyReason(hit, deps) {
   const head = `razor: '${hit.packages.join(' ')}' adds a new ${hit.manager} dependency. `;
-  const tail = 'If nothing covers it, run the same command again and razor will not object.';
   if (deps && deps.length) {
     const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
     const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
     return (
       head +
       `Already installed (${sorted.length}): ${shown}. ` +
-      `If none of these, the stdlib, or the platform covers it, run the same command again and razor will not object.`
+      PROVENANCE +
+      'If none of these, the stdlib, or the platform covers it, ' +
+      retryContract('command')
     );
   }
-  return head + 'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first. ' + tail;
+  return (
+    head +
+    'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first. ' +
+    PROVENANCE +
+    'If nothing covers it, ' +
+    retryContract('command')
+  );
 }
 
 // Ecosystem of a manager, for the reconsideration ledger shared with the
@@ -360,4 +380,4 @@ function check(data, state) {
   return denyReason(hit, installedDeps(hit.manager, data.cwd));
 }
 
-module.exports = { check, parseInstallCommand, depKey, installedDeps, denyReason };
+module.exports = { check, parseInstallCommand, depKey, installedDeps, denyReason, PROVENANCE, retryContract };

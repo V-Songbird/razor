@@ -29,7 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps } = require('./dep-guard');
+const { installedDeps, PROVENANCE, retryContract } = require('./dep-guard');
 
 // Node core modules — importing one is never a new dependency.
 const NODE_BUILTINS = new Set([
@@ -197,7 +197,7 @@ const LIST_CAP = 30;
 function denyReason(tool, roots, eco, manifestName, deps) {
   const what = roots.map((r) => `\`${r}\``).join(', ');
   const head = `razor: importing ${what} in this ${tool} adds a new ${eco} dependency — not in ${manifestName}. `;
-  const tail = `If nothing covers it, re-issue the same ${tool} unchanged and razor will not object.`;
+  const tail = PROVENANCE + 'If nothing covers it, ' + retryContract(tool);
   if (deps && deps.length) {
     const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
     const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');

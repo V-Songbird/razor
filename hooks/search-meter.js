@@ -31,6 +31,7 @@
 // near zero.
 
 const { settingNumber, turnKey } = require('./razor-lib');
+const { PROVENANCE, retryContract } = require('./dep-guard');
 
 const BUDGET = settingNumber('SEARCH_BUDGET', 1);
 
@@ -73,7 +74,9 @@ function check(data, state) {
   return (
     `razor: another search after you'd already started implementing (post-edit budget ${BUDGET}). ` +
     "If you're deciding how to leave a check behind, inline is enough — no need to find a convention. " +
-    'If a genuinely different area of the codebase needs checking, re-issue the search.'
+    PROVENANCE +
+    'If a genuinely different area of the codebase needs checking, ' +
+    retryContract('search')
   );
 }
 

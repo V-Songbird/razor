@@ -25,7 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps } = require('./dep-guard');
+const { installedDeps, PROVENANCE, retryContract } = require('./dep-guard');
 
 // null = unparseable (caller stays silent), Set otherwise.
 function jsonDepNames(text) {
@@ -60,7 +60,7 @@ const LIST_CAP = 30;
 function denyReason(tool, names, eco, manifestName, deps) {
   const what = names.map((n) => `\`${n}\``).join(', ');
   const head = `razor: this ${tool} to ${manifestName} adds a new ${eco} dependency (${what}) without an install. `;
-  const tail = `If nothing covers it, re-issue the same ${tool} unchanged and razor will not object.`;
+  const tail = PROVENANCE + 'If nothing covers it, ' + retryContract(tool);
   if (deps && deps.length) {
     const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
     const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
