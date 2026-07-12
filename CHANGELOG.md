@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.8-alpha — 2026-07-12
+
+Removed a redundant line from razor's guidance ladder; no change to how razor behaves.
+
 ## 0.3.7-alpha — 2026-07-12
 
 razor's guidance now also steers away from defensive error handling for cases that can't happen — one more form of over-engineering it trims, alongside needless files, abstractions, and dependencies. Genuine safeguards (data loss, trust boundaries, anything you asked for) are untouched.
