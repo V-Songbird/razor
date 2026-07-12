@@ -328,6 +328,13 @@ function denyReason(hit, deps) {
   return head + 'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first. ' + tail;
 }
 
+// Ecosystem of a manager, for the reconsideration ledger shared with the
+// manifest and import guards — one nudge per dependency however it enters.
+const MANAGER_ECO = {
+  npm: 'node', pnpm: 'node', yarn: 'node', bun: 'node',
+  pip: 'python', pip3: 'python', pipenv: 'python', poetry: 'python', uv: 'python',
+};
+
 // Dispatcher entry: mutates gate state, returns the deny reason or null.
 function check(data, state) {
   if (settingOff('DEP_GUARD')) return null;
@@ -338,9 +345,18 @@ function check(data, state) {
 
   const key = depKey(hit);
   if (state.deniedDeps && state.deniedDeps[key]) return null; // already reconsidered — normal permission flow applies
+  const eco = MANAGER_ECO[hit.manager];
+  if (eco && state.deniedImports
+      && hit.packages.every((p) => state.deniedImports[`${eco}:${p.toLowerCase()}`])) {
+    return null; // every package already reconsidered via a manifest edit or import
+  }
 
   state.deniedDeps = state.deniedDeps || {};
   state.deniedDeps[key] = true;
+  if (eco) {
+    state.deniedImports = state.deniedImports || {};
+    for (const p of hit.packages) state.deniedImports[`${eco}:${p.toLowerCase()}`] = true;
+  }
   return denyReason(hit, installedDeps(hit.manager, data.cwd));
 }
 

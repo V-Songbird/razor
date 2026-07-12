@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 248" font-family="Segoe UI,-apple-system,Helvetica,Arial,sans-serif">
   <text x="8" y="24" font-size="15" font-weight="600" fill="#8b949e">razor checks at the moment of action &#8212; not just at the start</text>
   <rect x="598" y="4" width="74" height="34" rx="17" fill="#16a34a"/>
-  <text x="635" y="27" font-size="13.5" font-weight="700" fill="#ffffff" text-anchor="middle">5 gates</text>
+  <text x="635" y="27" font-size="13.5" font-weight="700" fill="#ffffff" text-anchor="middle">6 gates</text>
   <line x1="40" y1="86" x2="656" y2="86" stroke="#8b949e" stroke-width="1.5" opacity="0.5"/>
   <circle cx="88" cy="86" r="6" fill="#8b949e"/>
   <circle cx="222" cy="86" r="6" fill="#16a34a"/>
@@ -28,9 +28,11 @@
   <text x="356" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">file budget</text>
   <rect x="446" y="104" width="88" height="22" rx="11" fill="#16a34a"/>
   <text x="490" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">install gate</text>
+  <rect x="446" y="132" width="88" height="22" rx="11" fill="#16a34a"/>
+  <text x="490" y="147" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">manifest gate</text>
   <rect x="580" y="104" width="88" height="22" rx="11" fill="#16a34a"/>
   <text x="624" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">build ledger</text>
   <text x="8" y="188" font-size="12.5" fill="#8b949e">A reminder injected at the start competes with everything else as the context grows.</text>
   <text x="8" y="208" font-size="12.5" font-weight="600" fill="#16a34a">razor&#8217;s checks fire at the exact tool call &#8212; deny once with the reason, and the retry always passes.</text>
-  <text x="8" y="236" font-size="11" fill="#8b949e">Five checkpoints, one philosophy: don&#8217;t build what isn&#8217;t needed</text>
+  <text x="8" y="236" font-size="11" fill="#8b949e">Six checkpoints, one philosophy: don&#8217;t build what isn&#8217;t needed</text>
 </svg>

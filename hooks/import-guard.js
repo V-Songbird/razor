@@ -239,10 +239,10 @@ function check(data, state) {
   if (!fresh.length) return null;
 
   state.deniedImports = state.deniedImports || {};
-  const unseen = fresh.filter((r) => !state.deniedImports[`${eco}:${r}`]);
+  const unseen = fresh.filter((r) => !state.deniedImports[`${eco}:${r.toLowerCase()}`]);
   if (!unseen.length) return null; // all already reconsidered — pass silently
 
-  for (const r of unseen) state.deniedImports[`${eco}:${r}`] = true;
+  for (const r of unseen) state.deniedImports[`${eco}:${r.toLowerCase()}`] = true;
   return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 

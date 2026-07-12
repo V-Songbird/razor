@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.5-alpha — 2026-07-12
+
+razor now also catches a new dependency added by editing `package.json` or `requirements.txt` directly — not just installs and `import` lines. Whichever way a package first tries to enter, razor prompts one reconsideration; once you've confirmed it through any path, the others stay silent. New setting: `RAZOR_MANIFEST_GUARD=off`.
+
 ## 0.3.4-alpha — 2026-07-11
 
 Fixed an issue in multi-turn sessions where the post-edit search check treated every turn after the session's first edit as "already implementing" — exploration at the start of a new request could be interrupted. The check now starts fresh each turn and only arms after that turn's first edit.

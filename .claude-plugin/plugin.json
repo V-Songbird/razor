@@ -36,6 +36,12 @@
       "description": "One forced reconsideration before code imports a package that isn't in the project manifest.",
       "default": true
     },
+    "manifest_guard": {
+      "type": "boolean",
+      "title": "Dependency guard (manifest edits)",
+      "description": "One forced reconsideration before an edit adds a new package to package.json or requirements.txt directly.",
+      "default": true
+    },
     "ledger": {
       "type": "boolean",
       "title": "End-of-session build check",

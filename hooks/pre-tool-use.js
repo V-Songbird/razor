@@ -4,8 +4,8 @@
 // PreToolUse — single entry point for every razor gate.
 //
 // One process per tool call and one state read/write, with the gates applied
-// in order against the same state object: dep guard, import guard, file
-// meter, search meter. Every gate still records its own bookkeeping even
+// in order against the same state object: dep guard, manifest guard, import
+// guard, file meter, search meter. Every gate still records its own bookkeeping even
 // when an earlier one already denied — the retry then passes all of them —
 // and the first reason found is the one emitted (most specific wins).
 //
@@ -17,6 +17,7 @@ const { readInput, readState, writeState, isActive, gateStateId } = require('./r
 
 const GATES = [
   require('./dep-guard'),
+  require('./manifest-guard'),
   require('./import-guard'),
   require('./file-meter'),
   require('./search-meter'),
