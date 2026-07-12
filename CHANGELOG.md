@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.3-alpha — 2026-07-11
+
+razor's settings (budgets, guard toggles, the end-of-session check) can now be set when enabling the plugin instead of through environment variables — the variables still work and take precedence. Session state moved to the plugin's persistent data directory and is cleaned up when the session ends; leftovers from crashed sessions are swept automatically after a week.
+
 ## 0.3.2-alpha — 2026-07-11
 
 razor's checks now run as one process per tool call, so overlapping checks can no longer lose each other's bookkeeping. Subagents get their own budgets — an exploration agent's searches no longer count against the main session's allowance, and vice versa. Turn boundaries come from the harness when available instead of being derived from the transcript. Fixed an issue where shell redirects such as `2>&1` were treated as package names by the dependency guard.

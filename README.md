@@ -70,7 +70,7 @@ If you're curious, it's all a handful of gentle, one-time nudges — never a nag
 
 ## Settings
 
-Most people never touch these, but a few environment variables tune it or turn parts off:
+Most people never touch these. razor asks for them when you enable it (and they can be changed anytime in the plugin's configuration) — the environment variables below do the same thing and take precedence when set:
 
 | Variable | What it does |
 | --- | --- |

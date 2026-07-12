@@ -40,9 +40,90 @@ function readInput() {
   }
 }
 
+// Settings resolve in order: explicit RAZOR_* env var, then the plugin
+// option set at enable time (CLAUDE_PLUGIN_OPTION_*, uppercased by the
+// harness), then the built-in default.
+function settingOff(name) {
+  const env = process.env[`RAZOR_${name}`];
+  if (env !== undefined && env !== '') return env === 'off';
+  return process.env[`CLAUDE_PLUGIN_OPTION_${name}`] === 'false';
+}
+
+function settingNumber(name, fallback) {
+  const env = process.env[`RAZOR_${name}`];
+  const raw = env !== undefined && env !== '' ? env : process.env[`CLAUDE_PLUGIN_OPTION_${name}`];
+  const n = parseInt(raw ?? '', 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+// State lives in the plugin's persistent data directory when the harness
+// provides one (tmp cleaners can't re-arm fired gates mid-session there);
+// tmpdir is the fallback.
+function stateDir() {
+  const dir = process.env.CLAUDE_PLUGIN_DATA;
+  if (dir) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      return dir;
+    } catch {
+      /* unwritable — fall through to tmpdir */
+    }
+  }
+  return os.tmpdir();
+}
+
+function safeId(id) {
+  return String(id || 'unknown').replace(/[^a-zA-Z0-9-]/g, '_');
+}
+
 function statePath(sessionId) {
-  const safe = String(sessionId || 'unknown').replace(/[^a-zA-Z0-9-]/g, '_');
-  return path.join(os.tmpdir(), `razor-${safe}.json`);
+  return path.join(stateDir(), `razor-${safeId(sessionId)}.json`);
+}
+
+// SessionEnd cleanup: this session's state file plus its agent-scoped ones.
+function clearSessionState(sessionId) {
+  if (!sessionId) return;
+  const dir = stateDir();
+  const prefix = `razor-${safeId(sessionId)}`;
+  let names;
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return;
+  }
+  for (const name of names) {
+    if (!name.startsWith(prefix) || !name.endsWith('.json')) continue;
+    try {
+      fs.unlinkSync(path.join(dir, name));
+    } catch {
+      /* best effort */
+    }
+  }
+}
+
+// Sessions that never reach SessionEnd (crashes, kills) would leak state
+// files forever in the persistent dir — sweep anything razor-owned and
+// older than a week.
+const GC_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function gcStateFiles() {
+  const dir = stateDir();
+  let names;
+  try {
+    names = fs.readdirSync(dir);
+  } catch {
+    return;
+  }
+  const cutoff = Date.now() - GC_AGE_MS;
+  for (const name of names) {
+    if (!/^razor-.*\.json$/.test(name)) continue;
+    const file = path.join(dir, name);
+    try {
+      if (fs.statSync(file).mtimeMs < cutoff) fs.unlinkSync(file);
+    } catch {
+      /* best effort */
+    }
+  }
 }
 
 function readState(sessionId) {
@@ -158,7 +239,12 @@ function gateStateId(data) {
 module.exports = {
   RULESET,
   readInput,
+  settingOff,
+  settingNumber,
+  stateDir,
   statePath,
+  clearSessionState,
+  gcStateFiles,
   readState,
   writeState,
   isActive,

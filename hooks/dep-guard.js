@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { settingOff } = require('./razor-lib');
 
 // manager → subcommands that add a named package
 const ADD_SUBCOMMANDS = {
@@ -329,7 +330,7 @@ function denyReason(hit, deps) {
 
 // Dispatcher entry: mutates gate state, returns the deny reason or null.
 function check(data, state) {
-  if (process.env.RAZOR_DEP_GUARD === 'off') return null;
+  if (settingOff('DEP_GUARD')) return null;
   if (data.tool_name !== 'Bash' && data.tool_name !== 'PowerShell') return null;
 
   const hit = parseInstallCommand(data.tool_input && data.tool_input.command);

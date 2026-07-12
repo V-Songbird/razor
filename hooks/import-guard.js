@@ -28,6 +28,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { settingOff } = require('./razor-lib');
 const { installedDeps } = require('./dep-guard');
 
 // Node core modules — importing one is never a new dependency.
@@ -212,7 +213,7 @@ function denyReason(tool, roots, eco, manifestName, deps) {
 
 // Dispatcher entry: mutates gate state, returns the deny reason or null.
 function check(data, state) {
-  if (process.env.RAZOR_IMPORT_GUARD === 'off') return null;
+  if (settingOff('IMPORT_GUARD')) return null;
   if (data.tool_name !== 'Write' && data.tool_name !== 'Edit') return null;
 
   const input = data.tool_input || {};

@@ -10,16 +10,16 @@
 // Silent while the session behaves; the thresholds are generous on purpose
 // so a legitimately large requested task never trips it.
 
-const { readInput, readState, writeState, isActive, git } = require('./razor-lib');
+const { readInput, readState, writeState, isActive, settingOff, settingNumber, git } = require('./razor-lib');
 
 const LOC_BUDGET = (() => {
-  const n = parseInt(process.env.RAZOR_LEDGER_LOC || '', 10);
-  return Number.isFinite(n) && n > 0 ? n : 500;
+  const n = settingNumber('LEDGER_LOC', 500);
+  return n > 0 ? n : 500;
 })();
 
 const FILES_BUDGET = (() => {
-  const n = parseInt(process.env.RAZOR_LEDGER_FILES || '', 10);
-  return Number.isFinite(n) && n > 0 ? n : 8;
+  const n = settingNumber('LEDGER_FILES', 8);
+  return n > 0 ? n : 8;
 })();
 
 // Sprawl = big net growth with next-to-no deletion, or a pile of new files.
@@ -45,7 +45,7 @@ function diffStats(ledger, cwd) {
 }
 
 function main() {
-  if (process.env.RAZOR_LEDGER === 'off') return;
+  if (settingOff('LEDGER')) return;
   const data = readInput();
   const state = readState(data.session_id);
   if (!isActive(state)) return;

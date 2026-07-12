@@ -23,10 +23,16 @@ function hookOutput(result) {
   return out ? JSON.parse(out) : null;
 }
 
-/** Unique session id per test so tmpdir state files never collide. */
+/**
+ * Unique session id per test so state files never collide. pid+counter
+ * alone is not enough: state files outlive the run and Windows recycles
+ * pids, so a later run can read a previous run's state and see gates that
+ * already fired. The timestamp+random suffix makes ids unique across runs.
+ */
 let counter = 0;
 function freshSession() {
-  return `razor-test-${process.pid}-${++counter}`;
+  const unique = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return `razor-test-${process.pid}-${unique}-${++counter}`;
 }
 
 /** Minimal transcript containing one real user prompt with the given uuid. */

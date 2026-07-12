@@ -15,12 +15,9 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { turnKey } = require('./razor-lib');
+const { turnKey, settingNumber } = require('./razor-lib');
 
-const BUDGET = (() => {
-  const n = parseInt(process.env.RAZOR_FILE_BUDGET || '', 10);
-  return Number.isFinite(n) ? n : 4;
-})();
+const BUDGET = settingNumber('FILE_BUDGET', 4);
 
 function norm(p) {
   return path.resolve(p).replace(/\\/g, '/').toLowerCase();

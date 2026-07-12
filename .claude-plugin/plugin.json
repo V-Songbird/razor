@@ -8,5 +8,39 @@
   },
   "homepage": "https://github.com/V-Songbird/razor",
   "repository": "https://github.com/V-Songbird/razor",
-  "keywords": ["yagni", "token-optimization", "minimalism", "over-engineering", "hooks", "subagents", "dependency-guard", "lazy"]
+  "keywords": ["yagni", "token-optimization", "minimalism", "over-engineering", "hooks", "subagents", "dependency-guard", "lazy"],
+  "userConfig": {
+    "file_budget": {
+      "type": "number",
+      "title": "New-file budget per turn",
+      "description": "New files allowed in one turn before razor asks whether existing files already cover it. 0 disables the check.",
+      "default": 4,
+      "min": 0
+    },
+    "search_budget": {
+      "type": "number",
+      "title": "Post-edit search budget",
+      "description": "Extra searches allowed after the code is written before razor asks whether the question is already answered. 0 disables the check.",
+      "default": 1,
+      "min": 0
+    },
+    "dep_guard": {
+      "type": "boolean",
+      "title": "Dependency guard (installs)",
+      "description": "One forced reconsideration before a command installs a new dependency.",
+      "default": true
+    },
+    "import_guard": {
+      "type": "boolean",
+      "title": "Dependency guard (imports)",
+      "description": "One forced reconsideration before code imports a package that isn't in the project manifest.",
+      "default": true
+    },
+    "ledger": {
+      "type": "boolean",
+      "title": "End-of-session build check",
+      "description": "One \"is all of this needed?\" question when a session adds a lot of code with almost no deletions.",
+      "default": true
+    }
+  }
 }

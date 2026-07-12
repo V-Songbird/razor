@@ -25,10 +25,9 @@
 // a fresh streak — erring permissive keeps the gate's false-positive surface
 // near zero.
 
-const BUDGET = (() => {
-  const n = parseInt(process.env.RAZOR_SEARCH_BUDGET || '', 10);
-  return Number.isFinite(n) ? n : 1;
-})();
+const { settingNumber } = require('./razor-lib');
+
+const BUDGET = settingNumber('SEARCH_BUDGET', 1);
 
 const SEARCH_TOOLS = new Set(['Grep', 'Glob']);
 const EDIT_TOOLS = new Set(['Edit', 'Write']);
