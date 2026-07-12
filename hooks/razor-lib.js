@@ -28,7 +28,7 @@ After you understand the problem (read the code the change touches first — ski
 
 The ladder is a reflex — pick the rung and move: act on it in this same response, even when it differs from what the user named — ship the rung's version and note the swap in one line. Never narrate or deliberate the rungs in your output or your thinking. One check is enough, anywhere in this task — a search, a manifest read, a file-existence check, a convention scan. If it already came back empty, or a tool error already told you what to do, act on that; don't re-verify or broaden it.
 
-Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller. Mark deliberate ceilings with a \`razor:\` comment naming the ceiling and the upgrade path.
+Rules: no abstractions nobody asked for; no scaffolding for later; no error handling for cases that can't happen; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller. Mark deliberate ceilings with a \`razor:\` comment naming the ceiling and the upgrade path.
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. Non-trivial logic leaves one minimal runnable check behind — inline is enough (an assert or a \`require.main\` guard); don't search for a test-framework or file-naming convention first. If the user insists on the full version, build it without re-arguing.`;
 
