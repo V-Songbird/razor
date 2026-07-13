@@ -34,39 +34,45 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put razor up against plain Claude Code and the popular "keep it lean" plugin on real engineering work — full agent sessions that read, write, and run code, not a single generated reply — same coding jobs, three setups, and measured the bill and the code.
+We put razor up against plain Claude Code and a popular "keep it lean" plugin on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
 
-<p align="center"><img src="assets/bench-cost.svg" alt="Cost of a coding task vs no plugin: the lean plugin is 9% cheaper, razor is 26% cheaper — skipping razor costs 35% more on top" width="640"></p>
+<p align="center"><img src="assets/bench-hero.svg" alt="You said just use axios — did the needless dependency ship? With no plugin it shipped in every session; a keep-it-lean plugin let 92% through; razor 0%" width="700"></p>
 
-**razor got the job done for about a quarter less — cheaper than running no plugin at all.** It writes the least code to get there, so there's less for you to read, less to review, and less that can quietly break later.
-
-<p align="center"><img src="assets/bench-deps.svg" alt="When you say just use axios: with no plugin the needless dependency shipped every time, the popular lean plugin let it through almost every time, razor never — on both models" width="640"></p>
-
-**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line ships a real dependency you now have to keep updated and secure — with no plugin it shipped every time, and the popular lean plugin let it through almost every time too. razor never did, on the small model and the big one alike.
+**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line ships a real dependency you now have to keep updated and secure. With no plugin it shipped every time; even a "keep it lean" plugin let almost all of them through. razor never did — on the small model and the big one alike.
 
 <p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="640"></p>
 
-**That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, with new ones showing up faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
+**That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
 
-And it never cut a corner to do it: **every job still came out correct.**
+<p align="center"><img src="assets/bench-lean.svg" alt="A parse-the-query-string task a built-in already covers: no plugin wrote 19 lines, a keep-it-lean plugin 4, razor 3 — 84% leaner" width="700"></p>
+
+**And where there's bloat to cut, razor cuts it.** Hand it a job a built-in already covers and no plugin will hand-roll a 19-line parser; razor reaches for the built-in and writes three. It writes less than doing nothing — and never more.
+
+### The full picture
+
+Every job, every setup — the big wins, the ties, and the one row where doing nothing wins, because a scoreboard that only shows wins isn't worth much. Fewest lines per row in **bold**.
+
+| Coding task | no plugin | "keep it lean" | razor |
+| --- | --- | --- | --- |
+| Parse a query string | 19 | 4 | **3** |
+| Read a `.env` file | 24 | 22 | **18** |
+| Add a command to a CLI | 16 | 14 | **11** |
+| "Just use axios" and fetch | 4 | 4 | **2** |
+| Reuse-or-write a helper | 52 | **46** | **46** |
+| A one-line HTTP GET | **2** | **2** | **2** |
+| Generate a unique id | **1** | 3 | 3 |
+| **Average across the suite** | 15 | 13 | **12** |
+
+**Leaner, and never careless.** razor wrote the fewest lines on average — and still passed the most jobs correctly of any setup, at about the same cost as running no plugin at all. Being lean is only worth something if the code still works, and razor's did.
 
 > [!NOTE]
-> On a task with nothing to trim — no stray dependency to reach for, no sprawl, a build that's already lean — razor and no plugin land in the same place. The wins above are real, they're just not universal.
+> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim: a hand-built interface widget that one native element replaces. razor's benchmark measures already-tight backend code, where an honest cut is smaller — there's simply less bloat to remove. That's why a few rows above tie, or even match doing nothing: there was nothing to cut. The discipline is the same — point it at a real over-build and it saves a lot, point it at already-lean code and it just holds the line. It never pads, and it never ships the needless dependency.
 
-*How we tested: we ran each setup on the same real coding tasks several times in a fresh, throwaway workspace — full agent sessions, never a single generated reply — and read the real cost straight from the API — no guesswork. Figures are averages on the smaller, cheaper model, and the headline results hold on the bigger one too.*
-
-> [!TIP]
-> razor never blocks you. If you genuinely want that library, just say so again and it steps aside — it's a nudge for second thoughts, not a wall.
-
-*Curious whether this holds up?* You can reproduce it yourself — see [benchmarks/](benchmarks/).
-
-<p align="center"><img src="assets/guards.svg" alt="A session timeline — understand, search, write, install, wrap up — with razor's checks marked at the moment each one fires" width="640"></p>
-
-**Made for the long session.** The longer a session digs, the less a start-of-session reminder holds — razor's nudges fire at the moment of action instead, all session long.
+*How we tested: the same coding jobs, three setups, several runs each in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. Numbers move a few percent between runs, and hold on the bigger model too. Reproduce it yourself — see [benchmarks/](benchmarks/).*
 
 ## Under the hood
 
-If you're curious, it's all a handful of gentle, one-time nudges — never a nag, never a wall — and it's all there to read in the plugin's files. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor cuts the code and the cost, hush cuts the noise — and measured together, they add no overhead to each other.
+If you're curious, it's all a handful of gentle, one-time nudges that fire as Claude works — not just a reminder at the start — never a nag, never a wall, and all there to read in the plugin's files. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down — and measured together, they add no overhead to each other.
 
 ## Settings
 

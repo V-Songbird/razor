@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.9-alpha — 2026-07-12
+
+Doc-only: rebuilt the Benchmarks section — a new headline chart, a full per-task table showing every job across all three setups (the wins and the ties), current numbers, and a note on how to read them against bigger claims elsewhere. No behavior change.
+
 ## 0.3.8-alpha — 2026-07-12
 
 Removed a redundant line from razor's guidance ladder; no change to how razor behaves.
