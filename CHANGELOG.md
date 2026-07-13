@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.12-alpha — 2026-07-13
+
+Doc-only: rewrote the README in a more direct voice, and led it with razor's actual decision order — the short list it runs down before writing anything — instead of burying it in prose. Benchmarks now tie each result back to a specific line on that list. No behavior change.
+
 ## 0.3.11-alpha — 2026-07-13
 
 Doc-only: added a How it works section summarizing the dependency, file, search, and end-of-session checks; trimmed the now-redundant mechanism detail out of the opening section. No behavior change.

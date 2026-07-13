@@ -4,7 +4,7 @@
     <img src="assets/logo.svg" alt="razor" width="240" />
   </picture>
   <h1>razor</h1>
-  <p><strong>Stops Claude from over-building — no dependency you didn't ask for, no file sprawl, no code "for later".</strong></p>
+  <p><strong>Gives Claude a checklist to run before it writes anything — and actually makes it stick to it.</strong></p>
 </div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code)
@@ -15,7 +15,7 @@
 
 AI assistants love to add things. Ask for one small feature and you might get a new library installed, five helper files, and an abstraction layer for a future that never comes — all of it stuff you now have to understand, maintain, and eventually delete.
 
-razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.**
+razor teaches Claude to run down a short list before writing anything: needed at all? already in the codebase? does the platform already do it? Most of the time the answer to something on that list is yes — which means most of the time, nothing new gets written.
 
 It's built for real engineering sessions — the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
 
@@ -28,7 +28,19 @@ It's built for real engineering sessions — the long kind, where one casual "ju
 
 ## How it works
 
-razor watches for the moments where over-building actually creeps in, and stops Claude to reconsider once at each:
+Here's the actual list, in order — Claude stops at the first line that fits:
+
+| Ask | Then |
+| --- | --- |
+| Does this need to exist at all? | Skip it |
+| Already in this codebase? | Reuse it |
+| Does the standard library do it? | Use it |
+| Does the platform do it? | Use it |
+| Already installed? | Use it |
+| Fits in one line? | Write one line |
+| None of the above | Write the smallest version that works |
+
+That's the list. Four checks make sure it isn't just a suggestion Claude quietly drops later:
 
 | Moment | What happens |
 | --- | --- |
@@ -52,11 +64,11 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put razor up against plain Claude Code and a plugin that just tells the model to keep things lean, on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
+We put that list up against plain Claude Code and a plugin that just tells the model to keep things lean, on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
 
 <p align="center"><img src="assets/bench-hero.svg" alt="You said just use axios — did the needless dependency ship? With no plugin it shipped in every session; a keep-it-lean plugin let 92% through; razor 0%" width="700"></p>
 
-**Say "just use axios" and razor quietly reaches for what's already built in.** That throwaway line ships a real dependency you now have to keep updated and secure. With no plugin it shipped every time; even a "keep it lean" plugin let almost all of them through. razor never did — on the small model and the big one alike.
+**"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. With no plugin it shipped every time; even a "keep it lean" plugin let almost all of them through. razor never did — on the small model and the big one alike.
 
 <p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="640"></p>
 
@@ -64,7 +76,7 @@ We put razor up against plain Claude Code and a plugin that just tells the model
 
 <p align="center"><img src="assets/bench-lean.svg" alt="A parse-the-query-string task a built-in already covers: no plugin wrote 19 lines, a keep-it-lean plugin 4, razor 3 — 84% leaner" width="700"></p>
 
-**And where there's bloat to cut, razor cuts it.** Hand it a job a built-in already covers and no plugin will hand-roll a 19-line parser; razor reaches for the built-in and writes three. It writes less than doing nothing — and never more.
+**Same question, different job.** Hand it a job a built-in already covers and no plugin will hand-roll a 19-line parser; razor stops at "does the platform do it?" and writes three. It writes less than doing nothing — and never more.
 
 ### The full picture
 
