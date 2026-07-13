@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.3.11-alpha — 2026-07-13
+
+Doc-only: added a How it works section summarizing the dependency, file, search, and end-of-session checks; trimmed the now-redundant mechanism detail out of the opening section. No behavior change.
+
 ## 0.3.10-alpha — 2026-07-13
 
 Doc-only: the README logo now adapts to dark mode (white silhouette instead of black). No behavior change.
