@@ -4,8 +4,10 @@
     <img src="assets/logo.svg" alt="razor" width="240" />
   </picture>
   <h1>razor</h1>
-  <p><strong>Stops Claude from over-building — no unnecessary dependencies, no file sprawl, no code "for later".</strong></p>
+  <p><strong>Stops Claude from over-building — no dependency you didn't ask for, no file sprawl, no code "for later".</strong></p>
 </div>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code)
 
 ---
 
@@ -28,12 +30,14 @@ It's built for real engineering sessions — the long kind, where one casual "ju
 
 razor watches for the moments where over-building actually creeps in, and stops Claude to reconsider once at each:
 
-- **Reaching for a new dependency** — an install command, an `import` line, or a hand-edit to the manifest — gets challenged once, with your project's real installed-dependency list right in the message.
-- **Spawning a lot of new files in one turn** gets a "does this all need to exist?" nudge.
-- **Searching instead of shipping** gets a nudge to act on what it already has.
-- **Wrapping up a heavy session** triggers a git-grounded check, once, on whether all the new code was actually needed.
+| Moment | What happens |
+| --- | --- |
+| Reaching for a new dependency (an install command, an `import` line, a hand-edit to the manifest) | Challenged once, with your project's real installed-dependency list right in the message |
+| Spawning a lot of new files in one turn | A "does this all need to exist?" nudge |
+| Searching instead of shipping | A nudge to act on what it already has |
+| Wrapping up a heavy session | A git-grounded check, once, on whether all the new code was actually needed |
 
-If Claude still thinks it's right after the nudge, it goes ahead.
+If Claude still thinks it's right after the nudge, it goes ahead. razor asks the question once — it doesn't argue.
 
 ## Install
 
@@ -48,7 +52,7 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put razor up against plain Claude Code and a popular "keep it lean" plugin on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
+We put razor up against plain Claude Code and a plugin that just tells the model to keep things lean, on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
 
 <p align="center"><img src="assets/bench-hero.svg" alt="You said just use axios — did the needless dependency ship? With no plugin it shipped in every session; a keep-it-lean plugin let 92% through; razor 0%" width="700"></p>
 
@@ -86,7 +90,7 @@ Every job, every setup — the big wins, the ties, and the one row where doing n
 
 ## Under the hood
 
-Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down — and measured together, they add no overhead to each other.
+Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down. Run both and neither notices the other — measured together, they add no overhead of their own.
 
 ## Settings
 
