@@ -13,7 +13,7 @@
 
 AI assistants love to add things. Ask for one small feature and you might get a new library installed, five helper files, and an abstraction layer for a future that never comes — all of it stuff you now have to understand, maintain, and eventually delete.
 
-razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.** And it backs the habit with real checks — when Claude reaches for a new dependency (whether as an install command, an `import` line, or a direct edit to the manifest), starts spawning files, or keeps searching instead of shipping, razor makes it stop and reconsider once. If Claude still thinks it's right, it goes ahead. A speed bump for second thoughts, never a wall.
+razor teaches Claude a simple habit: **don't build what isn't needed, reuse what's already there, prefer what's already installed.**
 
 It's built for real engineering sessions — the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
 
@@ -23,6 +23,17 @@ It's built for real engineering sessions — the long kind, where one casual "ju
 - **It acts, not just advises.** "Reuse first" is enforced in the tool layer, not just suggested in a prompt Claude can forget.
 - **Never blocks you.** Every nudge fires once and the retry always goes through. You stay in control.
 - **One switch.** `/razor off` turns it off for the session, `/razor on` back on. No dials to fiddle with.
+
+## How it works
+
+razor watches for the moments where over-building actually creeps in, and stops Claude to reconsider once at each:
+
+- **Reaching for a new dependency** — an install command, an `import` line, or a hand-edit to the manifest — gets challenged once, with your project's real installed-dependency list right in the message.
+- **Spawning a lot of new files in one turn** gets a "does this all need to exist?" nudge.
+- **Searching instead of shipping** gets a nudge to act on what it already has.
+- **Wrapping up a heavy session** triggers a git-grounded check, once, on whether all the new code was actually needed.
+
+If Claude still thinks it's right after the nudge, it goes ahead.
 
 ## Install
 
@@ -75,7 +86,7 @@ Every job, every setup — the big wins, the ties, and the one row where doing n
 
 ## Under the hood
 
-If you're curious, it's all a handful of gentle, one-time nudges that fire as Claude works — not just a reminder at the start — never a nag, never a wall, and all there to read in the plugin's files. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down — and measured together, they add no overhead to each other.
+Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down — and measured together, they add no overhead to each other.
 
 ## Settings
 
