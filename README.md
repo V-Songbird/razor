@@ -57,7 +57,7 @@ Inside Claude Code, run:
 
 ```
 /plugin marketplace add V-Songbird/foundry
-/plugin install razor
+/plugin install razor@foundry
 ```
 
 It's active from your next session — nothing to configure.
