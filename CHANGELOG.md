@@ -11,7 +11,7 @@ Added a new skill, `/razor:unused` — audits a project's manifest for dependenc
 
 Fixed an issue where TypeScript toolchain packages (`typescript`, `@types/*`, and similar) were reported as unused by that audit.
 
-[forge](../forge)'s read-only research agents (expert, critic) no longer receive the ladder injection.
+Read-only research agents (expert and critic roles) from another installed plugin no longer receive the ladder injection.
 
 ## 0.3.13-alpha — 2026-07-14
 
