@@ -212,7 +212,7 @@ describe('integration: evidence-carrying deny', () => {
     assert.match(out.hookSpecificOutput.permissionDecisionReason, /Rungs 3-5/);
   });
 
-  // Regression case from the razor-vs-ponytail benchmark (dep-toml task, 2026-07-06):
+  // Regression case from a 2026-07-06 rival-comparison benchmark (dep-toml task):
   // a stdlib-only task (TOML parsing) where the competing plugin's agent added a new
   // dependency anyway (a tomli fallback for pre-3.11 Pythons the task never asked to
   // support). The gate must still catch a pip install of that exact package.

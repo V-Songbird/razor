@@ -104,6 +104,10 @@ Every job, every setup — the big wins, the ties, and the one row where doing n
 
 Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down. Run both and neither notices the other — measured together, they add no overhead of their own.
 
+## Skills
+
+`/razor:unused` audits the other direction — dependencies already declared in your manifest that nothing imports. It reports what it finds and never edits a manifest or runs an uninstall; anything it can't confirm from imports alone (a name that only shows up in a script or a config file) is flagged separately as needing a manual check, not reported as a clean finding.
+
 ## Settings
 
 Most people never touch these. razor asks for them when you enable it (and they can be changed anytime in the plugin's configuration) — the environment variables below do the same thing and take precedence when set:

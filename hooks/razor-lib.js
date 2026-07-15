@@ -6,6 +6,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
 // Kept compact on purpose (~300 tokens per injection), and the
@@ -134,9 +135,65 @@ function readState(sessionId) {
   }
 }
 
+// Symlink-refusing, atomic-rename write for the state file — inline since
+// writeState is its only consumer. win32 has no uid, so a symlinked parent
+// dir is trusted only when it resolves under tmpdir/homedir (case-
+// insensitive); O_NOFOLLOW degrades to 0 there too, leaving the lstat checks
+// below as the accepted residual defense (same TOCTOU tradeoff hush ships).
+function safeWriteFileSync(target, content) {
+  const dir = path.dirname(target);
+  fs.mkdirSync(dir, { recursive: true });
+
+  let realDir = dir;
+  const dstat = fs.lstatSync(dir);
+  if (dstat.isSymbolicLink()) {
+    realDir = fs.realpathSync(dir);
+    const rstat = fs.statSync(realDir);
+    if (!rstat.isDirectory()) throw new Error('razor: dir target not a directory');
+    if (typeof process.getuid === 'function') {
+      if (rstat.uid !== process.getuid()) throw new Error('razor: dir owned by another user');
+    } else {
+      const roots = [os.tmpdir(), os.homedir()].map((r) => path.resolve(r).toLowerCase() + path.sep);
+      const real = path.resolve(realDir).toLowerCase() + path.sep;
+      if (!roots.some((r) => real.startsWith(r))) throw new Error('razor: dir outside trusted roots');
+    }
+  }
+
+  const realTarget = path.join(realDir, path.basename(target));
+  try {
+    if (fs.lstatSync(realTarget).isSymbolicLink()) throw new Error('razor: target is a symlink');
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
+
+  const tmpPath = path.join(realDir, `.${path.basename(target)}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`);
+  const O_NOFOLLOW = typeof fs.constants.O_NOFOLLOW === 'number' ? fs.constants.O_NOFOLLOW : 0;
+  const fd = fs.openSync(tmpPath, fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | O_NOFOLLOW, 0o600);
+  try {
+    fs.writeSync(fd, content);
+    try {
+      fs.fchmodSync(fd, 0o600);
+    } catch {
+      /* best-effort; irrelevant on win32 */
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+  try {
+    fs.renameSync(tmpPath, realTarget);
+  } catch (e) {
+    try {
+      fs.unlinkSync(tmpPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+    throw e;
+  }
+}
+
 function writeState(sessionId, state) {
   try {
-    fs.writeFileSync(statePath(sessionId), JSON.stringify(state));
+    safeWriteFileSync(statePath(sessionId), JSON.stringify(state));
   } catch {
     /* best effort — losing state means one extra nudge, not breakage */
   }
@@ -247,6 +304,7 @@ module.exports = {
   gcStateFiles,
   readState,
   writeState,
+  safeWriteFileSync,
   isActive,
   isRealUserPrompt,
   currentTurnKey,

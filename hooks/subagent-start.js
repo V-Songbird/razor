@@ -21,6 +21,10 @@ const DEFAULT_SKIP = [
   'claude-code-guide',
   'statusline-setup',
   'output-style-setup',
+  // forge's read-only research roles (never write code); synthesizer/
+  // reviser/implementer stay injected — they write plan text or code.
+  'forge-expert',
+  'adversarial-critic',
 ];
 
 function parseList(value) {

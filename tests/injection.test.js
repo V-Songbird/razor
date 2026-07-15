@@ -14,8 +14,21 @@ describe('unit: shouldInject', () => {
     }
   });
 
+  test('default skip list covers forge\'s read-only research roles, scoped or bare', () => {
+    for (const t of ['forge-expert', 'adversarial-critic', 'forge:forge-expert', 'forge:adversarial-critic']) {
+      assert.strictEqual(shouldInject(t, {}), false, t);
+    }
+  });
+
   test('unknown and code-writing agents get the ruleset', () => {
-    for (const t of ['general-purpose', 'claude', 'forge:forge-implementer', 'my-custom-agent']) {
+    for (const t of [
+      'general-purpose',
+      'claude',
+      'forge:forge-implementer',
+      'forge:forge-plan-synthesizer',
+      'forge:forge-plan-reviser',
+      'my-custom-agent',
+    ]) {
       assert.strictEqual(shouldInject(t, {}), true, t);
     }
   });

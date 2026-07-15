@@ -5,6 +5,18 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.0-alpha — 2026-07-14
+
+Added a new skill, `/razor:unused` — audits a project's manifest for dependencies nothing imports, so cleanup isn't limited to catching new ones at write time.
+
+Fixed an issue where TypeScript toolchain packages (`typescript`, `@types/*`, and similar) were reported as unused by that audit.
+
+[forge](../forge)'s read-only research agents (expert, critic) no longer receive the ladder injection.
+
+## 0.3.13-alpha — 2026-07-14
+
+Doc-only: noted why the dependency gate needs no special handling for commands another installed plugin rewrites before they run. No behavior change.
+
 ## 0.3.12-alpha — 2026-07-13
 
 Doc-only: rewrote the README in a more direct voice, and led it with razor's actual decision order — the short list it runs down before writing anything — instead of burying it in prose. Benchmarks now tie each result back to a specific line on that list. No behavior change.
