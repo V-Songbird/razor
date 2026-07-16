@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.2-alpha — 2026-07-16
+
+The ladder no longer asks for an inline self-check in every non-trivial change. Delivered files stay leaner, especially on larger models, with correctness unchanged.
+
 ## 0.4.1-alpha — 2026-07-16
 
 Docs only. The benchmark showcase is rebuilt out of the sessions it measures: the dependency and hand-rolled-parser comparisons are now the sessions' own diffs instead of drawings of them, and a new chart shows where razor lands against every unaided session.

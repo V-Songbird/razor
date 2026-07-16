@@ -31,7 +31,7 @@ The ladder is a reflex — pick the rung and move: act on it in this same respon
 
 Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller. Mark deliberate ceilings with a \`razor:\` comment naming the ceiling and the upgrade path.
 
-Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. Non-trivial logic leaves one minimal runnable check behind — inline is enough (an assert or a \`require.main\` guard); don't search for a test-framework or file-naming convention first. If the user insists on the full version, build it without re-arguing.`;
+Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
 function readInput() {
   try {
