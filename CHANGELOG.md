@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.1-alpha — 2026-07-16
+
+Docs only. The benchmark showcase is rebuilt out of the sessions it measures: the dependency and hand-rolled-parser comparisons are now the sessions' own diffs instead of drawings of them, and a new chart shows where razor lands against every unaided session.
+
 ## 0.4.0-alpha — 2026-07-14
 
 Added a new skill, `/razor:unused` — audits a project's manifest for dependencies nothing imports, so cleanup isn't limited to catching new ones at write time.
