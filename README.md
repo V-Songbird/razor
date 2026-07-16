@@ -5,6 +5,10 @@
   </picture>
   <h1>razor</h1>
   <p><strong>Gives Claude a checklist to run before it writes anything — and actually makes it stick to it.</strong></p>
+
+  <img src="assets/bench-offcut.svg" alt="Every no-plugin session in the benchmark suite drawn as a column, one per session, height being the lines of code it added. A stepped green edge runs across at the level the median razor run lands on that same job. Everything above the edge is tinted as the offcut: 328 lines across 88 sessions, most of it on the parse-a-query-string job" width="700" />
+
+  <p><em>This is where the razor falls.</em></p>
 </div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE) [![Claude Code](https://img.shields.io/badge/Claude_Code-E5582B)](https://docs.anthropic.com/en/docs/claude-code)
@@ -66,15 +70,83 @@ It's active from your next session — nothing to configure.
 
 We put that list up against plain Claude Code and a plugin that just tells the model to keep things lean, on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
 
-<p align="center"><img src="assets/bench-hero.svg" alt="You said just use axios — did the needless dependency ship? With no plugin it shipped in every session; a keep-it-lean plugin let 92% through; razor 0%" width="700"></p>
+Both agents got the same stub, the same instruction, and passed the same test. Here is what each one left behind:
 
-**"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. With no plugin it shipped every time; even a "keep it lean" plugin let almost all of them through. razor never did — on the small model and the big one alike.
+**no plugin** — 4 lines added
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; 0% of razor's sessions added an unnecessary dependency" width="640"></p>
+```diff
++const axios = require('axios');
++
+ async function fetchJson(url) {
+-  // GET the url and return the parsed JSON body
+-  throw new Error('not implemented');
++  const response = await axios.get(url);
++  return response.data;
+ }
+ module.exports = { fetchJson };
+```
+
+**razor** — 2 lines added
+
+```diff
+ async function fetchJson(url) {
+-  // GET the url and return the parsed JSON body
+-  throw new Error('not implemented');
++  const res = await fetch(url);
++  return res.json();
+ }
+ module.exports = { fetchJson };
+```
+
+**"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. One of them added a package to fetch a URL; the other reached for the built-in that has shipped with Node since v18. Across every session where the prompt named a library outright, on the small model and the big one alike, razor added a package exactly zero times.
+
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 156 sessions razor opened zero doors into that pool" width="700"></p>
 
 **That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
 
-<p align="center"><img src="assets/bench-lean.svg" alt="A parse-the-query-string task a built-in already covers: no plugin wrote 19 lines, a keep-it-lean plugin 4, razor 3 — 84% leaner" width="700"></p>
+Here is a job the platform already covers — parsing a query string:
+
+**no plugin** — 19 lines added
+
+```diff
+ function parseQuery(qs) {
+-  // Parse a URL query string into an object of key -> value.
+-  throw new Error('not implemented');
++  if (qs.startsWith('?')) {
++    qs = qs.slice(1);
++  }
++
++  const result = {};
++
++  if (!qs) {
++    return result;
++  }
++
++  const pairs = qs.split('&');
++  for (const pair of pairs) {
++    const [key, value] = pair.split('=');
++    if (key) {
++      result[key] = value ? decodeURIComponent(value) : '';
++    }
++  }
++
++  return result;
+ }
+ module.exports = { parseQuery };
+```
+
+**razor** — 3 lines added
+
+```diff
+ function parseQuery(qs) {
+-  // Parse a URL query string into an object of key -> value.
+-  throw new Error('not implemented');
++  if (!qs) return {};
++  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
++  return Object.fromEntries(params);
+ }
+ module.exports = { parseQuery };
+```
 
 **Same question, different job.** Hand it a job a built-in already covers and no plugin will hand-roll a 19-line parser; razor stops at "does the platform do it?" and writes three. It writes less than doing nothing — and never more.
 
