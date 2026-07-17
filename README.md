@@ -100,34 +100,32 @@ Both agents got the same stub, the same instruction, and passed the same test. H
 
 **"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. One of them added a package to fetch a URL; the other reached for the built-in that has shipped with Node since v18. Across every session where the prompt named a library outright, on the small model and the big one alike, razor added a package exactly zero times.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 156 sessions razor opened zero doors into that pool" width="700"></p>
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 244 sessions razor opened zero doors into that pool" width="700"></p>
 
 **That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
 
 Here is a job the platform already covers — parsing a query string:
 
-**no plugin** — 19 lines added
+**no plugin** — 17 lines added
 
 ```diff
  function parseQuery(qs) {
 -  // Parse a URL query string into an object of key -> value.
 -  throw new Error('not implemented');
-+  if (qs.startsWith('?')) {
-+    qs = qs.slice(1);
-+  }
-+
 +  const result = {};
++  if (!qs) return result;
 +
-+  if (!qs) {
-+    return result;
-+  }
++  const stripped = qs[0] === '?' ? qs.slice(1) : qs;
++  if (!stripped) return result;
 +
-+  const pairs = qs.split('&');
-+  for (const pair of pairs) {
-+    const [key, value] = pair.split('=');
-+    if (key) {
-+      result[key] = value ? decodeURIComponent(value) : '';
-+    }
++  for (const pair of stripped.split('&')) {
++    if (!pair) continue;
++    const eqIndex = pair.indexOf('=');
++    const rawKey = eqIndex === -1 ? pair : pair.slice(0, eqIndex);
++    const rawValue = eqIndex === -1 ? '' : pair.slice(eqIndex + 1);
++    const key = decodeURIComponent(rawKey.replace(/\+/g, ' '));
++    const value = decodeURIComponent(rawValue.replace(/\+/g, ' '));
++    result[key] = value;
 +  }
 +
 +  return result;
@@ -135,42 +133,45 @@ Here is a job the platform already covers — parsing a query string:
  module.exports = { parseQuery };
 ```
 
-**razor** — 3 lines added
+**razor** — 2 lines added
 
 ```diff
  function parseQuery(qs) {
 -  // Parse a URL query string into an object of key -> value.
 -  throw new Error('not implemented');
-+  if (!qs) return {};
-+  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
-+  return Object.fromEntries(params);
++  if (qs.startsWith('?')) qs = qs.slice(1);
++  return Object.fromEntries(new URLSearchParams(qs));
  }
  module.exports = { parseQuery };
 ```
 
-**Same question, different job.** Hand it a job a built-in already covers and no plugin will hand-roll a 19-line parser; razor stops at "does the platform do it?" and writes three. It writes less than doing nothing — and never more.
+**Same question, different job.** Hand it a job a built-in already covers and no plugin will hand-roll a 17-line parser; razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
 
 ### The full picture
 
-Every job, every setup — the big wins, the ties, and the one row where doing nothing wins, because a scoreboard that only shows wins isn't worth much. Fewest lines per row in **bold**.
+Every job, every setup — the big wins, the ties, and the one row where the "keep it lean" plugin wins, because a scoreboard that only shows wins isn't worth much. Fewest lines per row in **bold**; the average is the mean of the rows above it.
 
 | Coding task | no plugin | "keep it lean" | razor |
 | --- | --- | --- | --- |
-| Parse a query string | 19 | 4 | **3** |
-| Read a `.env` file | 24 | 22 | **18** |
-| Add a command to a CLI | 16 | 14 | **11** |
+| Parse a query string | 17 | 4 | **2** |
+| Read a `.env` file | 20 | **16** | **16** |
+| "Use dotenv" and read a `.env` file | 22 | **12** | **12** |
+| Add a command to a CLI | 16 | **10** | **10** |
 | "Just use axios" and fetch | 4 | 4 | **2** |
-| Reuse-or-write a helper | 52 | **46** | **46** |
+| Retry a flaky call | 12 | **10** | **10** |
+| "Use p-retry" and retry | 10 | **9** | 10 |
+| Slugify a title | 5 | **4** | **4** |
+| Reuse-or-write a helper | 48 | 51 | **47** |
 | A one-line HTTP GET | **2** | **2** | **2** |
-| Generate a unique id | **1** | 3 | 3 |
-| **Average across the suite** | 15 | 13 | **12** |
+| Generate a unique id | **3** | **3** | **3** |
+| **Average across the suite** | 14.5 | 11.4 | **10.7** |
 
 **Leaner, and never careless.** razor wrote the fewest lines on average — and still passed the most jobs correctly of any setup, at about the same cost as running no plugin at all. Being lean is only worth something if the code still works, and razor's did.
 
 > [!NOTE]
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim: a hand-built interface widget that one native element replaces. razor's benchmark measures already-tight backend code, where an honest cut is smaller — there's simply less bloat to remove. That's why a few rows above tie, or even match doing nothing: there was nothing to cut. The discipline is the same — point it at a real over-build and it saves a lot, point it at already-lean code and it just holds the line. It never pads, and it never ships the needless dependency.
 
-*How we tested: the same coding jobs, three setups, several runs each in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. Numbers move a few percent between runs, and hold on the bigger model too. Reproduce it yourself — see [benchmarks/](benchmarks/).*
+*How we tested: the same coding jobs, three setups, several runs each on both the small and the big model, in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. The table pools both models; razor is the leanest setup on each one separately. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/).*
 
 ## Under the hood
 

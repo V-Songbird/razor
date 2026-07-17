@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.3-alpha — 2026-07-16
+
+Docs only. Benchmark numbers refreshed from a fresh run of the full suite: the results table now shows every coding job — wins, ties, and the one loss — with an average you can check against the visible rows, and the worked examples are that run's own median sessions.
+
 ## 0.4.2-alpha — 2026-07-16
 
 The ladder no longer asks for an inline self-check in every non-trivial change. Delivered files stay leaner, especially on larger models, with correctness unchanged.
