@@ -87,8 +87,8 @@ function packageJsonDevDeps(projectDir) {
 
 // TypeScript toolchain deps are consumed by tsc/build, never imported by
 // source — a bare "Unused" verdict on them is a false positive. Routed to
-// "possibly used" instead, same suppressing-direction doctrine as the rest
-// of this audit.
+// the resolver-grade-check bucket instead, same suppressing-direction
+// doctrine as the rest of this audit.
 const KNOWN_TOOLCHAIN = new Set(['typescript', 'ts-node', 'tsx']);
 
 function nodeToolchainReason(dep, devDeps) {
@@ -96,6 +96,19 @@ function nodeToolchainReason(dep, devDeps) {
   if (KNOWN_TOOLCHAIN.has(dep)) return 'toolchain - consumed by tsc/build, not imported';
   if (devDeps.has(dep)) return 'devDependency - usually toolchain';
   return null;
+}
+
+// Detect whether knip — the resolver-grade dead-dependency tool — is
+// installed for the target project or resolvable from it (npm/pnpm/yarn
+// hoisting all satisfy require.resolve). Detection only: razor never
+// executes, installs, or depends on knip itself.
+function knipAvailable(projectDir) {
+  try {
+    require.resolve('knip/package.json', { paths: [projectDir] });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function configFilesText(eco, projectDir) {
@@ -109,16 +122,17 @@ function configFilesText(eco, projectDir) {
 }
 
 // Over-matching here (a substring hit that isn't a real reference) means one
-// dep reported "possibly used" instead of "unused" — the safe direction,
-// same suppressing-direction doctrine as the import-root normalization.
+// dep lands in the resolver-grade-check bucket instead of "unused" — the
+// safe direction, same suppressing-direction doctrine as the import-root
+// normalization.
 function mentionedOutsideImports(dep, haystack) {
   const escaped = dep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(`\\b${escaped}\\b`, 'i').test(haystack);
 }
 
 // Core audit: given a project directory, which declared deps have no
-// matching import root, split into "unused" and "possibly used outside
-// imports" (scripts/config mentions).
+// matching import root, split into "unused" and "needs a resolver-grade
+// check" (scripts/config mentions, toolchain, @types).
 function auditProject(projectDir) {
   const ecosystems = [];
   const nodeDeps = readNodeDeps(projectDir);
@@ -172,6 +186,10 @@ function auditProject(projectDir) {
     }
     result.ecosystems.push({
       eco, manifest: MANIFEST_NAME[eco], declaredCount: deps.length, scanned, unused, possiblyUsed,
+      // knip is JS/TS-only (ISC-licensed resolver: oxc AST + manifest
+      // peer/bin/types metadata) — only worth checking for the node
+      // ecosystem, and only costs a require.resolve when it does.
+      knipAvailable: eco === 'node' ? knipAvailable(projectDir) : false,
     });
   }
   return result;
@@ -179,8 +197,24 @@ function auditProject(projectDir) {
 
 const KNOWN_LIMITS =
   'Known limits: static import scanning cannot see dynamic import(variable) calls, ' +
-  'runtime require-by-string, or CLI tools/plugins invoked via npx/exec without ever ' +
-  'being imported. Treat "possibly used" entries as needing a manual check, not confirmed usage.';
+  'runtime require-by-string, CLI tools/plugins invoked via npx/exec without ever being ' +
+  'imported, or a dependency installed solely to satisfy another package\'s peerDependencies ' +
+  '(grep has no visibility into installed packages\' own manifests, so a peer-satisfied dep ' +
+  'can land in "Unused" above with no warning). The "needs a resolver-grade check" bucket ' +
+  'covers what grep CAN at least spot as ambiguous (script/config mentions, toolchain, ' +
+  '@types pairing) — treat every entry in it as needing a manual look, not confirmed usage.';
+
+// knip is JS/TS-only and resolves exactly the classes grep can't: peer-
+// dependency satisfaction, true @types pairing, config-only plugins, and
+// binaries invoked from package.json scripts. Named only when detected in
+// the target project — razor never suggests installing it.
+function knipEscalationLine() {
+  return (
+    '  Escalation: knip is available in this project and resolves peer-dependency, ' +
+    '@types-pairing, config-only, and script-invoked-binary usage precisely — run `npx knip` ' +
+    'for a definitive verdict on the node entries above (razor never runs it automatically).'
+  );
+}
 
 function formatReport(projectDir, result) {
   const lines = [`razor:unused audit — ${projectDir}`, ''];
@@ -190,11 +224,11 @@ function formatReport(projectDir, result) {
   }
 
   let totalUnused = 0;
-  let totalPossible = 0;
+  let totalNeedsCheck = 0;
   for (const eco of result.ecosystems) {
     lines.push(`## ${eco.eco} (${eco.manifest})`);
     if (eco.unused.length) {
-      lines.push(`Unused (${eco.unused.length}):`);
+      lines.push(`Unused (${eco.unused.length}) — high confidence, no mention anywhere:`);
       for (const { dep, scanned } of eco.unused) {
         lines.push(`  ${dep}: no import found in ${scanned} source files scanned`);
       }
@@ -202,19 +236,22 @@ function formatReport(projectDir, result) {
       lines.push('Unused: none');
     }
     if (eco.possiblyUsed.length) {
-      lines.push(`Possibly used outside imports (${eco.possiblyUsed.length}) — check before removing:`);
+      lines.push(`Needs a resolver-grade check (${eco.possiblyUsed.length}) — grep can't confirm either way:`);
       for (const { dep, scanned, reason } of eco.possiblyUsed) {
         const suffix = reason ? ` (${reason})` : '';
         lines.push(`  ${dep}${suffix}: no import found in ${scanned} source files scanned`);
       }
     }
+    if (eco.eco === 'node' && eco.knipAvailable && (eco.unused.length || eco.possiblyUsed.length)) {
+      lines.push(knipEscalationLine());
+    }
     lines.push('');
     totalUnused += eco.unused.length;
-    totalPossible += eco.possiblyUsed.length;
+    totalNeedsCheck += eco.possiblyUsed.length;
   }
 
   lines.push(
-    `Verdict: ${result.usedCount} used, ${totalUnused} unused, ${totalPossible} possibly used outside imports.`,
+    `Verdict: ${result.usedCount} used, ${totalUnused} unused, ${totalNeedsCheck} need a resolver-grade check.`,
   );
   lines.push('');
   lines.push(KNOWN_LIMITS);
@@ -233,4 +270,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { auditProject, formatReport, walkSourceFiles, mentionedOutsideImports };
+module.exports = { auditProject, formatReport, walkSourceFiles, mentionedOutsideImports, knipAvailable };

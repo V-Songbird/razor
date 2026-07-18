@@ -68,7 +68,7 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put that list up against plain Claude Code and a plugin that just tells the model to keep things lean, on real engineering work — full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, three setups; we measured the code and the bill.
+We put that list up against plain Claude Code, a plugin that just tells the model to keep things lean, and a popular prompt-only ruleset with no enforcement of its own — on real engineering work: full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, four setups; we measured the code and the bill.
 
 Both agents got the same stub, the same instruction, and passed the same test. Here is what each one left behind:
 
@@ -149,29 +149,48 @@ Here is a job the platform already covers — parsing a query string:
 
 ### The full picture
 
-Every job, every setup — the big wins, the ties, and the one row where the "keep it lean" plugin wins, because a scoreboard that only shows wins isn't worth much. Fewest lines per row in **bold**; the average is the mean of the rows above it.
+Every job, every setup — the wins, the ties, and the rows where a rival gets there in fewer lines, because a scoreboard that only shows wins isn't worth much. The small model and the big model don't always agree, so we show them separately below. Fewest lines per row in **bold**; a dagger (†) marks the lowest count in a row that didn't come with correct, dependency-safe code every time — not a clean win.
 
-| Coding task | no plugin | "keep it lean" | razor |
-| --- | --- | --- | --- |
-| Parse a query string | 17 | 4 | **2** |
-| Read a `.env` file | 20 | **16** | **16** |
-| "Use dotenv" and read a `.env` file | 22 | **12** | **12** |
-| Add a command to a CLI | 16 | **10** | **10** |
-| "Just use axios" and fetch | 4 | 4 | **2** |
-| Retry a flaky call | 12 | **10** | **10** |
-| "Use p-retry" and retry | 10 | **9** | 10 |
-| Slugify a title | 5 | **4** | **4** |
-| Reuse-or-write a helper | 48 | 51 | **47** |
-| A one-line HTTP GET | **2** | **2** | **2** |
-| Generate a unique id | **3** | **3** | **3** |
-| **Average across the suite** | 14.5 | 11.4 | **10.7** |
+**On the small model**
 
-**Leaner, and never careless.** razor wrote the fewest lines on average — and still passed the most jobs correctly of any setup, at about the same cost as running no plugin at all. Being lean is only worth something if the code still works, and razor's did.
+| Coding task | no plugin | "keep it lean" | prompt-only | razor |
+| --- | --- | --- | --- | --- |
+| Slugify a title | 6 | **4.5** | 6 | 5 |
+| Parse a `.toml` config file | 16 | **14**† | 16 | 15 |
+| Generate a unique id | **3** | **3** | **3** | **3** |
+| A one-line HTTP GET | 5 | **2** | **2** | **2** |
+| Retry a flaky call | 12 | **11** | 12 | **11** |
+| Read a `.env` file | 10 | **9** | 10 | **9** |
+| "Just use axios" and fetch | 4 | 4 | 4 | **2** |
+| "Tenacity's the move" and retry | 10.5 | 10 | **9**† | 10 |
+| "Use dotenv" and read a `.env` file | 10 | **9**† | 9.5 | 10 |
+| Read a user row from postgres | **15** | **15** | **15** | **15** |
+
+**On the big model**
+
+| Coding task | no plugin | "keep it lean" | prompt-only | razor |
+| --- | --- | --- | --- | --- |
+| Slugify a title | 5 | 13 | 5 | **4** |
+| Parse a `.toml` config file | 15.5 | 32 | 15 | **13** |
+| Generate a unique id | **3** | **3** | **3** | **3** |
+| A one-line HTTP GET | 13.5 | **2** | **2** | **2** |
+| Retry a flaky call | **10** | 34 | **10** | **10** |
+| Read a `.env` file | **9** | 27.5 | **9** | **9** |
+| "Just use axios" and fetch | 5 | 4.5 | 4 | **2** |
+| "Tenacity's the move" and retry | 7 | 33 | **6**† | 10 |
+| "Use dotenv" and read a `.env` file | **9** | 26.5 | **9** | **9** |
+| Read a user row from postgres | **10** | 11.5 | **10** | 11.5 |
+
+**Never careless.** Every other setup here lost on correctness or dependency-discipline somewhere in this table — razor never did, on either model. Take the row where the prompt itself suggests the library ("just use axios"): no plugin and the prompt-only setup got it wrong every single time, on both models. The rules-file rival caught it sometimes on the big model, never on the small one. razor caught it every time, on both.
+
+The one job here where installing really is the right call — pulling in a database client — razor still stops to confirm it first. That costs it a couple of extra lines the other setups skip straight past.
+
+Cost doesn't consistently favor any one setup. On the small model, running with no plugin at all is usually cheapest, since there's no extra instructions to read. On the big model, razor comes out cheapest more often than the other three setups combined.
 
 > [!NOTE]
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim: a hand-built interface widget that one native element replaces. razor's benchmark measures already-tight backend code, where an honest cut is smaller — there's simply less bloat to remove. That's why a few rows above tie, or even match doing nothing: there was nothing to cut. The discipline is the same — point it at a real over-build and it saves a lot, point it at already-lean code and it just holds the line. It never pads, and it never ships the needless dependency.
 
-*How we tested: the same coding jobs, three setups, several runs each on both the small and the big model, in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. The table pools both models; razor is the leanest setup on each one separately. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/).*
+*How we tested: the same coding jobs, four setups, several runs each on both the small and the big model, in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. Small-model and big-model results are kept separate above — a setup that wins small doesn't always win big. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/).*
 
 ## Under the hood
 

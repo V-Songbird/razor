@@ -6,7 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { auditProject } = require('../scripts/unused-deps');
+const { auditProject, knipAvailable, formatReport } = require('../scripts/unused-deps');
 
 function makeNodeWorkspace() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-unused-node-'));
@@ -107,11 +107,12 @@ describe('unused-deps: CLI', () => {
       encoding: 'utf-8',
     });
     assert.strictEqual(r.status, 0);
-    assert.match(r.stdout, /Unused \(1\):/);
+    assert.match(r.stdout, /Unused \(1\) — high confidence/);
     assert.match(r.stdout, /lodash: no import found in \d+ source files scanned/);
-    assert.match(r.stdout, /Possibly used outside imports \(1\)/);
-    assert.match(r.stdout, /Verdict: 2 used, 1 unused, 1 possibly used outside imports\./);
+    assert.match(r.stdout, /Needs a resolver-grade check \(1\)/);
+    assert.match(r.stdout, /Verdict: 2 used, 1 unused, 1 need a resolver-grade check\./);
     assert.match(r.stdout, /Known limits:/);
+    assert.match(r.stdout, /peerDependencies/);
   });
 
   test('no supported manifest reports cleanly', () => {
@@ -119,5 +120,46 @@ describe('unused-deps: CLI', () => {
     const r = spawnSync('node', [path.join(__dirname, '..', 'scripts', 'unused-deps.js'), dir], { encoding: 'utf-8' });
     assert.strictEqual(r.status, 0);
     assert.match(r.stdout, /No supported manifest found/);
+  });
+});
+
+function installFakeKnip(dir) {
+  const knipDir = path.join(dir, 'node_modules', 'knip');
+  fs.mkdirSync(knipDir, { recursive: true });
+  fs.writeFileSync(path.join(knipDir, 'package.json'), JSON.stringify({ name: 'knip', version: '5.0.0' }));
+}
+
+describe('unused-deps: knip detection', () => {
+  test('knipAvailable is false when knip is not installed in the target project', () => {
+    assert.strictEqual(knipAvailable(makeNodeWorkspace()), false);
+  });
+
+  test('knipAvailable is true when knip is resolvable from the target project node_modules', () => {
+    const dir = makeNodeWorkspace();
+    installFakeKnip(dir);
+    assert.strictEqual(knipAvailable(dir), true);
+  });
+
+  test('report escalates to knip by name only when it is detected, never suggesting installation', () => {
+    const dir = makeNodeWorkspace();
+    const withoutKnip = formatReport(dir, auditProject(dir));
+    assert.doesNotMatch(withoutKnip, /knip/i);
+
+    installFakeKnip(dir);
+    const withKnip = formatReport(dir, auditProject(dir));
+    assert.match(withKnip, /knip is available in this project/);
+    assert.match(withKnip, /npx knip/);
+    // Never tells the user to add knip as a dependency — only to run it.
+    assert.doesNotMatch(withKnip, /install knip/i);
+    assert.doesNotMatch(withKnip, /npm install knip|add knip/i);
+  });
+
+  test('python ecosystem never gets a knip escalation (JS\\/TS-only tool)', () => {
+    const dir = makePythonWorkspace();
+    // A knip install anywhere is irrelevant to a python-only project — no
+    // node_modules exists here at all, so detection must stay false and
+    // silent rather than erroring.
+    const report = formatReport(dir, auditProject(dir));
+    assert.doesNotMatch(report, /knip/i);
   });
 });
