@@ -8,9 +8,8 @@
 // — every escalation actually observed happened AFTER the core work was
 // already written, not before. Once the turn has made its first edit,
 // further searching is a different signal: the implementation exists, so
-// more Grep/Glob is almost always the "leave one check behind" rule
-// wondering about a test/file-naming convention, or a re-verification
-// reflex — not new understanding. The 2nd post-edit search is denied once
+// more Grep/Glob is almost always a test/file-naming-convention hunt or a
+// re-verification reflex — not new understanding. The 2nd post-edit search is denied once
 // with a reason; the retry passes. Any Read/Edit/Write resets the post-edit
 // search count to zero (evidence a decision was made, not more looking),
 // but never un-sets the has-edited phase within a turn — inside one task
@@ -73,7 +72,6 @@ function check(data, state) {
   if (!deny) return null;
   return (
     `razor: another search after you'd already started implementing (post-edit budget ${BUDGET}). ` +
-    "If you're deciding how to leave a check behind, inline is enough — no need to find a convention. " +
     PROVENANCE +
     'If a genuinely different area of the codebase needs checking, ' +
     retryContract('search')

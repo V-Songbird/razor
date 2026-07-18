@@ -28,6 +28,8 @@ describe('unit: parseInstallCommand', () => {
     ['dotnet add package Newtonsoft.Json', 'dotnet', ['Newtonsoft.Json']],
     ['dotnet add MyProj.csproj package Serilog', 'dotnet', ['Serilog']],
     ['sudo npm install -g http-server', 'npm', ['http-server']],
+    ['env PIP_NO_CACHE_DIR=1 pip install requests', 'pip', ['requests']],
+    ['command pip install requests', 'pip', ['requests']],
     ['cd api && npm i express', 'npm', ['express']],
     ['git pull; pip install requests', 'pip', ['requests']],
     // shell redirects are not package names

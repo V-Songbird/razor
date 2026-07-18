@@ -6,7 +6,7 @@
   <h1>razor</h1>
   <p><strong>Gives Claude a checklist to run before it writes anything — and actually makes it stick to it.</strong></p>
 
-  <img src="assets/bench-offcut.svg" alt="Every no-plugin session in the benchmark suite drawn as a column, one per session, height being the lines of code it added. A stepped green edge runs across at the level the median razor run lands on that same job. Everything above the edge is tinted as the offcut: 328 lines across 88 sessions, most of it on the parse-a-query-string job" width="700" />
+  <img src="assets/bench-offcut.svg" alt="Every no-plugin session in the benchmark suite drawn as a column, one per session, height being the lines of code it added. A stepped green edge runs across at the level the median razor run lands on that same job. Everything above the edge is tinted as the offcut: 116 lines across 80 sessions, a quarter of it on the TOML-parsing job" width="700" />
 
   <p><em>This is where the razor falls.</em></p>
 </div>
@@ -100,7 +100,7 @@ Both agents got the same stub, the same instruction, and passed the same test. H
 
 **"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. One of them added a package to fetch a URL; the other reached for the built-in that has shipped with Node since v18. Across every session where the prompt named a library outright, on the small model and the big one alike, razor added a package exactly zero times.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 244 sessions razor opened zero doors into that pool" width="700"></p>
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 120 sessions razor opened zero doors into that pool" width="700"></p>
 
 **That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Every dependency razor talks Claude out of is one fewer door into that pool.
 
@@ -155,37 +155,37 @@ Every job, every setup — the wins, the ties, and the rows where a rival gets t
 
 | Coding task | no plugin | "keep it lean" | prompt-only | razor |
 | --- | --- | --- | --- | --- |
-| Slugify a title | 6 | **4.5** | 6 | 5 |
-| Parse a `.toml` config file | 16 | **14**† | 16 | 15 |
+| Slugify a title | 5 | **4.5** | 6 | **4.5**† |
+| Parse a `.toml` config file | 16.5 | 14 | 16.5 | **13.5** |
 | Generate a unique id | **3** | **3** | **3** | **3** |
-| A one-line HTTP GET | 5 | **2** | **2** | **2** |
-| Retry a flaky call | 12 | **11** | 12 | **11** |
-| Read a `.env` file | 10 | **9** | 10 | **9** |
+| A one-line HTTP GET | **2** | **2** | **2** | **2**† |
+| Retry a flaky call | 11.5 | 12 | 11.5 | **11** |
+| Read a `.env` file | 10 | **9** | 10 | 9.5 |
 | "Just use axios" and fetch | 4 | 4 | 4 | **2** |
-| "Tenacity's the move" and retry | 10.5 | 10 | **9**† | 10 |
-| "Use dotenv" and read a `.env` file | 10 | **9**† | 9.5 | 10 |
-| Read a user row from postgres | **15** | **15** | **15** | **15** |
+| "Tenacity's the move" and retry | **8.5**† | 11 | 10.5 | 11 |
+| "Use dotenv" and read a `.env` file | 10 | 9 | 10 | **8.5** |
+| Read a user row from postgres | 15 | **14** | 15 | **14** |
 
 **On the big model**
 
 | Coding task | no plugin | "keep it lean" | prompt-only | razor |
 | --- | --- | --- | --- | --- |
 | Slugify a title | 5 | 13 | 5 | **4** |
-| Parse a `.toml` config file | 15.5 | 32 | 15 | **13** |
+| Parse a `.toml` config file | **15**† | 35.5 | **15** | **15** |
 | Generate a unique id | **3** | **3** | **3** | **3** |
-| A one-line HTTP GET | 13.5 | **2** | **2** | **2** |
+| A one-line HTTP GET | 3.5 | **2** | 9 | **2** |
 | Retry a flaky call | **10** | 34 | **10** | **10** |
-| Read a `.env` file | **9** | 27.5 | **9** | **9** |
-| "Just use axios" and fetch | 5 | 4.5 | 4 | **2** |
-| "Tenacity's the move" and retry | 7 | 33 | **6**† | 10 |
-| "Use dotenv" and read a `.env` file | **9** | 26.5 | **9** | **9** |
-| Read a user row from postgres | **10** | 11.5 | **10** | 11.5 |
+| Read a `.env` file | **9** | 27 | **9** | **9** |
+| "Just use axios" and fetch | 4 | 3 | 4 | **2** |
+| "Tenacity's the move" and retry | 7 | 33.5 | **6**† | 10 |
+| "Use dotenv" and read a `.env` file | **9** | 24 | **9** | **9** |
+| Read a user row from postgres | 12.5 | 13 | **11.5** | **11.5** |
 
-**Never careless.** Every other setup here lost on correctness or dependency-discipline somewhere in this table — razor never did, on either model. Take the row where the prompt itself suggests the library ("just use axios"): no plugin and the prompt-only setup got it wrong every single time, on both models. The rules-file rival caught it sometimes on the big model, never on the small one. razor caught it every time, on both.
+**Never careless.** razor is the most correct setup on the small model, flawless on the big one — and the only one of the four that never shipped a needless dependency on either. Every other setup did, somewhere in this table. Take the row where the prompt itself suggests the library ("just use axios"): no plugin and the prompt-only setup got it wrong every single time, on both models. The rules-file rival caught it three times out of four on the big model, never on the small one. razor caught it every time, on both. The daggers cut both ways: two of razor's small-model bests came with a single miss each, and they're marked like everyone else's.
 
-The one job here where installing really is the right call — pulling in a database client — razor still stops to confirm it first. That costs it a couple of extra lines the other setups skip straight past.
+The one job here where installing really is the right call — pulling in a database client — razor still stops to confirm it first, then lands on the lowest line count anyway.
 
-Cost doesn't consistently favor any one setup. On the small model, running with no plugin at all is usually cheapest, since there's no extra instructions to read. On the big model, razor comes out cheapest more often than the other three setups combined.
+Cost doesn't consistently favor any one setup. On the small model, running with no plugin at all is usually cheapest, since there's no extra instructions to read. On the big model, razor is cheapest on as many jobs as the other three setups combined, with the lowest average bill per session.
 
 > [!NOTE]
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim: a hand-built interface widget that one native element replaces. razor's benchmark measures already-tight backend code, where an honest cut is smaller — there's simply less bloat to remove. That's why a few rows above tie, or even match doing nothing: there was nothing to cut. The discipline is the same — point it at a real over-build and it saves a lot, point it at already-lean code and it just holds the line. It never pads, and it never ships the needless dependency.

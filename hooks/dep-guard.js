@@ -62,7 +62,9 @@ function packageArgs(args) {
 // named dependency, null otherwise.
 function parseSegment(segment) {
   const tokens = segment.trim().split(/\s+/).filter(Boolean);
-  while (tokens.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[0]) || tokens[0] === 'sudo')) {
+  // Wrapper prefixes (`sudo pip …`, `env PIP_X=1 pip …`, `command pip …`)
+  // resolve to the same install; strip them so the manager is what's judged.
+  while (tokens.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[0]) || ['sudo', 'env', 'command'].includes(tokens[0]))) {
     tokens.shift();
   }
   if (!tokens.length) return null;

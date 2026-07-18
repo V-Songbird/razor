@@ -5,6 +5,14 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.5-alpha — 2026-07-18
+
+Fixed an issue where installs wrapped in `env` or `command` slipped past the dependency guard.
+
+Fixed an issue where the search gate's message suggested leaving an inline check behind.
+
+Benchmark tables, charts, and surrounding numbers refreshed from a fresh run of the full suite on both models.
+
 ## 0.4.4-alpha — 2026-07-17
 
 `/razor:unused` now names knip as an available escalation for a node project's ambiguous findings (peer-dependency, `@types` pairing, config-only, and script-invoked-binary usage) when it's already installed or resolvable — razor never installs or runs it itself. The verdict line reports how many entries need this resolver-grade check instead of a vaguer "possibly used" count.
