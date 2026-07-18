@@ -68,7 +68,7 @@ It's active from your next session — nothing to configure.
 
 ## Benchmarks
 
-We put that list up against plain Claude Code, a plugin that just tells the model to keep things lean, and a popular prompt-only ruleset with no enforcement of its own — on real engineering work: full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, four setups; we measured the code and the bill.
+We put that list up against plain Claude Code, ponytail (a plugin that just tells the model to keep things lean), and a hugely popular prompt-only ruleset with no enforcement of its own — on real engineering work: full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, four setups; we measured the code and the bill.
 
 Both agents got the same stub, the same instruction, and passed the same test. Here is what each one left behind:
 
@@ -153,7 +153,7 @@ Every job, every setup — the wins, the ties, and the rows where a rival gets t
 
 **On the small model**
 
-| Coding task | no plugin | "keep it lean" | prompt-only | razor |
+| Coding task | no plugin | ponytail | prompt-only | razor |
 | --- | --- | --- | --- | --- |
 | Slugify a title | 5 | **4.5** | 6 | **4.5**† |
 | Parse a `.toml` config file | 16.5 | 14 | 16.5 | **13.5** |
@@ -168,7 +168,7 @@ Every job, every setup — the wins, the ties, and the rows where a rival gets t
 
 **On the big model**
 
-| Coding task | no plugin | "keep it lean" | prompt-only | razor |
+| Coding task | no plugin | ponytail | prompt-only | razor |
 | --- | --- | --- | --- | --- |
 | Slugify a title | 5 | 13 | 5 | **4** |
 | Parse a `.toml` config file | **15**† | 35.5 | **15** | **15** |
