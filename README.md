@@ -66,6 +66,10 @@ Inside Claude Code, run:
 
 It's active from your next session — nothing to configure.
 
+### Better together
+
+We ran the pair too — razor alongside [hush](https://github.com/V-Songbird/hush) — against the rivals run as a pair, caveman with ponytail. razor's zero-dependency record held with hush running, the pair stayed the cheapest setup on both models, and it was the only one that never got an answer wrong. The rivals' pair still shipped the bait — asking for lean code turns out to be different from enforcing it.
+
 ## Benchmarks
 
 We put that list up against plain Claude Code, ponytail (a plugin that just tells the model to keep things lean), and a hugely popular prompt-only ruleset with no enforcement of its own — on real engineering work: full agent sessions that read, write, and run code, not a single generated reply. Same coding jobs, four setups; we measured the code and the bill.
@@ -191,10 +195,6 @@ Cost doesn't consistently favor any one setup. On the small model, running with 
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim: a hand-built interface widget that one native element replaces. razor's benchmark measures already-tight backend code, where an honest cut is smaller — there's simply less bloat to remove. That's why a few rows above tie, or even match doing nothing: there was nothing to cut. The discipline is the same — point it at a real over-build and it saves a lot, point it at already-lean code and it just holds the line. It never pads, and it never ships the needless dependency.
 
 *How we tested: the same coding jobs, four setups, several runs each on both the small and the big model, in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. Small-model and big-model results are kept separate above — a setup that wins small doesn't always win big. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/).*
-
-### Better together
-
-We ran the pair too — razor alongside [hush](https://github.com/V-Songbird/hush) — against the rivals run as a pair, caveman with ponytail. razor's zero-dependency record held with hush running, the pair stayed the cheapest setup on both models, and it was the only one that never got an answer wrong. The rivals' pair still shipped the bait — asking for lean code turns out to be different from enforcing it.
 
 ## Under the hood
 
