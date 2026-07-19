@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.7-alpha — 2026-07-18
+
+Docs only. The README is rebuilt around a TL;DR up top and one unified section order shared with hush and foreman; the session controls now live in a single table.
+
 ## 0.4.6-alpha — 2026-07-18
 
 Docs only. The README's benchmark section now covers running razor and hush as a pair, measured against a rival plugin pair.
