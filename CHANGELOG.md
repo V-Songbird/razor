@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 0.4.6-alpha — 2026-07-18
+
+Docs only. The README's benchmark section now covers running razor and hush as a pair, measured against a rival plugin pair.
+
 ## 0.4.5-alpha — 2026-07-18
 
 Fixed an issue where installs wrapped in `env` or `command` slipped past the dependency guard.

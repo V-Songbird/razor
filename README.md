@@ -192,9 +192,13 @@ Cost doesn't consistently favor any one setup. On the small model, running with 
 
 *How we tested: the same coding jobs, four setups, several runs each on both the small and the big model, in fresh throwaway workspaces — full agent sessions, never a single generated reply — with the real cost read straight from the API. Small-model and big-model results are kept separate above — a setup that wins small doesn't always win big. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/).*
 
+### Better together
+
+We ran the pair too — razor alongside [hush](https://github.com/V-Songbird/hush) — against the rivals run as a pair, caveman with ponytail. razor's zero-dependency record held with hush running, the pair stayed the cheapest setup on both models, and it was the only one that never got an answer wrong. The rivals' pair still shipped the bait — asking for lean code turns out to be different from enforcing it.
+
 ## Under the hood
 
-Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down. Run both and neither notices the other — measured together, they add no overhead of their own.
+Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down. Run both and neither notices the other — measured as a pair, they're the setup we'd pick ourselves (see [Better together](#better-together)).
 
 ## Skills
 
