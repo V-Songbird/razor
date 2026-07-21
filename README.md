@@ -13,8 +13,8 @@
 
 <p align="center">
     <a href="https://github.com/V-Songbird/razor/stargazers"><img src="https://img.shields.io/github/stars/V-Songbird/razor?style=social" alt="GitHub stars"/></a>
-    <a href="https://https://github.com/V-Songbird/razor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/github/spec-kit" alt="License"/></a>
-    <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude_Code-E5582B" alt="License"/></a>
+    <a href="https://github.com/V-Songbird/razor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/V-Songbird/razor" alt="License"/></a>
+    <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude_Code-E5582B" alt="Claude Code"/></a>
 </p>
 
 > **TL;DR** — Ask for one small feature and Claude might install a library and five helper files for it. razor makes it check "does this already exist?" before writing anything — and enforces the check, every session. 120 benchmark sessions, zero needless dependencies shipped. Every rival setup shipped at least one.
