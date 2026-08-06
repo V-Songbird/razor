@@ -94,3 +94,7 @@ This **can** show whether razor changes what the agent builds and what it costs,
 ### A note on fairness
 
 razor's once-per-session ladder is part of the product, so its token cost is included in the measurement, not subtracted. Each arm runs in a fresh throwaway workspace outside any git repo, with only that one plugin loaded (`--setting-sources project,local`, no MCP servers, a scoped tool allowlist) — so a difference between arms is the plugin, nothing else.
+
+## The frozen records
+
+The per-cell records behind the front page's numbers are committed at [`records/v1-2026-08-06.json`](records/v1-2026-08-06.json): task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail for each of the 468 sessions. The third arm appears there as `rival` — the front page names it.

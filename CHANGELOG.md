@@ -9,6 +9,8 @@ version field by convention).
 
 The README now opens with a poster of the benchmark sessions and the edge razor cuts at, and the supply-chain figures moved to a card with bigger type — same numbers, readable at a glance.
 
+The per-cell records behind the front page's benchmark numbers now ship in the repo, at `benchmarks/records/`.
+
 ## 1.0.0 — 2026-08-06
 
 razor leaves alpha.
