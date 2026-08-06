@@ -17,9 +17,11 @@ The once-per-session size check now measures only what the session itself change
 
 Turning razor off with `/razor off` now survives resuming the session.
 
-The dependency messages now say "declared" — the list always came from your manifest, not from what's physically installed.
+Fixed an issue where the dependency messages described declared dependencies as installed ones.
 
 Removed the post-edit search check and its `RAZOR_SEARCH_BUDGET` setting.
+
+The benchmark section is rebuilt from a fresh run of the shipped suite on current models — every table row now names a job the published harness actually contains, and the worked examples are that run's own median sessions.
 
 ## 0.4.7-alpha — 2026-07-18
 
