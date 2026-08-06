@@ -105,8 +105,13 @@ function jsImportRoots(text) {
     /\bexport\s+[^'";]*?from\s+['"]([^'"]+)['"]/g,    // export {a} from 'x'
     /\bimport\s+['"]([^'"]+)['"]/g,                   // import 'x'
   ];
-  // Type-only imports never ship: strip them before matching.
-  const stripped = src.replace(/\bimport\s+type\b[^;]*;?/g, '');
+  // Comments never import, and type-only imports never ship: strip both
+  // before matching. The line-comment strip can eat a `//` inside a string
+  // literal — that only ever suppresses a nudge, never falsely denies.
+  const stripped = src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .replace(/\bimport\s+type\b[^;\n]*;?/g, '');
   for (const pat of pats) {
     let m;
     while ((m = pat.exec(stripped)) !== null) {
@@ -181,6 +186,19 @@ function findManifest(eco, startDir) {
   return null;
 }
 
+// A python absolute import of the project's own package carries no ./
+// marker, so only the disk can tell it from an external dependency: a
+// module or package by that name beside the file, at the manifest root,
+// or under its src/ layout is local, never a new dependency.
+function isLocalPyModule(root, dirs) {
+  for (const base of dirs) {
+    try {
+      if (fs.existsSync(path.join(base, root)) || fs.existsSync(path.join(base, `${root}.py`))) return true;
+    } catch { /* unreadable — keep checking */ }
+  }
+  return false;
+}
+
 // New external roots this payload introduces: imports in the incoming text
 // that are neither declared in the manifest nor already imported by the
 // file's current on-disk content.
@@ -225,7 +243,11 @@ function check(data, state) {
   try { existing = fs.readFileSync(path.resolve(filePath), 'utf-8'); } catch { /* new file */ }
 
   const deps = installedDeps(eco === 'node' ? 'npm' : 'pip', fileDir);
-  const fresh = newImports(eco, incoming, existing, deps);
+  let fresh = newImports(eco, incoming, existing, deps);
+  if (eco === 'python') {
+    const local = [fileDir, manifest.dir, path.join(manifest.dir, 'src')];
+    fresh = fresh.filter((r) => !isLocalPyModule(r, local));
+  }
   if (!fresh.length) return null;
 
   state.deniedImports = state.deniedImports || {};
@@ -236,4 +258,4 @@ function check(data, state) {
   return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 
-module.exports = { check, jsImportRoots, pyImportRoots, newImports, isDeclared, isTestFile, ecosystemOf, findManifest };
+module.exports = { check, jsImportRoots, pyImportRoots, newImports, isDeclared, isLocalPyModule, isTestFile, ecosystemOf, findManifest };

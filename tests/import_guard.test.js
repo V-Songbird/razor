@@ -41,6 +41,23 @@ describe('unit: jsImportRoots', () => {
   test('type-only imports never ship, never count', () => {
     assert.strictEqual(jsImportRoots("import type { Foo } from 'some-types-pkg';").size, 0);
   });
+
+  test('a semicolon-less type import never swallows the imports after it', () => {
+    const src = "import type { A } from 'pkg-a'\nimport axios from 'axios'\nconst z = require('zod')";
+    assert.deepStrictEqual([...jsImportRoots(src)].sort(), ['axios', 'zod']);
+  });
+
+  test('imports inside comments never count', () => {
+    const src = [
+      "// example: const axios = require('axios')",
+      "/* import left from 'left-pad' */",
+      '/**',
+      " * import docs from 'doc-lib'",
+      ' */',
+      "const z = require('zod');",
+    ].join('\n');
+    assert.deepStrictEqual([...jsImportRoots(src)], ['zod']);
+  });
 });
 
 describe('unit: pyImportRoots', () => {
@@ -173,6 +190,26 @@ describe('integration: import gate', () => {
     const deny = hookOutput(runHook('pre-tool-use.js', undeclared));
     assert.strictEqual(deny.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(deny.hookSpecificOutput.permissionDecisionReason, /adds a new python dependency/);
+  });
+
+  test("python: the project's own package is local, not a dependency", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-igloc-'));
+    fs.writeFileSync(path.join(dir, 'requirements.txt'), 'requests==2.31\n');
+    fs.mkdirSync(path.join(dir, 'src', 'myapp'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'sibling.py'), 'X = 1\n');
+
+    const session = freshSession();
+    const localImports = input(session, 'Write', {
+      file_path: path.join(dir, 'main.py'),
+      content: 'from myapp.utils import helper\nimport sibling\n',
+    });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', localImports)), null);
+
+    const external = input(session, 'Write', {
+      file_path: path.join(dir, 'main.py'),
+      content: 'import numpy\n',
+    });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', external)).hookSpecificOutput.permissionDecision, 'deny');
   });
 
   test('no manifest up-tree: greenfield stays ungated', (t) => {
