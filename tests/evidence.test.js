@@ -328,9 +328,25 @@ describe('integration: build ledger', () => {
     const { dir, sha } = gitRepo();
     fs.writeFileSync(path.join(dir, 'pre-existing.js'), '// was here\n');
     const session = freshSession();
-    writeState(session, { ledger: { baseSha: sha, baseUntracked: 1, fired: false } });
+    writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: ['pre-existing.js'], fired: false } });
     for (let i = 0; i < 8; i++) fs.writeFileSync(path.join(dir, `n${i}.js`), '// x\n');
     // 9 untracked total - 1 baseline = 8 new → not > 8, stays silent
+    assert.strictEqual(hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir })), null);
+  });
+
+  test('staging pre-existing untracked files is never charged to the session', () => {
+    const { dir } = gitRepo();
+    // 10 one-line untracked files exist BEFORE the session starts
+    for (let i = 0; i < 10; i++) fs.writeFileSync(path.join(dir, `pre${i}.js`), '// dirt\n');
+    const session = freshSession();
+    runHook('session-start.js', { session_id: session, cwd: dir, hook_event_name: 'SessionStart' });
+
+    // the session's only act: commit that pre-existing dirt
+    const g = (...args) =>
+      spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: dir, encoding: 'utf-8' });
+    g('add', '-A');
+    g('commit', '-qm', 'sweep');
+
     assert.strictEqual(hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir })), null);
   });
 });

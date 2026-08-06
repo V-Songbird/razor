@@ -25,7 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps, evidenceReason } = require('./dep-guard');
+const { installedDeps, evidenceReason, ledgerName } = require('./dep-guard');
 
 // null = unparseable (caller stays silent), Set otherwise.
 function jsonDepNames(text) {
@@ -103,9 +103,9 @@ function check(data, state) {
   if (!fresh.length) return null;
 
   state.deniedImports = state.deniedImports || {};
-  const unseen = fresh.filter((n) => !state.deniedImports[`${spec.eco}:${n}`]);
+  const unseen = fresh.filter((n) => !state.deniedImports[`${spec.eco}:${ledgerName(n)}`]);
   if (!unseen.length) return null; // all already reconsidered — pass silently
-  for (const n of unseen) state.deniedImports[`${spec.eco}:${n}`] = true;
+  for (const n of unseen) state.deniedImports[`${spec.eco}:${ledgerName(n)}`] = true;
 
   const deps = installedDeps(spec.manager, path.dirname(path.resolve(filePath)));
   return denyReason(data.tool_name, unseen, spec.eco, path.basename(filePath), deps);

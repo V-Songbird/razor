@@ -58,6 +58,24 @@ describe('unit: jsImportRoots', () => {
     ].join('\n');
     assert.deepStrictEqual([...jsImportRoots(src)], ['zod']);
   });
+
+  test('a `/*` inside a glob string never starts a comment strip', () => {
+    const src = [
+      'const src = "src/*.js";',
+      'const axios = require("axios");',
+      'const fixtures = "tests/*/fixtures";',
+    ].join('\n');
+    assert.deepStrictEqual([...jsImportRoots(src)], ['axios']);
+  });
+
+  test('a URL specifier survives the line-comment strip intact', () => {
+    const src = "import x from 'https://esm.sh/react'\nconst a = 1\nconst b = 'hello'";
+    assert.deepStrictEqual([...jsImportRoots(src)], ['https:']);
+  });
+
+  test('type-only re-exports never count either', () => {
+    assert.strictEqual(jsImportRoots("export type { T } from 'undeclared-types'").size, 0);
+  });
 });
 
 describe('unit: pyImportRoots', () => {

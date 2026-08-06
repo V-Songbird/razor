@@ -39,14 +39,19 @@ const PIP_RESTORE_FLAGS = new Set(['-r', '--requirement', '-e', '--editable']);
 
 // Flags, `.`, and shell redirects are not package names. A bare redirect
 // operator (`>`, `2>`) also consumes the following token — its target.
+// Quotes come off first: the shell strips them before the manager ever
+// sees the token, and a version spec must be quoted in a real shell
+// (`pip install 'flask>=2.1'`), so `'flask>=2.1'` and `flask>=2.1` are
+// the same package.
 function packageArgs(args) {
   const out = [];
   let skipNext = false;
-  for (const a of args) {
+  for (const raw of args) {
     if (skipNext) {
       skipNext = false;
       continue;
     }
+    const a = raw.replace(/^['"]+|['"]+$/g, '');
     if (!a || a === '.' || a.startsWith('-')) continue;
     const redirect = a.match(/^\d*(?:>>?|<<?|&>>?)(.*)$/);
     if (redirect) {
@@ -129,8 +134,15 @@ function packageName(token) {
   return t.slice(0, end) || t;
 }
 
+// One ledger identity per dependency: case- and separator-insensitive
+// (pip treats `python-dotenv` and `python_dotenv` as one package; folding
+// on every ecosystem can only suppress a nudge, never falsely deny).
+function ledgerName(name) {
+  return String(name).toLowerCase().replace(/-/g, '_');
+}
+
 function depKey(hit) {
-  return `${hit.manager}:${hit.packages.map((p) => packageName(p).toLowerCase()).sort().join(',')}`;
+  return `${hit.manager}:${hit.packages.map((p) => ledgerName(packageName(p))).sort().join(',')}`;
 }
 
 // Manifest-name match in the suppressing direction only (`python_dotenv` ≙
@@ -407,7 +419,7 @@ function check(data, state) {
   if (state.deniedDeps && state.deniedDeps[key]) return null; // already reconsidered — normal permission flow applies
   const eco = MANAGER_ECO[hit.manager];
   if (eco && state.deniedImports
-      && names.every((n) => state.deniedImports[`${eco}:${n.toLowerCase()}`])) {
+      && names.every((n) => state.deniedImports[`${eco}:${ledgerName(n)}`])) {
     return null; // every package already reconsidered via a manifest edit or import
   }
 
@@ -415,13 +427,13 @@ function check(data, state) {
   state.deniedDeps[key] = true;
   if (eco) {
     state.deniedImports = state.deniedImports || {};
-    for (const n of names) state.deniedImports[`${eco}:${n.toLowerCase()}`] = true;
+    for (const n of names) state.deniedImports[`${eco}:${ledgerName(n)}`] = true;
   }
   return denyReason(hit, deps);
 }
 
 module.exports = {
-  check, parseInstallCommand, depKey, packageName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
+  check, parseInstallCommand, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
   // razor: exported for scripts/unused-deps.js (reuse the manifest readers,
   // never copy them) — behavior-neutral, no logic change.
   readNodeDeps, readPythonDeps, readCargoDeps, readGoDeps, readComposerDeps, readGemDeps, readDotnetDeps, READERS,

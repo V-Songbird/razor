@@ -38,22 +38,31 @@ function parseShortstat(shortstat) {
 }
 
 // The session's own delta: the working tree vs the base commit, minus the
-// dirt that was already there when the session started.
-// razor: count-level subtraction; per-line attribution needs a full diff
-// snapshot at session start.
+// dirt that was already there when the session started. Files that were
+// untracked at session start are excluded by NAME — staging or committing
+// them mid-session must not move their content onto the session's bill.
+// razor: count-level subtraction for edits to pre-existing files; per-line
+// attribution needs a full diff snapshot at session start.
 function diffStats(ledger, cwd) {
-  const shortstat = git(['diff', '--shortstat', ledger.baseSha], cwd);
-  if (shortstat === null) return null; // base sha gone (rebase) or not a repo
-  const now = parseShortstat(shortstat);
-  const insertions = Math.max(0, now.insertions - (ledger.baseInsertions || 0));
-  const deletions = Math.max(0, now.deletions - (ledger.baseDeletions || 0));
+  const numstat = git(['diff', '--numstat', ledger.baseSha], cwd);
+  if (numstat === null) return null; // base sha gone (rebase) or not a repo
+  const baseNames = new Set(ledger.baseUntrackedFiles || []);
+  let insertions = 0;
+  let deletions = 0;
+  for (const line of numstat.split('\n')) {
+    const [ins, del, file] = line.split('\t');
+    if (!file || baseNames.has(file)) continue;
+    insertions += parseInt(ins, 10) || 0;
+    deletions += parseInt(del, 10) || 0;
+  }
+  insertions = Math.max(0, insertions - (ledger.baseInsertions || 0));
+  deletions = Math.max(0, deletions - (ledger.baseDeletions || 0));
 
-  const added = git(['diff', '--diff-filter=A', '--name-only', ledger.baseSha], cwd) || '';
-  const untracked = git(['ls-files', '--others', '--exclude-standard'], cwd) || '';
-  const count = (s) => s.split('\n').filter(Boolean).length;
-  const newFiles =
-    Math.max(0, count(added) - (ledger.baseAdded || 0)) +
-    Math.max(0, count(untracked) - (ledger.baseUntracked || 0));
+  const list = (s) => (s || '').split('\n').filter(Boolean);
+  const added = list(git(['diff', '--diff-filter=A', '--name-only', ledger.baseSha], cwd));
+  const untracked = list(git(['ls-files', '--others', '--exclude-standard'], cwd));
+  const fresh = [...new Set([...added, ...untracked])].filter((f) => !baseNames.has(f));
+  const newFiles = Math.max(0, fresh.length - (ledger.baseAdded || 0));
 
   return { insertions, deletions, newFiles };
 }

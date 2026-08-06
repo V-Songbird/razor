@@ -103,6 +103,19 @@ describe('unit: parseInstallCommand', () => {
       depKey(parseInstallCommand('pip install Flask'))
     );
   });
+
+  test('shell quotes come off the token, and separators fold into one identity', () => {
+    assert.deepStrictEqual(parseInstallCommand("pip install 'flask>=2.1'").packages, ['flask>=2.1']);
+    assert.deepStrictEqual(parseInstallCommand('npm install "axios@^1.9"').packages, ['axios@^1.9']);
+    assert.strictEqual(
+      depKey(parseInstallCommand("pip install 'flask>=2.1'")),
+      depKey(parseInstallCommand('pip install flask'))
+    );
+    assert.strictEqual(
+      depKey(parseInstallCommand('pip install python_dotenv')),
+      depKey(parseInstallCommand('pip install python-dotenv'))
+    );
+  });
 });
 
 describe('integration: soft gate', () => {
@@ -149,9 +162,19 @@ describe('integration: soft gate', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', withCwd)), null);
 
     const py = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-dg-'));
-    fs.writeFileSync(path.join(py, 'requirements.txt'), 'python-dotenv==1.0\n');
+    fs.writeFileSync(path.join(py, 'requirements.txt'), 'python-dotenv==1.0\nflask>=2.0\n');
     const pyCwd = { ...input(freshSession(), 'pip install python_dotenv'), cwd: py };
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', pyCwd)), null);
+    // the realistic shell spelling of a spec'd reinstall: quoted
+    const quoted = { ...input(freshSession(), "pip install 'flask>=2.1'"), cwd: py };
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', quoted)), null);
+  });
+
+  test('the hyphen and underscore spellings of a pip package share one nudge', () => {
+    const session = freshSession();
+    const first = hookOutput(runHook('pre-tool-use.js', input(session, 'pip install python_dotenv')));
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'pip install python-dotenv'))), null);
   });
 
   test('a versioned install denied once passes on the bare-name retry, ledger key normalized', () => {

@@ -20,14 +20,16 @@ function main() {
   if (!state.ledger && !settingOff('LEDGER')) {
     const baseSha = git(['rev-parse', 'HEAD'], data.cwd);
     if (baseSha) {
-      const count = (s) => (s || '').split('\n').filter(Boolean).length;
+      const list = (s) => (s || '').split('\n').filter(Boolean);
       const dirty = parseShortstat(git(['diff', '--shortstat', 'HEAD'], data.cwd) || '');
       state.ledger = {
         baseSha,
         baseInsertions: dirty.insertions,
         baseDeletions: dirty.deletions,
-        baseAdded: count(git(['diff', '--diff-filter=A', '--name-only', 'HEAD'], data.cwd)),
-        baseUntracked: count(git(['ls-files', '--others', '--exclude-standard'], data.cwd)),
+        baseAdded: list(git(['diff', '--diff-filter=A', '--name-only', 'HEAD'], data.cwd)).length,
+        // Names, not a count: a pre-existing untracked file the session
+        // merely stages or commits must stay off the session's bill.
+        baseUntrackedFiles: list(git(['ls-files', '--others', '--exclude-standard'], data.cwd)),
         fired: false,
       };
       writeState(data.session_id, state);

@@ -29,7 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps, evidenceReason } = require('./dep-guard');
+const { installedDeps, evidenceReason, ledgerName } = require('./dep-guard');
 
 // Node core modules — importing one is never a new dependency.
 const NODE_BUILTINS = new Set([
@@ -98,20 +98,23 @@ function isTestFile(filePath) {
 function jsImportRoots(text) {
   const roots = new Set();
   const src = String(text || '');
+  // Specifiers never span a line — the \n bound keeps a mangled statement
+  // from swallowing the source lines after it into a "package name".
   const pats = [
-    /require\s*\(\s*['"]([^'"]+)['"]/g,               // require('x')
-    /\bimport\s*\(\s*['"]([^'"]+)['"]/g,              // import('x')
-    /\bimport\s+[^'";]*?from\s+['"]([^'"]+)['"]/g,    // import a from 'x'
-    /\bexport\s+[^'";]*?from\s+['"]([^'"]+)['"]/g,    // export {a} from 'x'
-    /\bimport\s+['"]([^'"]+)['"]/g,                   // import 'x'
+    /require\s*\(\s*['"]([^'"\n]+)['"]/g,               // require('x')
+    /\bimport\s*\(\s*['"]([^'"\n]+)['"]/g,              // import('x')
+    /\bimport\s+[^'";]*?from\s+['"]([^'"\n]+)['"]/g,    // import a from 'x'
+    /\bexport\s+[^'";]*?from\s+['"]([^'"\n]+)['"]/g,    // export {a} from 'x'
+    /\bimport\s+['"]([^'"\n]+)['"]/g,                   // import 'x'
   ];
-  // Comments never import, and type-only imports never ship: strip both
-  // before matching. The line-comment strip can eat a `//` inside a string
-  // literal — that only ever suppresses a nudge, never falsely denies.
+  // Comments never import, and type-only imports/re-exports never ship:
+  // strip both before matching. Block comments count only from a line
+  // start and line comments only after whitespace, so a `/*` in a glob
+  // string or the `//` in a URL specifier never starts a strip.
   const stripped = src
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\/\/[^\n]*/g, '')
-    .replace(/\bimport\s+type\b[^;\n]*;?/g, '');
+    .replace(/^[ \t]*\/\*[\s\S]*?\*\//gm, '')
+    .replace(/(^|\s)\/\/[^\n]*/g, '$1')
+    .replace(/\b(import|export)\s+type\b[^;\n]*;?/g, '');
   for (const pat of pats) {
     let m;
     while ((m = pat.exec(stripped)) !== null) {
@@ -262,10 +265,10 @@ function check(data, state) {
   if (!fresh.length) return null;
 
   state.deniedImports = state.deniedImports || {};
-  const unseen = fresh.filter((r) => !state.deniedImports[`${eco}:${r.toLowerCase()}`]);
+  const unseen = fresh.filter((r) => !state.deniedImports[`${eco}:${ledgerName(r)}`]);
   if (!unseen.length) return null; // all already reconsidered — pass silently
 
-  for (const r of unseen) state.deniedImports[`${eco}:${r.toLowerCase()}`] = true;
+  for (const r of unseen) state.deniedImports[`${eco}:${ledgerName(r)}`] = true;
   return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 
