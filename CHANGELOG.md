@@ -5,6 +5,10 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## Unreleased
+
+The README now opens with a poster of the benchmark sessions and the edge razor cuts at, and the supply-chain figures moved to a card with bigger type — same numbers, readable at a glance.
+
 ## 1.0.0 — 2026-08-06
 
 razor leaves alpha.
