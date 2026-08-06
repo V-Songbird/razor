@@ -90,22 +90,14 @@ function walk(dir, base = dir, out = []) {
   return out;
 }
 
-function readFixtureSet(workdir) {
-  const fm = path.join(workdir, '_fixture_files.json');
-  if (!fs.existsSync(fm)) return new Set();
-  try { return new Set(JSON.parse(fs.readFileSync(fm, 'utf8'))); } catch { return new Set(); }
-}
-
 // LOC over code-extension source files only. total_loc counts every non-blank
 // line including comments (the bloat a vibe baseline actually produces); src_loc
 // is code-only. Tests tracked separately, never as bloat. selfcheckAsTest
 // (surgical tasks): an in-file self-check is reclassified from source to test.
 function codeStats(workdir, selfcheckAsTest = false) {
-  const fixture = readFixtureSet(workdir);
   const rels = walk(workdir).filter((rel) => {
     const name = rel.split('/').pop();
-    return CODE_EXT.has(path.extname(name)) && !name.startsWith('.') && !name.startsWith('_')
-      && !fixture.has(rel);
+    return CODE_EXT.has(path.extname(name)) && !name.startsWith('.') && !name.startsWith('_');
   });
   const read = (rel) => {
     try { return fs.readFileSync(path.join(workdir, rel), 'utf8'); } catch { return ''; }
@@ -221,22 +213,6 @@ function pkgAddAttempts(workdir) {
     .filter((l) => ADD_PAT.test(l));
 }
 
-// LOC of fenced code blocks in a chat answer: [total incl comments, code-only].
-function chatCodeLoc(text) {
-  let total = 0, code = 0;
-  const re = /```[a-zA-Z0-9_+-]*\r?\n([\s\S]*?)```/g;
-  let m;
-  while ((m = re.exec(text || '')) !== null) {
-    for (const ln of m[1].split(/\r?\n/)) {
-      const s = ln.trim();
-      if (!s) continue;
-      total++;
-      if (!COMMENT_RE.test(s)) code++;
-    }
-  }
-  return [total, code];
-}
-
 // --- transcript extraction ------------------------------------------------------
 
 // stream-json -> final result event written as _claude.json, plus the raw stream
@@ -262,5 +238,5 @@ module.exports = {
   CODE_EXT, NODE_BUILTINS,
   isTest, countLines, selfcheckSplit, codeStats,
   git, gitSnapshot, gitDiffStats, gitNewFiles,
-  jsNewDeps, pkgAddAttempts, chatCodeLoc, extractResult,
+  jsNewDeps, pkgAddAttempts, extractResult,
 };

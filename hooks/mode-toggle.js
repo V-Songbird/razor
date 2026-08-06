@@ -10,7 +10,7 @@ const { RULESET, readInput, readState, writeState } = require('./razor-lib');
 
 function parseToggle(prompt) {
   const p = String(prompt || '').trim().toLowerCase();
-  const m = p.match(/^[/@$]?razor(?::razor)?\s+(on|off)\b/);
+  const m = p.match(/^\/?razor(?::razor)?\s+(on|off)\b/);
   if (m) return m[1];
   if (/^(stop razor|razor off)[.!]?$/.test(p)) return 'off';
   return null;

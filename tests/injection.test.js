@@ -3,7 +3,7 @@
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
 const { runHook, hookOutput, freshSession } = require('./helpers');
-const { shouldInject, DEFAULT_SKIP } = require('../hooks/subagent-start');
+const { shouldInject } = require('../hooks/subagent-start');
 const { RULESET, writeState } = require('../hooks/razor-lib');
 const { parseToggle } = require('../hooks/mode-toggle');
 
@@ -151,9 +151,5 @@ describe('integration: injection lifecycle', () => {
       agent_type: 'general-purpose',
     });
     assert.strictEqual(r.stdout.trim(), '');
-  });
-
-  test('DEFAULT_SKIP stays lean — every entry is a known non-coding agent', () => {
-    assert.ok(DEFAULT_SKIP.length <= 8);
   });
 });

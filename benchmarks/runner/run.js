@@ -30,7 +30,7 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { RAZOR_TASKS } = require('./tasks.js');
 const {
-  codeStats, gitSnapshot, gitDiffStats, gitNewFiles, pkgAddAttempts, chatCodeLoc, extractResult,
+  codeStats, gitSnapshot, gitDiffStats, gitNewFiles, pkgAddAttempts, extractResult,
   selfcheckSplit,
 } = require('./metrics.js');
 
@@ -188,11 +188,11 @@ async function scoreCell(taskId, arm, model, ws) {
   }
   meta.install_attempts = pkgAddAttempts(ws).length;
 
-  const surgical = !task.open && !task.fixture && !task.meta;
+  const surgical = !task.meta;
   let stats;
   if (task.meta) {
     stats = { files: 0, src_files: 0, total_loc: 0, src_loc: 0, test_files: 0, test_loc: 0, new_files: 0 };
-  } else if (task.fixture || task.git) {
+  } else if (task.git) {
     stats = gitDiffStats(ws);
     stats.new_files = gitNewFiles(ws);
     // Same reclassification codeStats does for surgical tasks: an inline
@@ -212,17 +212,8 @@ async function scoreCell(taskId, arm, model, ws) {
     stats = codeStats(ws, surgical);
     stats.new_files = stats.src_files || 0;
   }
-  if (task.open && stats.total_loc === 0 && resultText) {
-    const [t, c] = chatCodeLoc(resultText);
-    stats = { ...stats, total_loc: t, src_loc: c, src_files: t ? 1 : 0 };
-  }
 
-  let sc;
-  if (task.fixture) {
-    sc = { correct: stats.total_loc > 0 ? 1 : 0, safe: 1, reason: 'git-diff' };
-  } else {
-    sc = await task.score(ws);
-  }
+  const sc = await task.score(ws);
   return { task: taskId, arm, model, ...sc, ...stats, ...meta };
 }
 
@@ -272,7 +263,7 @@ function runCell(taskId, arm, model, ws) {
     fs.writeFileSync(path.join(ws, fn), content);
   }
   const shimDir = task.shims ? writeShims(ws) : null;
-  if (task.git || task.fixture) gitSnapshot(ws);
+  if (task.git) gitSnapshot(ws);
 
   if (!CLAUDE) throw new Error('claude CLI not found on PATH');
   const args = buildArgs(task, arm, model);
@@ -311,7 +302,6 @@ function runCell(taskId, arm, model, ws) {
 async function selftest() {
   let failures = 0;
   for (const [tid, task] of Object.entries(TASKS)) {
-    if (task.open || task.fixture) continue;
     const axis = task.axis || 'safe';
     for (const kind of ['good', 'bad']) {
       const d = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-selftest-'));

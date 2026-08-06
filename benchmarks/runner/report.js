@@ -110,37 +110,6 @@ function fmt(v, digits) {
   return digits !== undefined ? Number(v).toFixed(digits) : String(v);
 }
 
-function mdToHtml(md) {
-  const out = [];
-  let table = [];
-  const flush = () => {
-    if (!table.length) return;
-    out.push('<table>');
-    table.forEach((row, i) => {
-      const cells = row.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-      const tag = i === 0 ? 'th' : 'td';
-      out.push('<tr>' + cells.map((c) => `<${tag}>${c.replace(/\*\*/g, '')}</${tag}>`).join('') + '</tr>');
-    });
-    out.push('</table>');
-    table = [];
-  };
-  for (const line of md.split('\n')) {
-    const s = line.trim();
-    if (s.startsWith('|') && (s.match(/\|/g) || []).length > 2) {
-      if (s.replace(/[|\-:]/g, '').trim() === '') continue;
-      table.push(s);
-      continue;
-    }
-    flush();
-    if (s.startsWith('# ')) out.push(`<h1>${s.slice(2)}</h1>`);
-    else if (s.startsWith('## ')) out.push(`<h2>${s.slice(3)}</h2>`);
-    else if (s.startsWith('![')) out.push(`<img src="${s.slice(s.indexOf('(') + 1, s.indexOf(')'))}" style="max-width:100%">`);
-    else if (s) out.push(`<p>${s}</p>`);
-  }
-  flush();
-  return out.join('\n');
-}
-
 function main() {
   let runDir = process.argv[2]
     ? path.resolve(process.argv[2])
@@ -232,12 +201,7 @@ function main() {
   fs.writeFileSync(path.join(runDir, 'charts.svg'), svg);
   md.splice(2, 0, '\n![charts](charts.svg)\n');
   fs.writeFileSync(path.join(runDir, 'report.md'), md.join('\n') + '\n');
-  const html = "<!doctype html><meta charset='utf-8'><title>razor benchmark</title>"
-    + '<style>body{font-family:Segoe UI,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}'
-    + 'table{border-collapse:collapse;font-size:13px}td,th{border:1px solid #ccc;padding:3px 8px;text-align:right}'
-    + 'th,td:first-child,td:nth-child(2){text-align:left}</style>' + mdToHtml(md.join('\n'));
-  fs.writeFileSync(path.join(runDir, 'report.html'), html);
-  console.log(`wrote ${path.join(runDir, 'report.md')}, report.html, charts.svg`);
+  console.log(`wrote ${path.join(runDir, 'report.md')}, charts.svg`);
 }
 
 main();
