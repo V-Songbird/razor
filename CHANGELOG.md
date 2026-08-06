@@ -5,6 +5,22 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## 1.0.0 — 2026-08-06
+
+razor leaves alpha.
+
+Installing a dependency your manifest already declares no longer triggers the new-dependency question. A versioned spec and the bare name (`axios@^1.8`, `axios`) now count as one dependency, not two, across the install, import, and manifest checks alike.
+
+The import check no longer mistakes imports inside comments, type-only imports, or your project's own Python modules for new dependencies. Common Python packages whose import name differs from their package name (`pillow`/`PIL`, `beautifulsoup4`/`bs4`, and friends) are now recognized as declared.
+
+The once-per-session size check now measures only what the session itself changed — work already sitting uncommitted when the session started no longer counts against it.
+
+Turning razor off with `/razor off` now survives resuming the session.
+
+The dependency messages now say "declared" — the list always came from your manifest, not from what's physically installed.
+
+Removed the post-edit search check and its `RAZOR_SEARCH_BUDGET` setting.
+
 ## 0.4.7-alpha — 2026-07-18
 
 Docs only. The README is rebuilt around a TL;DR up top and one unified section order shared with hush and foreman; the session controls now live in a single table.

@@ -30,9 +30,9 @@ razor hands Claude a short checklist to run before it writes anything: Do we nee
 ## Why you'd want it
 
 - **Leaner projects.** Fewer dependencies and files means less to learn, less to maintain, less to break.
-- **It acts, not just advises.** "Reuse first" is enforced in the tool layer, not buried in a prompt Claude can forget.
+- **It acts, not just advises.** The "do we need this?" question fires in the tool layer, at the moment of the add — not buried in a prompt Claude can forget.
 - **It never blocks you.** Every nudge fires once, and the retry always goes through. You stay in control.
-- **One switch.** `/razor off` for the session, `/razor on` to bring it back. No dials.
+- **One switch.** `/razor off` for the session, `/razor on` to bring it back.
 
 ## How it works
 
@@ -80,7 +80,7 @@ razor runs itself. These are the only controls:
 | Turn razor off or back on for the session | `/razor off` · `/razor on` |
 | Find dependencies in your manifest that nothing imports | `/razor:unused` |
 
-`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Anything it can't confirm from imports alone gets flagged for a manual check, never reported as a clean finding.
+`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Anything it can spot as ambiguous gets flagged for a manual check, and the report names the blind spots a static scan can't see.
 
 ## Benchmarks
 
@@ -218,7 +218,7 @@ Every check above fires as Claude works, not just as a reminder at the start —
 
 ## Settings
 
-Most people never touch these. razor asks about them when you enable it — the environment variables below do the same thing, and take precedence when set:
+Most people never touch these. razor asks about most of them when you enable it — the environment variables below do the same thing, and take precedence when set:
 
 | Variable | What it does |
 | --- | --- |

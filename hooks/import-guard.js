@@ -151,9 +151,20 @@ function pyImportRoots(text) {
 // A declared dependency name can differ from its import name (python-dotenv
 // -> dotenv, pyyaml -> yaml). Normalize in the SUPPRESSING direction only —
 // over-matching here means one missed nudge, never a false deny.
+// razor: a static alias list for the common odd pairs; full metadata-derived
+// mapping if these ever prove insufficient.
+const KNOWN_IMPORT_NAMES = {
+  pillow: 'pil',
+  beautifulsoup4: 'bs4',
+  'opencv-python': 'cv2',
+  'scikit-learn': 'sklearn',
+};
+
 function declaredNameForms(name) {
   const n = String(name).toLowerCase();
-  return new Set([n, n.replace(/-/g, '_'), n.replace(/^python-/, ''), n.replace(/^py/, '')]);
+  const forms = new Set([n, n.replace(/-/g, '_'), n.replace(/^python-/, ''), n.replace(/^py/, '')]);
+  if (KNOWN_IMPORT_NAMES[n]) forms.add(KNOWN_IMPORT_NAMES[n]);
+  return forms;
 }
 
 function isDeclared(root, deps) {

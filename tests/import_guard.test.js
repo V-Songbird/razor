@@ -76,7 +76,10 @@ describe('unit: classification helpers', () => {
   test('isDeclared normalizes name/import mismatches in the suppressing direction', () => {
     assert.strictEqual(isDeclared('dotenv', ['python-dotenv']), true);
     assert.strictEqual(isDeclared('yaml', ['pyyaml']), true);
-    assert.strictEqual(isDeclared('PIL', ['pillow']), false); // known limit: no alias table
+    assert.strictEqual(isDeclared('PIL', ['pillow']), true);
+    assert.strictEqual(isDeclared('bs4', ['beautifulsoup4']), true);
+    assert.strictEqual(isDeclared('cv2', ['opencv-python']), true);
+    assert.strictEqual(isDeclared('sklearn', ['scikit-learn']), true);
     assert.strictEqual(isDeclared('axios', ['express', 'lodash']), false);
     assert.strictEqual(isDeclared('lodash', ['express', 'lodash']), true);
   });

@@ -200,7 +200,10 @@ const KNOWN_LIMITS =
   'runtime require-by-string, CLI tools/plugins invoked via npx/exec without ever being ' +
   'imported, or a dependency installed solely to satisfy another package\'s peerDependencies ' +
   '(grep has no visibility into installed packages\' own manifests, so a peer-satisfied dep ' +
-  'can land in "Unused" above with no warning). The "needs a resolver-grade check" bucket ' +
+  'can land in "Unused" above with no warning). Only .js/.ts-family and .py files are ' +
+  'scanned — a dependency imported solely from .vue/.svelte/.astro/.mdx source, or a ' +
+  'python package whose import name differs from its distribution name beyond the common ' +
+  'aliases, can also land in "Unused" wrongly. The "needs a resolver-grade check" bucket ' +
   'covers what grep CAN at least spot as ambiguous (script/config mentions, toolchain, ' +
   '@types pairing) — treat every entry in it as needing a manual look, not confirmed usage.';
 

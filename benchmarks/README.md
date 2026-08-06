@@ -70,10 +70,10 @@ Options: `--rival-name <label>` (how it shows up in the report). We don't ship o
 The claims also rest on razor's unit tests, which cost nothing to run — they exercise razor's gates and ruleset directly:
 
 ```bash
-node --test razor/tests/*.test.js
+node --test tests/*.test.js
 ```
 
-(Run that from the repo root. On Windows Node 22, use the explicit `*.test.js` glob shown here — a bare `node --test tests/` with a trailing slash trips up on that version.)
+(Run that from the razor repo root. On Windows Node 22, use the explicit `*.test.js` glob shown here — a bare `node --test tests/` with a trailing slash trips up on that version.)
 
 ## What's measured
 

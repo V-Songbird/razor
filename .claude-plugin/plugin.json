@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI enforcement at the harness level for real engineering work — nudges toward the simplest solution and gates against unnecessary dependencies, file sprawl, and unchecked build growth.",
+  "description": "YAGNI checkpoints at the harness level for real engineering work — nudges toward the simplest solution and asks one evidence-backed \"do we need this?\" before new dependencies, file sprawl, and unchecked build growth.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",
@@ -37,8 +37,8 @@
     },
     "ledger": {
       "type": "boolean",
-      "title": "End-of-session build check",
-      "description": "One \"is all of this needed?\" question when a session adds a lot of code with almost no deletions.",
+      "title": "Once-per-session build check",
+      "description": "One \"is all of this needed?\" question when a session adds a lot of code with almost no deletions, or a pile of new files.",
       "default": true
     }
   }
