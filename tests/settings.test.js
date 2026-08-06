@@ -65,30 +65,18 @@ describe('integration: plugin options (CLAUDE_PLUGIN_OPTION_*)', () => {
     assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
   });
 
-  test('search_budget option is honored', () => {
-    const session = freshSession();
-    const env = { CLAUDE_PLUGIN_OPTION_SEARCH_BUDGET: '2' };
-    runHook('pre-tool-use.js', input(session, 'Edit', {}), env);
-    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep', {}), env)), null);
-    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob', {}), env)), null);
-    const third = hookOutput(runHook('pre-tool-use.js', input(session, 'Grep', {}), env));
-    assert.strictEqual(third.hookSpecificOutput.permissionDecision, 'deny');
-  });
 });
 
 describe('integration: persistent state dir and cleanup', () => {
-  test('state lands in CLAUDE_PLUGIN_DATA and session-end removes it, agent files included', () => {
+  test('state lands in CLAUDE_PLUGIN_DATA, agent-scoped files included', () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-data-'));
     const session = freshSession();
     const env = { CLAUDE_PLUGIN_DATA: dataDir };
 
-    runHook('pre-tool-use.js', input(session, 'Edit', {}), env);
-    runHook('pre-tool-use.js', input(session, 'Grep', {}, { agent_id: 'ag1' }), env);
+    runHook('pre-tool-use.js', input(session, 'Write', { file_path: newFile(30) }, { prompt_id: 'p1' }), env);
+    runHook('pre-tool-use.js', input(session, 'Write', { file_path: newFile(31) }, { agent_id: 'ag1', prompt_id: 'p1' }), env);
     const files = fs.readdirSync(dataDir).filter((f) => f.startsWith('razor-') && f.endsWith('.json'));
     assert.strictEqual(files.length, 2); // session state + agent-scoped state
-
-    runHook('session-end.js', { session_id: session, hook_event_name: 'SessionEnd' }, env);
-    assert.strictEqual(fs.readdirSync(dataDir).length, 0);
   });
 
   test('session-start sweeps razor state files older than a week, keeps fresh ones', () => {

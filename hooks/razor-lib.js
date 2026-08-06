@@ -81,30 +81,8 @@ function statePath(sessionId) {
   return path.join(stateDir(), `razor-${safeId(sessionId)}.json`);
 }
 
-// SessionEnd cleanup: this session's state file plus its agent-scoped ones.
-function clearSessionState(sessionId) {
-  if (!sessionId) return;
-  const dir = stateDir();
-  const prefix = `razor-${safeId(sessionId)}`;
-  let names;
-  try {
-    names = fs.readdirSync(dir);
-  } catch {
-    return;
-  }
-  for (const name of names) {
-    if (!name.startsWith(prefix) || !name.endsWith('.json')) continue;
-    try {
-      fs.unlinkSync(path.join(dir, name));
-    } catch {
-      /* best effort */
-    }
-  }
-}
-
-// Sessions that never reach SessionEnd (crashes, kills) would leak state
-// files forever in the persistent dir — sweep anything razor-owned and
-// older than a week.
+// State files are swept by age alone — a session's file must outlive the
+// session so a later --resume still sees its /razor off toggle.
 const GC_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function gcStateFiles() {
@@ -242,16 +220,11 @@ module.exports = {
   readInput,
   settingOff,
   settingNumber,
-  stateDir,
-  statePath,
-  clearSessionState,
   gcStateFiles,
   readState,
   writeState,
-  safeWriteFileSync,
   isActive,
   isRealUserPrompt,
-  currentTurnKey,
   turnKey,
   gateStateId,
   git,

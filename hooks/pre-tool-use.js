@@ -5,7 +5,7 @@
 //
 // One process per tool call and one state read/write, with the gates applied
 // in order against the same state object: dep guard, manifest guard, import
-// guard, file meter, search meter. Every gate still records its own bookkeeping even
+// guard, file meter. Every gate still records its own bookkeeping even
 // when an earlier one already denied — the retry then passes all of them —
 // and the first reason found is the one emitted (most specific wins).
 //
@@ -20,7 +20,6 @@ const GATES = [
   require('./manifest-guard'),
   require('./import-guard'),
   require('./file-meter'),
-  require('./search-meter'),
 ];
 
 function main() {

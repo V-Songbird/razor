@@ -27,7 +27,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "^(Bash|PowerShell|Grep|Glob|Read|Edit|Write)$",
+        "matcher": "^(Bash|PowerShell|Edit|Write)$",
         "hooks": [
           {
             "type": "command",
@@ -57,18 +57,6 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js"],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/session-end.js"],
             "timeout": 5
           }
         ]

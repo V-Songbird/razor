@@ -48,14 +48,13 @@ Here's the actual checklist, in order. Claude stops at the first line that fits:
 | Fits in one line? | Write one line |
 | None of the above | Write the smallest version that works |
 
-Four checks make sure the list isn't just a suggestion Claude quietly drops later:
+Three checks make sure the list isn't just a suggestion Claude quietly drops later:
 
 | Moment | What happens |
 | --- | --- |
-| Reaching for a new dependency (an install command, an `import` line, a hand-edit to the manifest) | Challenged once, with your project's real installed-dependency list right in the message |
+| Reaching for a new dependency (an install command, an `import` line, a hand-edit to the manifest) | Challenged once, with your project's declared-dependency list right in the message |
 | Spawning a lot of new files in one turn | A "does this all need to exist?" nudge |
-| Searching instead of shipping | A nudge to act on what it already has |
-| Wrapping up a heavy session | A git-grounded check, once, on whether all the new code was actually needed |
+| A session's new code piles up | A git-grounded check, once per session, on whether all of it was actually needed |
 
 If Claude still thinks it's right after the nudge, it goes ahead. razor asks once — it doesn't argue.
 
@@ -228,8 +227,8 @@ Most people never touch these. razor asks about them when you enable it — the 
 | `RAZOR_IMPORT_GUARD=off` | Stops the new-dependency nudge for `import`/`require` lines |
 | `RAZOR_MANIFEST_GUARD=off` | Stops the new-dependency nudge for direct edits to `package.json`/`requirements.txt` |
 | `RAZOR_FILE_BUDGET=4` | New files allowed in one turn before it speaks up |
-| `RAZOR_SEARCH_BUDGET=1` | Extra searches allowed after the code is written before it speaks up |
-| `RAZOR_LEDGER=off` | Turns off the end-of-session "is all this needed?" check |
+| `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
+| `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
 
 ## License
 

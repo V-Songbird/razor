@@ -5,7 +5,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { safeWriteFileSync } = require('../hooks/razor-lib');
+const { safeWriteFileSync } = require('../hooks/lib/safe-write');
 
 const dirs = [];
 after(() => {

@@ -17,13 +17,6 @@
       "default": 4,
       "min": 0
     },
-    "search_budget": {
-      "type": "number",
-      "title": "Post-edit search budget",
-      "description": "Extra searches allowed after the code is written before razor asks whether the question is already answered. 0 disables the check.",
-      "default": 1,
-      "min": 0
-    },
     "dep_guard": {
       "type": "boolean",
       "title": "Dependency guard (installs)",

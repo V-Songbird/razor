@@ -31,7 +31,7 @@ describe('unit: state scoping helpers', () => {
 });
 
 describe('integration: one process, one state', () => {
-  test('a single Write feeds both the file meter and the search phase', () => {
+  test('a single Write books the file meter turn state', () => {
     const session = freshSession();
     assert.strictEqual(
       hookOutput(runHook('pre-tool-use.js', input(session, 'Write', { file_path: newFile(1) }, { prompt_id: 'p1' }))),
@@ -39,7 +39,6 @@ describe('integration: one process, one state', () => {
     );
     const state = readState(session);
     assert.strictEqual(state.turn.count, 1);
-    assert.strictEqual(state.searchPhase.hasEdited, true);
   });
 
   test('import guard outranks the file meter when one Write trips both; the retry passes both', () => {
@@ -72,22 +71,6 @@ describe('integration: one process, one state', () => {
 });
 
 describe('integration: subagent budget isolation', () => {
-  test("a subagent's searches never spend the main thread's post-edit budget", () => {
-    const session = freshSession();
-    runHook('pre-tool-use.js', input(session, 'Edit', {}));
-
-    // Inside a subagent: fresh phase, unmetered pre-edit searching.
-    const agent = { agent_id: 'agent-1' };
-    for (let i = 0; i < 3; i++) {
-      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep', {}, agent))), null);
-    }
-
-    // Main thread unaffected by the agent's searches: still budget 1.
-    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Grep', {}))), null);
-    const second = hookOutput(runHook('pre-tool-use.js', input(session, 'Glob', {})));
-    assert.strictEqual(second.hookSpecificOutput.permissionDecision, 'deny');
-  });
-
   test('a subagent gets its own file budget', () => {
     const session = freshSession();
     const env = { RAZOR_FILE_BUDGET: '1' };
@@ -110,9 +93,10 @@ describe('integration: subagent budget isolation', () => {
     const session = freshSession();
     writeState(session, { off: true });
     const agent = { agent_id: 'agent-3' };
-    runHook('pre-tool-use.js', input(session, 'Edit', {}, agent));
-    runHook('pre-tool-use.js', input(session, 'Grep', {}, agent));
-    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'Glob', {}, agent))), null);
+    assert.strictEqual(
+      hookOutput(runHook('pre-tool-use.js', input(session, 'Bash', { command: 'npm i left-pad' }, agent))),
+      null
+    );
   });
 });
 
