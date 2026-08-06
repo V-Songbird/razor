@@ -117,8 +117,28 @@ function parseInstallCommand(command) {
   return null;
 }
 
+// One decision per package however the spec is written: `axios`,
+// `axios@^1.8`, `flask==2.0`, and `requests[socks]` all name the same
+// dependency. Cut at the first version/extras marker; a non-leading `@`
+// starts a version (a leading one is an npm scope).
+function packageName(token) {
+  const t = String(token || '');
+  const at = t.indexOf('@', 1);
+  const spec = t.search(/[=<>!~[]/);
+  const end = Math.min(at === -1 ? t.length : at, spec === -1 ? t.length : spec);
+  return t.slice(0, end) || t;
+}
+
 function depKey(hit) {
-  return `${hit.manager}:${hit.packages.map((p) => p.toLowerCase()).sort().join(',')}`;
+  return `${hit.manager}:${hit.packages.map((p) => packageName(p).toLowerCase()).sort().join(',')}`;
+}
+
+// Manifest-name match in the suppressing direction only (`python_dotenv` ≙
+// `python-dotenv`) — missing a nudge is acceptable, a false deny is not.
+function isDeclaredIn(name, deps) {
+  const norm = (s) => String(s).toLowerCase().replace(/-/g, '_');
+  const n = norm(name);
+  return (deps || []).some((d) => norm(d) === n);
 }
 
 // ---- evidence: what's already installed, from the project manifest ----
@@ -333,26 +353,33 @@ function retryContract(what) {
   );
 }
 
-function denyReason(hit, deps) {
-  const head = `razor: '${hit.packages.join(' ')}' adds a new ${hit.manager} dependency. `;
+// One deny body for all three dependency gates; only the head sentence
+// differs. The list is what the manifest declares — evidence, not a claim
+// about what's physically installed.
+function evidenceReason(head, deps, what) {
   if (deps && deps.length) {
     const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
     const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
     return (
       head +
-      `Already installed (${sorted.length}): ${shown}. ` +
+      `Already declared (${sorted.length}): ${shown}. ` +
+      'Rungs 3-5 — check the stdlib, the platform, and those first, even when the user names the library. ' +
       PROVENANCE +
-      'If none of these, the stdlib, or the platform covers it, ' +
-      retryContract('command')
+      'If nothing covers it, ' +
+      retryContract(what)
     );
   }
   return (
     head +
-    'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first. ' +
+    'Rungs 3-5 — check the stdlib, the platform, and already-declared deps first, even when the user names the library. ' +
     PROVENANCE +
     'If nothing covers it, ' +
-    retryContract('command')
+    retryContract(what)
   );
+}
+
+function denyReason(hit, deps) {
+  return evidenceReason(`razor: '${hit.packages.join(' ')}' adds a new ${hit.manager} dependency. `, deps, 'command');
 }
 
 // Ecosystem of a manager, for the reconsideration ledger shared with the
@@ -370,11 +397,17 @@ function check(data, state) {
   const hit = parseInstallCommand(data.tool_input && data.tool_input.command);
   if (!hit) return null;
 
+  const names = hit.packages.map(packageName);
+  const deps = installedDeps(hit.manager, data.cwd);
+  // Installing what the manifest already declares is a restore, not an
+  // addition — never checkpointed.
+  if (deps && names.every((n) => isDeclaredIn(n, deps))) return null;
+
   const key = depKey(hit);
   if (state.deniedDeps && state.deniedDeps[key]) return null; // already reconsidered — normal permission flow applies
   const eco = MANAGER_ECO[hit.manager];
   if (eco && state.deniedImports
-      && hit.packages.every((p) => state.deniedImports[`${eco}:${p.toLowerCase()}`])) {
+      && names.every((n) => state.deniedImports[`${eco}:${n.toLowerCase()}`])) {
     return null; // every package already reconsidered via a manifest edit or import
   }
 
@@ -382,13 +415,13 @@ function check(data, state) {
   state.deniedDeps[key] = true;
   if (eco) {
     state.deniedImports = state.deniedImports || {};
-    for (const p of hit.packages) state.deniedImports[`${eco}:${p.toLowerCase()}`] = true;
+    for (const n of names) state.deniedImports[`${eco}:${n.toLowerCase()}`] = true;
   }
-  return denyReason(hit, installedDeps(hit.manager, data.cwd));
+  return denyReason(hit, deps);
 }
 
 module.exports = {
-  check, parseInstallCommand, depKey, installedDeps, denyReason, PROVENANCE, retryContract,
+  check, parseInstallCommand, depKey, packageName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
   // razor: exported for scripts/unused-deps.js (reuse the manifest readers,
   // never copy them) — behavior-neutral, no logic change.
   readNodeDeps, readPythonDeps, readCargoDeps, readGoDeps, readComposerDeps, readGemDeps, readDotnetDeps, READERS,

@@ -65,7 +65,7 @@ describe('integration: manifest gate', () => {
     assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /adds a new node dependency/);
     assert.match(first.hookSpecificOutput.permissionDecisionReason, /`pg`/);
-    assert.match(first.hookSpecificOutput.permissionDecisionReason, /Already installed \(2\): express, lodash/);
+    assert.match(first.hookSpecificOutput.permissionDecisionReason, /Already declared \(2\): express, lodash/);
 
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });

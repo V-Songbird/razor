@@ -155,14 +155,14 @@ describe('unit: denyReason', () => {
 
   test('with evidence: lists installed deps with count', () => {
     const reason = denyReason(hit, ['lodash', 'axios', 'date-fns']);
-    assert.match(reason, /Already installed \(3\): axios, date-fns, lodash\./);
+    assert.match(reason, /Already declared \(3\): axios, date-fns, lodash\./);
     assert.match(reason, /dayjs/);
   });
 
   test('list is capped with ellipsis', () => {
     const many = Array.from({ length: 40 }, (_, i) => `pkg-${String(i).padStart(2, '0')}`);
     const reason = denyReason(hit, many);
-    assert.match(reason, /Already installed \(40\):/);
+    assert.match(reason, /Already declared \(40\):/);
     assert.match(reason, /…/);
     assert.ok(!reason.includes('pkg-35')); // beyond the cap of 30
   });
@@ -196,7 +196,7 @@ describe('integration: evidence-carrying deny', () => {
       })
     );
     assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
-    assert.match(out.hookSpecificOutput.permissionDecisionReason, /Already installed \(2\): date-fns, lodash/);
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /Already declared \(2\): date-fns, lodash/);
   });
 
   test('deny falls back to generic wording without a manifest', () => {
@@ -227,7 +227,7 @@ describe('integration: evidence-carrying deny', () => {
       })
     );
     assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
-    assert.match(out.hookSpecificOutput.permissionDecisionReason, /Already installed \(3\): flask, requests, rich/);
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /Already declared \(3\): flask, requests, rich/);
     assert.match(out.hookSpecificOutput.permissionDecisionReason, /tomli/);
   });
 });

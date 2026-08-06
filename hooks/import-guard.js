@@ -29,7 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps, PROVENANCE, retryContract } = require('./dep-guard');
+const { installedDeps, evidenceReason } = require('./dep-guard');
 
 // Node core modules — importing one is never a new dependency.
 const NODE_BUILTINS = new Set([
@@ -192,23 +192,13 @@ function newImports(eco, incomingText, existingText, deps) {
   return [...incoming].filter((r) => !existing.has(r) && !isDeclared(r, deps)).sort();
 }
 
-const LIST_CAP = 30;
-
 function denyReason(tool, roots, eco, manifestName, deps) {
   const what = roots.map((r) => `\`${r}\``).join(', ');
-  const head = `razor: importing ${what} in this ${tool} adds a new ${eco} dependency — not in ${manifestName}. `;
-  const tail = PROVENANCE + 'If nothing covers it, ' + retryContract(tool);
-  if (deps && deps.length) {
-    const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
-    const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
-    return head
-      + `Already installed (${sorted.length}): ${shown}. `
-      + 'Rungs 3-5 — check the stdlib, the platform, and those first, even when the user names the library. '
-      + tail;
-  }
-  return head
-    + 'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first, even when the user names the library. '
-    + tail;
+  return evidenceReason(
+    `razor: importing ${what} in this ${tool} adds a new ${eco} dependency — not in ${manifestName}. `,
+    deps,
+    tool
+  );
 }
 
 // Dispatcher entry: mutates gate state, returns the deny reason or null.

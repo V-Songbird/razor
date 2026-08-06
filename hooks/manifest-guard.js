@@ -25,7 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps, PROVENANCE, retryContract } = require('./dep-guard');
+const { installedDeps, evidenceReason } = require('./dep-guard');
 
 // null = unparseable (caller stays silent), Set otherwise.
 function jsonDepNames(text) {
@@ -55,23 +55,13 @@ const GUARDED = {
   'requirements.txt': { eco: 'python', manager: 'pip', extract: reqDepNames },
 };
 
-const LIST_CAP = 30;
-
 function denyReason(tool, names, eco, manifestName, deps) {
   const what = names.map((n) => `\`${n}\``).join(', ');
-  const head = `razor: this ${tool} to ${manifestName} adds a new ${eco} dependency (${what}) without an install. `;
-  const tail = PROVENANCE + 'If nothing covers it, ' + retryContract(tool);
-  if (deps && deps.length) {
-    const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
-    const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
-    return head
-      + `Already installed (${sorted.length}): ${shown}. `
-      + 'Rungs 3-5 — check the stdlib, the platform, and those first, even when the user names the library. '
-      + tail;
-  }
-  return head
-    + 'Rungs 3-5 — check the stdlib, the platform, and already-installed deps first, even when the user names the library. '
-    + tail;
+  return evidenceReason(
+    `razor: this ${tool} to ${manifestName} adds a new ${eco} dependency (${what}) without an install. `,
+    deps,
+    tool
+  );
 }
 
 // The resulting manifest content this tool call would produce, or null when

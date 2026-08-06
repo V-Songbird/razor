@@ -2,8 +2,12 @@
 
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { runHook, hookOutput, freshSession } = require('./helpers');
-const { parseInstallCommand, depKey } = require('../hooks/dep-guard');
+const { parseInstallCommand, depKey, packageName } = require('../hooks/dep-guard');
+const { readState } = require('../hooks/razor-lib');
 
 describe('unit: parseInstallCommand', () => {
   const adds = [
@@ -78,6 +82,27 @@ describe('unit: parseInstallCommand', () => {
     const b = depKey(parseInstallCommand('pip install requests flask'));
     assert.strictEqual(a, b);
   });
+
+  test('packageName strips version specs and extras, keeps npm scopes', () => {
+    assert.strictEqual(packageName('axios@^1.8'), 'axios');
+    assert.strictEqual(packageName('@scope/pkg@2.0.0'), '@scope/pkg');
+    assert.strictEqual(packageName('@scope/pkg'), '@scope/pkg');
+    assert.strictEqual(packageName('flask==2.0'), 'flask');
+    assert.strictEqual(packageName('requests[socks]>=2.28'), 'requests');
+    assert.strictEqual(packageName('github.com/gorilla/mux@v1.8.0'), 'github.com/gorilla/mux');
+    assert.strictEqual(packageName('serde'), 'serde');
+  });
+
+  test('a versioned spec and the bare name share one decision', () => {
+    assert.strictEqual(
+      depKey(parseInstallCommand('npm i axios@^1.8')),
+      depKey(parseInstallCommand('npm install axios'))
+    );
+    assert.strictEqual(
+      depKey(parseInstallCommand('pip install flask==2.0')),
+      depKey(parseInstallCommand('pip install Flask'))
+    );
+  });
 });
 
 describe('integration: soft gate', () => {
@@ -115,6 +140,26 @@ describe('integration: soft gate', () => {
 
   test('non-install commands stay silent', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(freshSession(), 'git status'))), null);
+  });
+
+  test('installing an already-declared dependency never checkpoints', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-dg-'));
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ dependencies: { lodash: '^4' } }));
+    const withCwd = { ...input(freshSession(), 'npm install lodash'), cwd: dir };
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', withCwd)), null);
+
+    const py = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-dg-'));
+    fs.writeFileSync(path.join(py, 'requirements.txt'), 'python-dotenv==1.0\n');
+    const pyCwd = { ...input(freshSession(), 'pip install python_dotenv'), cwd: py };
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', pyCwd)), null);
+  });
+
+  test('a versioned install denied once passes on the bare-name retry, ledger key normalized', () => {
+    const session = freshSession();
+    const first = hookOutput(runHook('pre-tool-use.js', input(session, 'npm i axios@^1.8')));
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.strictEqual(readState(session).deniedImports['node:axios'], true);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(session, 'npm install axios'))), null);
   });
 
   test('RAZOR_DEP_GUARD=off disables the gate', () => {
