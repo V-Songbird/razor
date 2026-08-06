@@ -30,16 +30,30 @@ function shouldFire(stats, locBudget, filesBudget) {
   return sprawlLoc || stats.newFiles > filesBudget;
 }
 
+function parseShortstat(shortstat) {
+  return {
+    insertions: parseInt((/(\d+) insertion/.exec(shortstat) || [])[1] || '0', 10),
+    deletions: parseInt((/(\d+) deletion/.exec(shortstat) || [])[1] || '0', 10),
+  };
+}
+
+// The session's own delta: the working tree vs the base commit, minus the
+// dirt that was already there when the session started.
+// razor: count-level subtraction; per-line attribution needs a full diff
+// snapshot at session start.
 function diffStats(ledger, cwd) {
   const shortstat = git(['diff', '--shortstat', ledger.baseSha], cwd);
   if (shortstat === null) return null; // base sha gone (rebase) or not a repo
-  const insertions = parseInt((/(\d+) insertion/.exec(shortstat) || [])[1] || '0', 10);
-  const deletions = parseInt((/(\d+) deletion/.exec(shortstat) || [])[1] || '0', 10);
+  const now = parseShortstat(shortstat);
+  const insertions = Math.max(0, now.insertions - (ledger.baseInsertions || 0));
+  const deletions = Math.max(0, now.deletions - (ledger.baseDeletions || 0));
 
   const added = git(['diff', '--diff-filter=A', '--name-only', ledger.baseSha], cwd) || '';
   const untracked = git(['ls-files', '--others', '--exclude-standard'], cwd) || '';
   const count = (s) => s.split('\n').filter(Boolean).length;
-  const newFiles = count(added) + Math.max(0, count(untracked) - (ledger.baseUntracked || 0));
+  const newFiles =
+    Math.max(0, count(added) - (ledger.baseAdded || 0)) +
+    Math.max(0, count(untracked) - (ledger.baseUntracked || 0));
 
   return { insertions, deletions, newFiles };
 }
@@ -75,4 +89,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { shouldFire, diffStats };
+module.exports = { shouldFire, diffStats, parseShortstat };

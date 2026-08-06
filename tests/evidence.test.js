@@ -308,6 +308,22 @@ describe('integration: build ledger', () => {
     assert.strictEqual(hookOutput(r), null);
   });
 
+  test('pre-existing dirty work is never charged to the session', () => {
+    const { dir } = gitRepo();
+    // 600 dirty insertions before the session ever starts
+    fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 600 }, (_, i) => `old ${i}\n`).join(''));
+    const session = freshSession();
+    runHook('session-start.js', { session_id: session, cwd: dir, hook_event_name: 'SessionStart' });
+
+    // the session itself writes nothing → silent
+    assert.strictEqual(hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir })), null);
+
+    // the session then adds its own 700 → fires with the session's delta only
+    fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 700 }, (_, i) => `new ${i}\n`).join(''));
+    const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir }));
+    assert.match(out.hookSpecificOutput.additionalContext, /\+700 \/ -0 LOC/);
+  });
+
   test('untracked baseline is subtracted', () => {
     const { dir, sha } = gitRepo();
     fs.writeFileSync(path.join(dir, 'pre-existing.js'), '// was here\n');
