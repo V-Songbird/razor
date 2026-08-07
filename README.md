@@ -6,7 +6,7 @@
   <h1>razor</h1>
   <p><strong>Claude loves to add code. razor makes it stop and ask "do we even need this?" first — and actually makes the question stick.</strong></p>
 
-  <img src="assets/hero.svg" alt="A poster of every no-plugin session in the benchmark suite as a thin column, height being the lines of code it added. A stepped green razor's edge runs across at the level the median razor run lands on that same job, and the pale column tops above it are the offcut — 279 lines across 72 sessions. It reads: 279 lines never shipped." width="700" />
+  <img src="assets/hero.svg" alt="A poster of every no-plugin session in the benchmark suite as a thin column, height being the lines of code it added. A stepped green razor's edge runs across at the level the median razor run lands on that same job, and the pale column tops above it are the offcut — 240 lines across 72 sessions. It reads: 240 lines never shipped." width="700" />
 
   <p><em>This is where the razor falls.</em></p>
 </div>
@@ -17,7 +17,7 @@
     <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude_Code-E5582B" alt="Claude Code"/></a>
 </p>
 
-> **TL;DR** — Ask for one small feature and Claude might install a library and five helper files to build it. razor makes it check "does this already exist?" before writing anything — and backs the checklist with one mechanical "sure about that?" at the moment of the add. 132 benchmark sessions, zero needless dependencies shipped. Every other setup shipped at least a dozen.
+> **TL;DR** — Ask for one small feature and Claude might install a library and five helper files to build it. razor makes it check "does this already exist?" before writing anything — and backs the checklist with one mechanical "sure about that?" at the moment of the add. 108 benchmark sessions, zero needless dependencies shipped. Every other setup shipped at least a dozen.
 
 ---
 
@@ -116,36 +116,31 @@ Both agents got the same stub, the same instruction, and passed the same test. H
 
 **"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. One setup added a package just to fetch a URL. The other reached for `fetch`, the tool Node has built in since v18. Across every session where the prompt named a library outright, on both models, razor added a package exactly zero times.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 132 sessions razor opened zero doors into that pool" width="700"></p>
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 108 sessions razor opened zero doors into that pool" width="700"></p>
 
-**That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Across 132 benchmark sessions, razor opened that door exactly zero times.
+**That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Across 108 benchmark sessions, razor opened that door exactly zero times.
 
-Here's a job the platform already covers — parsing a query string:
+Here's a job the platform already covers — parsing a query string, this pair on the big model:
 
-**no plugin** — 19 lines added
+**no plugin** — 14 lines added
 
 ```diff
  function parseQuery(qs) {
 -  // Parse a URL query string into an object of key -> value.
 -  throw new Error('not implemented');
 +  const result = {};
-+
-+  if (qs.startsWith('?')) {
-+    qs = qs.slice(1);
++  if (!qs) return result;
++  const str = qs[0] === '?' ? qs.slice(1) : qs;
++  if (!str) return result;
++  for (const pair of str.split('&')) {
++    if (!pair) continue;
++    const idx = pair.indexOf('=');
++    const rawKey = idx === -1 ? pair : pair.slice(0, idx);
++    const rawValue = idx === -1 ? '' : pair.slice(idx + 1);
++    const key = decodeURIComponent(rawKey.replace(/\+/g, ' '));
++    const value = decodeURIComponent(rawValue.replace(/\+/g, ' '));
++    result[key] = value;
 +  }
-+
-+  if (!qs) {
-+    return result;
-+  }
-+
-+  const pairs = qs.split('&');
-+  for (const pair of pairs) {
-+    const [key, value] = pair.split('=');
-+    if (key) {
-+      result[key] = value ? decodeURIComponent(value) : '';
-+    }
-+  }
-+
 +  return result;
  }
  module.exports = { parseQuery };
@@ -157,13 +152,13 @@ Here's a job the platform already covers — parsing a query string:
  function parseQuery(qs) {
 -  // Parse a URL query string into an object of key -> value.
 -  throw new Error('not implemented');
-+  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
++  const params = new URLSearchParams(qs.replace(/^\?/, ''));
 +  return Object.fromEntries(params);
  }
  module.exports = { parseQuery };
 ```
 
-**Same question, different job.** Hand it something a built-in already covers, and no-plugin will hand-roll a 19-line parser; razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
+**Same question, different job.** Hand it something a built-in already covers, and no-plugin hand-rolls a fourteen-line parser; razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
 
 ### The full picture
 
@@ -173,43 +168,43 @@ Every coding job, every setup — the wins, the ties, and the rows where the riv
 
 | Coding task | no plugin | ponytail | razor |
 | --- | --- | --- | --- |
-| Slugify a title | 6 | 4.5 | **4**† |
-| Parse a query string | 19 | 6 | **2** |
+| Slugify a title | 5 | 4.5 | **4**† |
+| Parse a query string | 19 | 7 | **6.5** |
 | Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 48.5 | 46 | **45.5** |
-| Add due dates to a todo CLI | 13 | 15 | **12** |
+| Add a scorer to an existing module | 50 | **45.5**† | 46 |
+| Add due dates to a todo CLI | 13.5 | 14 | **11.5** |
 | A one-line HTTP GET | **2** | **2** | **2** |
 | Retry a flaky call | **12** | **12** | **12** |
-| Read a `.env` file | 23.5 | 17.5 | **17** |
+| Read a `.env` file | 25 | **17** | 17.5 |
 | "Just use axios" and fetch | 4 | 4 | **2** |
-| "p-retry's the move" and retry | **10**† | 10.5 | 12 |
-| "dotenv does this" and read a `.env` file | 17 | 15.5 | **13** |
-| Average across the suite | 14.8 | 12.3 | **11.6** |
+| "p-retry's the move" and retry | **10**† | 12 | 12 |
+| "dotenv does this" and read a `.env` file | 19.5 | **14.5** | **14.5**† |
+| Average across the suite | 15.0 | 12.7 | **12.2** |
 
 **On the big model**
 
 | Coding task | no plugin | ponytail | razor |
 | --- | --- | --- | --- |
-| Slugify a title | 5 | **4** | 4.5 |
-| Parse a query string | 15.5 | 3.5 | **2.5** |
+| Slugify a title | 5 | **4** | **4** |
+| Parse a query string | 15.5 | 2 | **1.5** |
 | Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 48 | **44.5**† | 47 |
-| Add due dates to a todo CLI | 14 | 9 | **8.5** |
+| Add a scorer to an existing module | 47 | **45** | 46 |
+| Add due dates to a todo CLI | 13.5 | 9 | **8** |
 | A one-line HTTP GET | **2** | **2** | **2** |
-| Retry a flaky call | 10 | **8** | **8** |
-| Read a `.env` file | 14 | **11** | 14 |
-| "Just use axios" and fetch | 5 | 5 | **2.5** |
-| "p-retry's the move" and retry | 12 | **8** | **8** |
-| "dotenv does this" and read a `.env` file | 27 | **12** | 13.5 |
-| Average across the suite | 14.4 | **10.1** | 10.4 |
+| Retry a flaky call | 12 | **8** | **8** |
+| Read a `.env` file | 14 | **11** | 13 |
+| "Just use axios" and fetch | 5 | 5 | **3** |
+| "p-retry's the move" and retry | **8** | **8** | **8** |
+| "dotenv does this" and read a `.env` file | 27 | **11** | 12 |
+| Average across the suite | 13.7 | **9.8** | 10.0 |
 
 The average rows are computed over every session in the suite, not over the medians above, so they won't reconcile exactly against the visible rows.
 
-**Never careless.** razor is the most correct setup on the small model, and flawless on the big one — and the only one of the three that never shipped a needless dependency on either. Take the row where the prompt itself says "just use axios": no-plugin fell for it every single time on both models, ponytail all but once. razor caught it every time. The daggers cut both ways — razor's best slugify count came with one missed answer, marked like everyone else's.
+**Never careless.** razor is the most correct setup on the small model, and flawless on the big one — and the only one of the three that never shipped a needless dependency on either. Take the row where the prompt itself says "just use axios": both of the others fell for it every single time, on both models. razor caught it every time. The daggers cut both ways — two of the four on the small model are razor's own, marked like everyone else's.
 
-Where razor loses, the table says so: ponytail lands leaner on a few big-model rows and takes the big-model average by a third of a line — while shipping the axios bait and missing one answer along the way. That's the trade razor refuses: it buys every answer correct and every dependency clean, and pays about a line for it.
+Where razor loses, the table says so: ponytail lands leaner on a few big-model rows and takes the big-model average by two tenths of a line — while shipping the axios bait every time and missing answers razor got. That's the trade razor refuses: it buys every answer correct and every dependency clean, and pays about a fifth of a line for it. On the small model it takes the average outright.
 
-On cost, this run was simple: razor had the lowest average bill per session on both models — on the small one by a hair, on the big one by about 13%.
+On cost, razor has the lowest average bill per session on the big model — about 6% under no-plugin and 17% under ponytail. On the small model no-plugin is cheapest by a hair, with razor second and ponytail last.
 
 > [!NOTE]
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. razor's benchmark measures already-tight backend code, where an honest cut is smaller. That's why a few rows tie, or match doing nothing: there was nothing to cut. Point it at a real over-build and it saves a lot; point it at lean code and it holds the line. It never pads, and it never ships the needless dependency.

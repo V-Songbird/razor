@@ -97,4 +97,4 @@ razor's once-per-session ladder is part of the product, so its token cost is inc
 
 ## The frozen records
 
-The per-cell records behind the front page's numbers are committed at [`records/v1-2026-08-06.json`](records/v1-2026-08-06.json): task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail for each of the 468 sessions. The third arm appears there as `rival` — the front page names it.
+The per-cell records behind the front page's numbers are committed at [`records/v1.1-2026-08-06.json`](records/v1.1-2026-08-06.json): task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail for each of the 468 sessions. The third arm appears there as `rival` — the front page names it. Earlier releases' records stay alongside it.

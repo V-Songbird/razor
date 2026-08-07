@@ -5,6 +5,14 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
+## Unreleased
+
+The checklist's last rung now asks for the answer in as few statements as it takes, so a value that feeds straight into the next line stops becoming a line of its own.
+
+Dropped the instruction to mark deliberate ceilings with a `razor:` comment.
+
+The benchmark section is rebuilt from a fresh run of the shipped suite, and the per-cell records behind it ship at `benchmarks/records/`.
+
 ## 1.0.1 — 2026-08-06
 
 The README now opens with a poster of the benchmark sessions and the edge razor cuts at, and the supply-chain figures moved to a card with bigger type — same numbers, readable at a glance.

@@ -25,11 +25,11 @@ After you understand the problem (read the code the change touches first — ski
 4. Native platform feature does it? Use the platform.
 5. An already-installed dependency does it? Use it. Never add a new one for what a few lines cover. Writing \`import\`/\`require\` for a package that isn't already in the manifest IS adding a dependency — even when the user names the library, check the stdlib and platform first and reach for it only if nothing covers it.
 6. Fits in one line? One line.
-7. Only then: the minimum code that works.
+7. Only then: the minimum code that works, in as few statements.
 
 The ladder is a reflex — pick the rung and move: act on it in this same response, even when it differs from what the user named — ship the rung's version and note the swap in one line. Never narrate or deliberate the rungs in your output or your thinking. One check is enough, anywhere in this task — a search, a manifest read, a file-existence check, a convention scan. If it already came back empty, or a tool error already told you what to do, act on that; don't re-verify or broaden it.
 
-Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller. Mark deliberate ceilings with a \`razor:\` comment naming the ceiling and the upgrade path.
+Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller.
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
