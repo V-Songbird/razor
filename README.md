@@ -25,7 +25,7 @@
 
 AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and an abstraction layer for a future that never arrives. All of it is now yours to understand, maintain, and eventually delete.
 
-razor hands Claude a short checklist to run before it writes anything. Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes. Which means most of the time, nothing new gets written. It earns its keep in real engineering sessions — the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
+razor hands Claude a short checklist to run before it writes anything. Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes — so nothing new gets written.
 
 ## Why you'd want it
 
@@ -80,11 +80,11 @@ razor runs itself. These are the only controls:
 | Turn razor off or back on for the session | `/razor off` · `/razor on` |
 | Find dependencies in your manifest that nothing imports | `/razor:unused` |
 
-`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Anything it can spot as ambiguous gets flagged for a manual check, and the report names the blind spots a static scan can't see.
+`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Anything it can spot as ambiguous gets flagged for a manual check.
 
 ## Benchmarks
 
-We put that checklist up against plain Claude Code and ponytail (a plugin that just tells the model to keep things lean). Real engineering work: full agent sessions that read, write, and run code. Same jobs, three setups, both models, run fresh on the exact code this release ships. We measured the code and the bill.
+We put that checklist up against plain Claude Code and ponytail (a plugin that just tells the model to keep things lean). Full agent sessions, same jobs, three setups, both models. We measured the code and the bill.
 
 Both agents got the same stub, the same instruction, and passed the same test. Here's what each one left behind:
 
@@ -114,55 +114,15 @@ Both agents got the same stub, the same instruction, and passed the same test. H
  module.exports = { fetchJson };
 ```
 
-**"Does the platform do it?" catches this one every time.** Say "just use axios" and that throwaway line ships a real dependency you now have to keep updated and secure. One setup added a package just to fetch a URL. The other reached for `fetch`, the tool Node has built in since v18. Across every session where the prompt named a library outright, on both models, razor added a package exactly zero times.
+**Say "just use axios" and that throwaway line ships a real dependency.** One setup added a package just to fetch a URL. The other reached for `fetch`, built into Node since v18. Across every session where the prompt named a library outright, on both models, razor added a package exactly zero times. The same reflex covers jobs a built-in already does: asked to parse a query string, no-plugin hand-rolled fourteen lines and razor wrote two.
 
 <p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 108 sessions razor opened zero doors into that pool" width="700"></p>
 
-**That "never" matters more than it sounds.** Open-source registries have already blocked over 1.2 million malicious packages, and new ones arrive faster every year. Across 108 benchmark sessions, razor opened that door exactly zero times.
-
-Here's a job the platform already covers — parsing a query string, this pair on the big model:
-
-**no plugin** — 14 lines added
-
-```diff
- function parseQuery(qs) {
--  // Parse a URL query string into an object of key -> value.
--  throw new Error('not implemented');
-+  const result = {};
-+  if (!qs) return result;
-+  const str = qs[0] === '?' ? qs.slice(1) : qs;
-+  if (!str) return result;
-+  for (const pair of str.split('&')) {
-+    if (!pair) continue;
-+    const idx = pair.indexOf('=');
-+    const rawKey = idx === -1 ? pair : pair.slice(0, idx);
-+    const rawValue = idx === -1 ? '' : pair.slice(idx + 1);
-+    const key = decodeURIComponent(rawKey.replace(/\+/g, ' '));
-+    const value = decodeURIComponent(rawValue.replace(/\+/g, ' '));
-+    result[key] = value;
-+  }
-+  return result;
- }
- module.exports = { parseQuery };
-```
-
-**razor** — 2 lines added
-
-```diff
- function parseQuery(qs) {
--  // Parse a URL query string into an object of key -> value.
--  throw new Error('not implemented');
-+  const params = new URLSearchParams(qs.replace(/^\?/, ''));
-+  return Object.fromEntries(params);
- }
- module.exports = { parseQuery };
-```
-
-**Same question, different job.** Hand it something a built-in already covers, and no-plugin hand-rolls a fourteen-line parser. razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
+**That "never" matters more than it sounds.** Registries have already blocked over 1.2 million malicious packages. Across 108 benchmark sessions, razor opened that door exactly zero times.
 
 ### The full picture
 
-Every coding job, every setup — the wins, the ties, and the rows where the rival gets there in fewer lines. (The suite's two remaining tasks produce no code at all; they measure question-answering overhead, not lines.) A scoreboard that only shows wins isn't worth much. The two models don't always agree, so they're shown separately. Fewest lines per row in **bold**; a dagger (†) marks a low count that didn't come with correct, dependency-safe code every time — not a clean win.
+Every coding job, every setup — the wins, the ties, and the rows where the rival gets there in fewer lines. (The suite's two remaining tasks produce no code; they measure question-answering overhead.) The two models don't always agree, so they're shown separately. Fewest lines per row in **bold**; a dagger (†) marks a low count that didn't come with correct, dependency-safe code every time.
 
 **On the small model**
 
@@ -198,22 +158,20 @@ Every coding job, every setup — the wins, the ties, and the rows where the riv
 | "dotenv does this" and read a `.env` file | 27 | **11** | 12 |
 | Average across the suite | 13.7 | **9.8** | 10.0 |
 
-The average rows are computed over every session in the suite, not over the medians above, so they won't reconcile exactly against the visible rows.
+The average rows are computed over every session, not over the medians above, so they won't reconcile exactly against the visible rows.
 
-**Never careless.** razor is the most correct setup on the small model, and flawless on the big one. It's also the only one of the three that never shipped a needless dependency on either. Take the row where the prompt itself says "just use axios": both of the others fell for it every single time, on both models. razor caught it every time. The daggers cut both ways — two of the four on the small model are razor's own, marked like everyone else's.
+**Never careless.** razor is the most correct setup on the small model, flawless on the big one, and the only one that never shipped a needless dependency. Both rivals fell for the axios bait every single time, on both models. The daggers cut both ways — two of the four on the small model are razor's own.
 
-Where razor loses, the table says so. ponytail lands leaner on a few big-model rows and takes the big-model average by two tenths of a line — while shipping the axios bait every time and missing answers razor got. That's the trade razor refuses: it buys every answer correct and every dependency clean, and pays about a fifth of a line for it. On the small model it takes the average outright.
-
-On cost, razor has the lowest average bill per session on the big model — about 6% under no-plugin and 17% under ponytail. On the small model no-plugin is cheapest by a hair, with razor second and ponytail last.
+**Where razor loses, the table says so.** ponytail takes the big-model average by two tenths of a line — while shipping the bait and missing answers razor got. On cost, razor has the lowest average bill on the big model, about 6% under no-plugin and 17% under ponytail. On the small model no-plugin is cheapest by a hair.
 
 > [!NOTE]
-> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. razor's benchmark measures already-tight backend code, where an honest cut is smaller. That's why a few rows tie, or match doing nothing: there was nothing to cut. Point it at a real over-build and it saves a lot; point it at lean code and it holds the line. It never pads, and it never ships the needless dependency.
+> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. razor's benchmark measures already-tight backend code, where an honest cut is smaller. Point it at a real over-build and it saves a lot; point it at lean code and it holds the line.
 
-*How we tested: same jobs, three setups, several runs each on both the small and the big model, in fresh throwaway workspaces — a full multi-turn agent session every time, never a single generated reply — costs read from the API, not estimated. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/); the shipped harness runs the no-plugin and razor arms out of the box, and `--rival-dir` adds any third plugin you point it at.*
+*How we tested: same jobs, three setups, several runs each on both models, in fresh throwaway workspaces — full multi-turn agent sessions, costs read from the API. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
 
 ## Under the hood
 
-Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. razor pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down. Run both and neither notices the other.
+Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down.
 
 ## Settings
 

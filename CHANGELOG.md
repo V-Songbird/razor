@@ -4,6 +4,10 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.1.2 — 2026-08-07
+
+The README is about a fifth shorter. One worked example folded into a sentence; every table and number is kept.
+
 ## 1.1.1 — 2026-08-07
 
 The README, the benchmark guide, and this file's intro are rewritten in plainer language — shorter sentences, everyday words, the benefit up front. Every number, diff, and table is unchanged.
