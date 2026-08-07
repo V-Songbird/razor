@@ -2,7 +2,7 @@
   "schema": "razor-bench-record@1",
   "frozen": "2026-08-06",
   "razor_version": "1.1.0",
-  "razor_commit": "pending",
+  "razor_commit": "55dabe9129dca4c653e94f820a594da2b97a74f7",
   "corpus": "runner/tasks.js at razor_commit",
   "claude": "2.1.223 (Claude Code)",
   "models": {

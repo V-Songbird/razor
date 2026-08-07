@@ -5,7 +5,7 @@ plugin — its version is owned by `.claude-plugin/marketplace.json` at the
 repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
 version field by convention).
 
-## Unreleased
+## 1.1.0 — 2026-08-07
 
 The checklist's last rung now asks for the answer in as few statements as it takes, so a value that feeds straight into the next line stops becoming a line of its own.
 
