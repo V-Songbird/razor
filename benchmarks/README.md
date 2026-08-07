@@ -2,7 +2,7 @@
 
 Curious whether the numbers on razor's front page hold up? This is the actual harness — run it yourself.
 
-It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed coding tasks, once with no plugin and once with razor, and reads the true cost and token counts straight out of the API's own usage JSON. No mocks, no estimates, and no single-shot prompts — a canned reply can't tell you what a plugin costs across a real multi-turn session, so we don't measure it that way. Each session is scored on the code it leaves behind, and correctness is checked mechanically — the harness runs the produced code with `node` — so a lean answer that breaks the task scores as a *failure*, not a win.
+It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed coding tasks, once with no plugin and once with razor. Cost and token counts come straight out of the API's own usage JSON. No mocks, no estimates, and no single-shot prompts — a canned reply can't tell you what a plugin costs across a real multi-turn session. Each session is scored on the code it leaves behind, and correctness is checked mechanically — the harness runs the produced code with `node`. A lean answer that breaks the task scores as a *failure*, not a win.
 
 ## Before you start
 

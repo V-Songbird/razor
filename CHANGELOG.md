@@ -1,9 +1,12 @@
 # Changelog
 
-All notable changes to razor are documented here. Razor is a monorepo-folder
-plugin — its version is owned by `.claude-plugin/marketplace.json` at the
-repo root, not by `razor/.claude-plugin/plugin.json` (which carries no
-version field by convention).
+All notable changes to razor are documented here. Looking for a version
+number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
+listing — that's why `plugin.json` here carries none.
+
+## 1.1.1 — 2026-08-07
+
+The README, the benchmark guide, and this file's intro are rewritten in plainer language — shorter sentences, everyday words, the benefit up front. Every number, diff, and table is unchanged.
 
 ## 1.1.0 — 2026-08-07
 

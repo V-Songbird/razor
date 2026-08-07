@@ -23,9 +23,9 @@
 
 ## What is this?
 
-AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and an abstraction layer for a future that never arrives — all of it now yours to understand, maintain, and eventually delete.
+AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and an abstraction layer for a future that never arrives. All of it is now yours to understand, maintain, and eventually delete.
 
-razor hands Claude a short checklist to run before it writes anything: Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes — which means most of the time, nothing new gets written. It earns its keep in real engineering sessions, the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
+razor hands Claude a short checklist to run before it writes anything. Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes. Which means most of the time, nothing new gets written. It earns its keep in real engineering sessions — the long kind, where one casual "just add a library" quietly becomes a stack you maintain forever.
 
 ## Why you'd want it
 
@@ -84,7 +84,7 @@ razor runs itself. These are the only controls:
 
 ## Benchmarks
 
-We put that checklist up against plain Claude Code and ponytail (a plugin that just tells the model to keep things lean) — on real engineering work: full agent sessions that read, write, and run code. Same coding jobs, three setups, both models, run fresh on the exact code this release ships. We measured the code and the bill.
+We put that checklist up against plain Claude Code and ponytail (a plugin that just tells the model to keep things lean). Real engineering work: full agent sessions that read, write, and run code. Same jobs, three setups, both models, run fresh on the exact code this release ships. We measured the code and the bill.
 
 Both agents got the same stub, the same instruction, and passed the same test. Here's what each one left behind:
 
@@ -158,7 +158,7 @@ Here's a job the platform already covers — parsing a query string, this pair o
  module.exports = { parseQuery };
 ```
 
-**Same question, different job.** Hand it something a built-in already covers, and no-plugin hand-rolls a fourteen-line parser; razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
+**Same question, different job.** Hand it something a built-in already covers, and no-plugin hand-rolls a fourteen-line parser. razor stops at "does the platform do it?" and writes two. It writes less than doing nothing — and never more.
 
 ### The full picture
 
@@ -200,9 +200,9 @@ Every coding job, every setup — the wins, the ties, and the rows where the riv
 
 The average rows are computed over every session in the suite, not over the medians above, so they won't reconcile exactly against the visible rows.
 
-**Never careless.** razor is the most correct setup on the small model, and flawless on the big one — and the only one of the three that never shipped a needless dependency on either. Take the row where the prompt itself says "just use axios": both of the others fell for it every single time, on both models. razor caught it every time. The daggers cut both ways — two of the four on the small model are razor's own, marked like everyone else's.
+**Never careless.** razor is the most correct setup on the small model, and flawless on the big one. It's also the only one of the three that never shipped a needless dependency on either. Take the row where the prompt itself says "just use axios": both of the others fell for it every single time, on both models. razor caught it every time. The daggers cut both ways — two of the four on the small model are razor's own, marked like everyone else's.
 
-Where razor loses, the table says so: ponytail lands leaner on a few big-model rows and takes the big-model average by two tenths of a line — while shipping the axios bait every time and missing answers razor got. That's the trade razor refuses: it buys every answer correct and every dependency clean, and pays about a fifth of a line for it. On the small model it takes the average outright.
+Where razor loses, the table says so. ponytail lands leaner on a few big-model rows and takes the big-model average by two tenths of a line — while shipping the axios bait every time and missing answers razor got. That's the trade razor refuses: it buys every answer correct and every dependency clean, and pays about a fifth of a line for it. On the small model it takes the average outright.
 
 On cost, razor has the lowest average bill per session on the big model — about 6% under no-plugin and 17% under ponytail. On the small model no-plugin is cheapest by a hair, with razor second and ponytail last.
 
