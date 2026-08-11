@@ -95,6 +95,6 @@ This **can** show whether razor changes what the agent builds and what it costs,
 
 razor's once-per-session ladder is part of the product, so its token cost is included in the measurement, not subtracted. Each arm runs in a fresh throwaway workspace outside any git repo, with only that one plugin loaded (`--setting-sources project,local`, no MCP servers, a scoped tool allowlist) — so a difference between arms is the plugin, nothing else.
 
-## The frozen records
+## The records
 
-The per-cell records behind the front page's numbers are committed at [`records/v1.1-2026-08-06.json`](records/v1.1-2026-08-06.json): task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail for each of the 468 sessions. The third arm appears there as `rival` — the front page names it. Earlier releases' records stay alongside it.
+Each run writes per-cell records — task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail per session — into `records/`, which stays on your machine. The front page's numbers came from a run of this same harness; run it yourself to regenerate them from scratch.
