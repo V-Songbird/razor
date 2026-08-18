@@ -4,7 +4,7 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
-## [Unreleased]
+## 1.3.0 — 2026-08-18
 
 The new-file check now counts production files only. A feature that ships with its tests, a migration and a config file is no longer treated as sprawl, and when the check does speak it names what the turn actually produced. Set `RAZOR_FILE_BUDGET` yourself and it goes back to counting every new file.
 
@@ -13,6 +13,8 @@ The new-file check now counts production files only. A feature that ships with i
 `/razor:unused` also sees more: type-only imports, imports inside `.vue`, `.svelte`, `.astro` and `.mdx` files, and each workspace package of a monorepo audited against its own manifest. It honours the ignore list your project already declares, so a dependency you have answered for is not raised again.
 
 Python dependencies declared in a `-r` included requirements file, or in a PEP 735 dependency group, now count as declared everywhere razor looks at them.
+
+The benchmark harness in `benchmarks/` now runs on the current model generation by default, and its cost note says what a run actually costs there.
 
 ## 1.2.0 — 2026-08-18
 
