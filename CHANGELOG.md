@@ -4,7 +4,7 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
-## [Unreleased]
+## 1.2.0 — 2026-08-18
 
 `/razor:unused` now answers to the name the docs give it. It was registered under a longer one and the documented command did nothing.
 
@@ -21,6 +21,8 @@ Fixed an issue where `/razor:unused` reported a scoped package like `@scope/cli`
 `RAZOR_DISABLE=1` now silences `/razor on` as well, instead of printing a checklist nothing enforces.
 
 Read-only research agents from a plugin that is no longer published are no longer skipped by default. Use `RAZOR_AGENT_SKIP` to skip your own.
+
+The README now says what razor will never do, in one place.
 
 ## 1.1.3 — 2026-08-11
 

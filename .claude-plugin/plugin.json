@@ -32,7 +32,7 @@
     "manifest_guard": {
       "type": "boolean",
       "title": "Dependency guard (manifest edits)",
-      "description": "One forced reconsideration before an edit adds a new package to package.json or requirements.txt directly.",
+      "description": "One forced reconsideration before an edit adds a new package to package.json, requirements.txt, or pyproject.toml directly.",
       "default": true
     },
     "ledger": {

@@ -173,6 +173,20 @@ The average rows are computed over every session, not over the medians above, so
 
 Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down.
 
+## Scope
+
+razor asks one question — do we need this? — at the moment new code gets added. That is the whole job.
+
+> [!NOTE]
+> **What razor will never do.** It never edits your code, your manifest, or your
+> lockfile. Every check is a message, and the retry always goes through. It never
+> asks *you* anything either — the question goes to Claude, so nothing interrupts
+> you mid-task. It never installs a package or runs another tool in your project.
+> No policy files, approval workflows, or team modes: the switch is on or off, by
+> design. No linting, formatting, or code review — other tools do that better.
+> And nothing leaves your machine. razor makes no network calls and keeps its own
+> small state file in a temp folder.
+
 ## Settings
 
 Most people never touch these. razor asks about most of them when you enable it — the environment variables below do the same thing, and take precedence when set:
@@ -182,7 +196,7 @@ Most people never touch these. razor asks about most of them when you enable it 
 | `RAZOR_DISABLE=1` | Turns everything off |
 | `RAZOR_DEP_GUARD=off` | Stops the new-dependency nudge for install commands |
 | `RAZOR_IMPORT_GUARD=off` | Stops the new-dependency nudge for `import`/`require` lines |
-| `RAZOR_MANIFEST_GUARD=off` | Stops the new-dependency nudge for direct edits to `package.json`/`requirements.txt` |
+| `RAZOR_MANIFEST_GUARD=off` | Stops the new-dependency nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
 | `RAZOR_FILE_BUDGET=4` | New files allowed in one turn before it speaks up |
 | `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
 | `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
