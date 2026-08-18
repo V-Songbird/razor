@@ -6,7 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { auditProject, knipAvailable, formatReport } = require('../scripts/unused-deps');
+const { auditProject, knipAvailable, formatReport, mentionedOutsideImports } = require('../scripts/unused-deps');
 
 function makeNodeWorkspace() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-unused-node-'));
@@ -161,5 +161,28 @@ describe('unused-deps: knip detection', () => {
     // silent rather than erroring.
     const report = formatReport(dir, auditProject(dir));
     assert.doesNotMatch(report, /knip/i);
+  });
+});
+
+describe('scoped names are visible outside imports', () => {
+  test('a scoped dep named in an npm script is not reported unused', () => {
+    assert.strictEqual(mentionedOutsideImports('@scope/cli', 'node_modules/.bin/x && @scope/cli build'), true);
+  });
+
+  test('a scoped dep named in a config file is not reported unused', () => {
+    assert.strictEqual(mentionedOutsideImports('@eslint/js', 'plugins: ["@eslint/js"]'), true);
+  });
+
+  test('an unmentioned scoped dep still reads as unmentioned', () => {
+    assert.strictEqual(mentionedOutsideImports('@scope/cli', 'nothing here'), false);
+  });
+
+  test('a longer scoped name does not match a shorter one', () => {
+    assert.strictEqual(mentionedOutsideImports('@scope/cli', 'run @other/cli'), false);
+  });
+
+  test('plain names still match as before', () => {
+    assert.strictEqual(mentionedOutsideImports('eslint', 'eslint --fix'), true);
+    assert.strictEqual(mentionedOutsideImports('eslint', 'eslintrc-ish'), false);
   });
 });

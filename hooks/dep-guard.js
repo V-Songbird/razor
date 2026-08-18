@@ -37,10 +37,30 @@ const ADD_SUBCOMMANDS = {
 // pip args that mean "restore/develop", not "add a new dependency"
 const PIP_RESTORE_FLAGS = new Set(['-r', '--requirement', '-e', '--editable']);
 
-// Flags, `.`, and shell redirects are not package names. A bare redirect
-// operator (`>`, `2>`) also consumes the following token — its target.
-// Quotes come off first: the shell strips them before the manager ever
-// sees the token, and a version spec must be quoted in a real shell
+// Flags that take their value as the NEXT token. Left alone, that value is
+// read as a package name and the deny reason invents a dependency nobody
+// asked for. Only the separated form needs this — `--flag=value` is one
+// token and already skipped as a flag.
+const VALUE_FLAGS = new Set([
+  '-t', '--target', '-i', '--index-url', '--extra-index-url', '-f', '--find-links',
+  '-c', '--constraint', '--python', '--prefix', '--registry', '--tag',
+  '-w', '--workspace', '--features', '--manifest-path',
+]);
+
+// A local path or a URL is a location, not a name from a registry. Denying
+// one names a package that does not exist, and the suppressing direction is
+// the safe one: a missed nudge costs nothing, a false deny costs a turn.
+function isLocationSpec(a) {
+  return (
+    /^\.{1,2}[\\/]/.test(a) || a === './...' || a.startsWith('/') || a.startsWith('~/')
+    || /^[A-Za-z]:[\\/]/.test(a) || a.includes('://') || a.startsWith('file:')
+  );
+}
+
+// Flags, `.`, locations, and shell redirects are not package names. A bare
+// redirect operator (`>`, `2>`) also consumes the following token — its
+// target. Quotes come off first: the shell strips them before the manager
+// ever sees the token, and a version spec must be quoted in a real shell
 // (`pip install 'flask>=2.1'`), so `'flask>=2.1'` and `flask>=2.1` are
 // the same package.
 function packageArgs(args) {
@@ -52,12 +72,17 @@ function packageArgs(args) {
       continue;
     }
     const a = raw.replace(/^['"]+|['"]+$/g, '');
-    if (!a || a === '.' || a.startsWith('-')) continue;
+    if (!a || a === '.') continue;
+    if (a.startsWith('-')) {
+      if (VALUE_FLAGS.has(a)) skipNext = true;
+      continue;
+    }
     const redirect = a.match(/^\d*(?:>>?|<<?|&>>?)(.*)$/);
     if (redirect) {
       if (!redirect[1]) skipNext = true;
       continue;
     }
+    if (isLocationSpec(a)) continue;
     out.push(a);
   }
   return out;
@@ -105,6 +130,9 @@ function parseSegment(segment) {
 
   const packages = packageArgs(tokens);
   if (!packages.length) return null; // bare install = lockfile restore
+  // `pip install --upgrade pip` upgrades the tool, it does not add a project
+  // dependency. Same for any manager asked to install only itself.
+  if (packages.length === 1 && packages[0].toLowerCase() === cmd) return null;
   return { manager: cmd, packages };
 }
 
@@ -182,42 +210,49 @@ function readNodeDeps(dir) {
   }
 }
 
+// Declared names in a pyproject.toml's own text. Split out from the reader
+// below so the manifest guard can judge an edit by the file it would produce,
+// exactly as it already does for package.json and requirements.txt.
+//
+// Line-scan state machine: PEP 621 dependency arrays (which may span lines and
+// contain "]" inside extras like flask[async]) plus poetry dependency tables.
+// Bracket counting survives quoted extras because their brackets are balanced.
+function pyprojectDepNames(text) {
+  const names = new Set();
+  let section = '';
+  let arrayDepth = 0;
+  for (const line of String(text || '').split(/\r?\n/)) {
+    if (arrayDepth === 0) {
+      const header = line.match(/^\s*\[(.+)\]\s*$/);
+      if (header) {
+        section = header[1];
+        continue;
+      }
+    }
+    if (/^tool\.poetry(\.group\.[^.\]]+)?\.(dev-)?dependencies$/.test(section)) {
+      const kv = line.match(/^\s*([A-Za-z0-9_.-]+)\s*=/);
+      if (kv && kv[1].toLowerCase() !== 'python') names.add(kv[1].toLowerCase());
+      continue;
+    }
+    const startsArray =
+      (section === 'project' && /^\s*dependencies\s*=\s*\[/.test(line)) ||
+      (section === 'project.optional-dependencies' && /^\s*[A-Za-z0-9_.-]+\s*=\s*\[/.test(line));
+    if (arrayDepth > 0 || startsArray) {
+      for (const q of line.matchAll(/["']([^"']+)["']/g)) {
+        const name = specName(q[1]);
+        if (name) names.add(name.toLowerCase());
+      }
+      arrayDepth += (line.match(/\[/g) || []).length - (line.match(/\]/g) || []).length;
+      if (arrayDepth < 0) arrayDepth = 0;
+    }
+  }
+  return names;
+}
+
 function readPythonDeps(dir) {
   const names = new Set();
   const toml = readText(path.join(dir, 'pyproject.toml'));
-  if (toml !== null) {
-    // Line-scan state machine: PEP 621 dependency arrays (which may span
-    // lines and contain "]" inside extras like flask[async]) plus poetry
-    // dependency tables. Bracket counting survives quoted extras because
-    // their brackets are balanced.
-    let section = '';
-    let arrayDepth = 0;
-    for (const line of toml.split(/\r?\n/)) {
-      if (arrayDepth === 0) {
-        const header = line.match(/^\s*\[(.+)\]\s*$/);
-        if (header) {
-          section = header[1];
-          continue;
-        }
-      }
-      if (/^tool\.poetry(\.group\.[^.\]]+)?\.(dev-)?dependencies$/.test(section)) {
-        const kv = line.match(/^\s*([A-Za-z0-9_.-]+)\s*=/);
-        if (kv && kv[1].toLowerCase() !== 'python') names.add(kv[1]);
-        continue;
-      }
-      const startsArray =
-        (section === 'project' && /^\s*dependencies\s*=\s*\[/.test(line)) ||
-        (section === 'project.optional-dependencies' && /^\s*[A-Za-z0-9_.-]+\s*=\s*\[/.test(line));
-      if (arrayDepth > 0 || startsArray) {
-        for (const q of line.matchAll(/["']([^"']+)["']/g)) {
-          const name = specName(q[1]);
-          if (name) names.add(name);
-        }
-        arrayDepth += (line.match(/\[/g) || []).length - (line.match(/\]/g) || []).length;
-        if (arrayDepth < 0) arrayDepth = 0;
-      }
-    }
-  }
+  if (toml !== null) for (const n of pyprojectDepNames(toml)) names.add(n);
   if (names.size) return [...names];
   const req = readText(path.join(dir, 'requirements.txt'));
   if (req !== null) {
@@ -434,7 +469,8 @@ function check(data, state) {
 
 module.exports = {
   check, parseInstallCommand, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
-  // razor: exported for scripts/unused-deps.js (reuse the manifest readers,
-  // never copy them) — behavior-neutral, no logic change.
-  readNodeDeps, readPythonDeps, readCargoDeps, readGoDeps, readComposerDeps, readGemDeps, readDotnetDeps, READERS,
+  // The two readers scripts/unused-deps.js consumes — it reuses them so the
+  // audit and the gates can never silently disagree. The other ecosystems'
+  // readers stay internal; nothing outside this file has ever called them.
+  readNodeDeps, readPythonDeps, pyprojectDepNames,
 };

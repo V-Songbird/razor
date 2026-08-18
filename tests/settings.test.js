@@ -6,6 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { runHook, hookOutput, freshSession } = require('./helpers');
+const { shouldFire } = require('../hooks/build-ledger');
 
 const newFile = (i) => path.join(__dirname, '..', 'does-not-exist', `s${i}.js`);
 
@@ -95,5 +96,61 @@ describe('integration: persistent state dir and cleanup', () => {
     );
     assert.strictEqual(fs.existsSync(stale), false);
     assert.strictEqual(fs.existsSync(fresh), true);
+  });
+});
+
+describe('RAZOR_DISABLE silences every hook, not just the gates', () => {
+  test('mode-toggle emits nothing for "/razor on" under the kill switch', () => {
+    const r = runHook('mode-toggle.js', { session_id: freshSession(), prompt: '/razor on' }, { RAZOR_DISABLE: '1' });
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+
+  test('mode-toggle still answers "/razor on" without the kill switch', () => {
+    const r = runHook('mode-toggle.js', { session_id: freshSession(), prompt: '/razor on' }, { RAZOR_DISABLE: '' });
+    assert.match(r.stdout, /RAZOR ACTIVE/);
+  });
+});
+
+describe('the plugin-option wiring reaches every gate it declares', () => {
+  const off = (key) => ({ [`CLAUDE_PLUGIN_OPTION_${key}`]: 'false' });
+
+  test('dep_guard=false silences the install gate', () => {
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(), tool_name: 'Bash', tool_input: { command: 'npm i axios' },
+    }, off('DEP_GUARD'));
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+
+  test('import_guard=false silences the import gate', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-opt-imp-'));
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ dependencies: { lodash: '^4' } }));
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(), tool_name: 'Write',
+      tool_input: { file_path: path.join(dir, 'a.js'), content: "require('axios');\n" },
+    }, off('IMPORT_GUARD'));
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+
+  test('manifest_guard=false silences the manifest gate', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-opt-man-'));
+    const file = path.join(dir, 'package.json');
+    fs.writeFileSync(file, JSON.stringify({ dependencies: { lodash: '^4' } }, null, 2));
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(), tool_name: 'Edit',
+      tool_input: { file_path: file, old_string: '"lodash": "^4"', new_string: '"lodash": "^4",\n    "axios": "^1"' },
+    }, off('MANIFEST_GUARD'));
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+});
+
+describe('the ledger thresholds are readable knobs', () => {
+  test('a generous budget does not fire on a diff a tight one would catch', () => {
+    assert.strictEqual(shouldFire({ insertions: 600, deletions: 0, newFiles: 2 }, 500, 8), true);
+    assert.strictEqual(shouldFire({ insertions: 600, deletions: 0, newFiles: 2 }, 5000, 8), false);
+  });
+
+  test('the new-file budget fires on its own', () => {
+    assert.strictEqual(shouldFire({ insertions: 10, deletions: 5, newFiles: 9 }, 500, 8), true);
+    assert.strictEqual(shouldFire({ insertions: 10, deletions: 5, newFiles: 9 }, 500, 20), false);
   });
 });

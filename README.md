@@ -6,7 +6,7 @@
   <h1>razor</h1>
   <p><strong>Claude loves to add code. razor makes it stop and ask "do we even need this?" first — and actually makes the question stick.</strong></p>
 
-  <img src="assets/hero.svg" alt="A poster of every no-plugin session in the benchmark suite as a thin column, height being the lines of code it added. A stepped green razor's edge runs across at the level the median razor run lands on that same job, and the pale column tops above it are the offcut — 240 lines across 72 sessions. It reads: 240 lines never shipped." width="700" />
+  <img src="assets/hero.svg" alt="A poster of every no-plugin session on the benchmark's nine dependency jobs, small model, as a thin column, height being the lines of code it added. A stepped green razor's edge runs across at the level the median razor run lands on that same job, and the pale column tops above it are the offcut — 240 lines across 72 sessions. It reads: 240 lines never shipped." width="700" />
 
   <p><em>This is where the razor falls.</em></p>
 </div>

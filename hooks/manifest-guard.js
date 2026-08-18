@@ -13,8 +13,9 @@
 // and import guards — one nudge per dependency however it enters.
 //
 // Bounded on purpose:
-//   - package.json (dependencies + devDependencies) and requirements.txt
-//     only; other manifests are covered when their install is attempted,
+//   - package.json (dependencies + devDependencies), requirements.txt, and
+//     pyproject.toml (PEP 621 plus poetry tables) only; other manifests are
+//     covered when their install is attempted,
 //   - fires only when the manifest already exists on disk (creating a fresh
 //     manifest is scaffolding a project, not sneaking a dependency in),
 //   - version bumps of existing entries never fire — only new names count,
@@ -25,7 +26,7 @@
 const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
-const { installedDeps, evidenceReason, ledgerName } = require('./dep-guard');
+const { installedDeps, evidenceReason, ledgerName, pyprojectDepNames } = require('./dep-guard');
 
 // null = unparseable (caller stays silent), Set otherwise.
 function jsonDepNames(text) {
@@ -53,6 +54,10 @@ function reqDepNames(text) {
 const GUARDED = {
   'package.json': { eco: 'node', manager: 'npm', extract: jsonDepNames },
   'requirements.txt': { eco: 'python', manager: 'pip', extract: reqDepNames },
+  // A modern python project may declare everything here and never own a
+  // requirements.txt, which left the manifest-edit path ungated for it —
+  // the exact path this gate exists to cover.
+  'pyproject.toml': { eco: 'python', manager: 'pip', extract: pyprojectDepNames },
 };
 
 function denyReason(tool, names, eco, manifestName, deps) {

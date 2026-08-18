@@ -83,13 +83,15 @@ function ecosystemOf(filePath) {
 
 // Same convention as the benchmark scorers and common runners: test files
 // never gate.
+// One pattern over the whole JS/TS extension family, so a `.test.tsx` or a
+// `.spec.mjs` is exempt for the same reason a `.test.js` is.
+const TEST_SUFFIX = /[._](test|spec)\.(js|mjs|cjs|jsx|ts|tsx|mts|cts)$/;
+
 function isTestFile(filePath) {
   const parts = String(filePath).split(/[\\/]/);
   const name = (parts[parts.length - 1] || '').toLowerCase();
   return (
-    name.startsWith('test_') || name.endsWith('.test.js') || name.endsWith('.spec.js')
-    || name.endsWith('_test.js') || name.endsWith('_test.py') || name.endsWith('.test.ts')
-    || name.endsWith('.spec.ts')
+    name.startsWith('test_') || name.endsWith('_test.py') || TEST_SUFFIX.test(name)
     || parts.some((p) => /^(test|tests|__tests__)$/i.test(p))
   );
 }

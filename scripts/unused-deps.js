@@ -127,7 +127,11 @@ function configFilesText(eco, projectDir) {
 // normalization.
 function mentionedOutsideImports(dep, haystack) {
   const escaped = dep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`\\b${escaped}\\b`, 'i').test(haystack);
+  // `\b` only anchors beside a word character, and a scoped name starts with
+  // "@" — so a leading `\b` can never match one, and every scoped dependency
+  // mentioned in a script or config would read as unmentioned.
+  const left = /^\w/.test(dep) ? '\\b' : '(?<![\\w@/-])';
+  return new RegExp(`${left}${escaped}\\b`, 'i').test(haystack);
 }
 
 // Core audit: given a project directory, which declared deps have no

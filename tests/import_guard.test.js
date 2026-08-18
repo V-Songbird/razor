@@ -255,3 +255,20 @@ describe('integration: import gate', () => {
     assert.strictEqual(hookOutput(r), null);
   });
 });
+
+describe('the test-file exemption covers the whole JS/TS family', () => {
+  const exempt = [
+    'src/Button.test.tsx', 'src/Button.spec.tsx', 'src/util.test.jsx',
+    'src/util.test.mjs', 'src/util.spec.cjs', 'src/util_test.ts',
+    'src/util.test.js', 'src/util.spec.ts', 'tests/anything.ts', 'test_thing.py',
+    'src/thing_test.py',
+  ];
+  for (const p of exempt) {
+    test(`exempt: ${p}`, () => assert.strictEqual(isTestFile(p), true, p));
+  }
+
+  const gated = ['src/latest.ts', 'src/protest.js', 'src/spectacle.tsx', 'src/index.ts'];
+  for (const p of gated) {
+    test(`still gated: ${p}`, () => assert.strictEqual(isTestFile(p), false, p));
+  }
+});

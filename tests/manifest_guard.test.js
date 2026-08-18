@@ -170,3 +170,80 @@ describe('integration: one reconsideration per dependency, across gates', () => 
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', code)), null);
   });
 });
+
+describe('pyproject.toml is gated like the other manifests', () => {
+  const seed = [
+    '[project]',
+    'name = "app"',
+    'dependencies = [',
+    '  "flask>=2.1",',
+    ']',
+    '',
+    '[tool.poetry.dependencies]',
+    'python = "^3.11"',
+    'click = "^8.1"',
+  ].join('\n') + '\n';
+
+  function workspace() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-pyproj-'));
+    fs.writeFileSync(path.join(dir, 'pyproject.toml'), seed);
+    return dir;
+  }
+
+  test('a new PEP 621 dependency is denied once, and the retry passes', () => {
+    const dir = workspace();
+    const file = path.join(dir, 'pyproject.toml');
+    const session = freshSession();
+    const call = {
+      session_id: session,
+      tool_name: 'Edit',
+      tool_input: { file_path: file, old_string: '  "flask>=2.1",', new_string: '  "flask>=2.1",\n  "requests",' },
+    };
+    const first = hookOutput(runHook('pre-tool-use.js', call));
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(first.hookSpecificOutput.permissionDecisionReason, /requests/);
+    assert.strictEqual(runHook('pre-tool-use.js', call).stdout.trim(), '');
+  });
+
+  test('a new poetry dependency is denied', () => {
+    const dir = workspace();
+    const out = hookOutput(runHook('pre-tool-use.js', {
+      session_id: freshSession(),
+      tool_name: 'Edit',
+      tool_input: {
+        file_path: path.join(dir, 'pyproject.toml'),
+        old_string: 'click = "^8.1"',
+        new_string: 'click = "^8.1"\nhttpx = "^0.27"',
+      },
+    }));
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /httpx/);
+  });
+
+  test('a version bump of a declared dependency stays silent', () => {
+    const dir = workspace();
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(),
+      tool_name: 'Edit',
+      tool_input: {
+        file_path: path.join(dir, 'pyproject.toml'),
+        old_string: '  "flask>=2.1",',
+        new_string: '  "flask>=3.0",',
+      },
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+
+  test('the python version pin is never treated as a dependency', () => {
+    const dir = workspace();
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(),
+      tool_name: 'Edit',
+      tool_input: {
+        file_path: path.join(dir, 'pyproject.toml'),
+        old_string: 'python = "^3.11"',
+        new_string: 'python = "^3.12"',
+      },
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+});

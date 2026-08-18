@@ -4,3 +4,7 @@ runs/
 
 # Run records stay on the operator's machine; the repo carries the harness.
 records/
+
+# Any other run output stays local too — the repo carries the harness only.
+results/
+records-archive/

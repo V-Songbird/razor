@@ -1,5 +1,5 @@
 ---
-name: razor-unused
+name: unused
 description: Audits a project's manifest for dependencies no source file imports — the reverse of razor's write-time gates (which block NEW dependencies), this finds EXISTING dead weight. Report-only; never edits any file.
 when_to_use: Trigger when the user wants to find unused dependencies, says "find unused deps", "audit dependencies", "what deps aren't used", "check for dead dependencies", or invokes /razor:unused.
 argument-hint: "[project directory, defaults to cwd]"

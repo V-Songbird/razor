@@ -17,6 +17,11 @@ function main() {
   const state = readState(data.session_id);
   if (!isActive(state)) return;
 
+  // The ladder goes out first. Everything below it is git, and a repo slow
+  // enough to burn the hook's timeout must cost at most the ledger baseline —
+  // never the injection, which is the whole product.
+  process.stdout.write(RULESET);
+
   if (!state.ledger && !settingOff('LEDGER')) {
     const baseSha = git(['rev-parse', 'HEAD'], data.cwd);
     if (baseSha) {
@@ -35,8 +40,6 @@ function main() {
       writeState(data.session_id, state);
     }
   }
-
-  process.stdout.write(RULESET);
 }
 
 if (require.main === module) main();

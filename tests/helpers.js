@@ -7,14 +7,28 @@ const { spawnSync } = require('child_process');
 
 const HOOKS_DIR = path.join(__dirname, '..', 'hooks');
 
-/** Run a hook script from hooks/ with JSON stdin; returns spawnSync result. */
+/**
+ * Run a hook script from hooks/ with JSON stdin; returns spawnSync result.
+ *
+ * Every razor hook exits 0 — silence is how it says "nothing to do". So a
+ * crash also produces empty stdout, and without this check every
+ * "stays silent" assertion in the suite would pass for a hook that threw
+ * before it ran. Fail loudly instead, with the child's own stderr.
+ */
 function runHook(name, stdinData, env) {
-  return spawnSync('node', [path.join(HOOKS_DIR, name)], {
+  const result = spawnSync('node', [path.join(HOOKS_DIR, name)], {
     input: stdinData === undefined ? undefined : JSON.stringify(stdinData),
     encoding: 'utf-8',
     timeout: 30000,
     env: { ...process.env, ...(env || {}) },
   });
+  if (result.error) throw result.error;
+  if (result.status !== 0 || result.signal) {
+    throw new Error(
+      `${name} exited ${result.status}${result.signal ? ` (${result.signal})` : ''}: ${result.stderr || '(no stderr)'}`
+    );
+  }
+  return result;
 }
 
 /** Parse hook stdout as JSON, or null when the hook stayed silent. */

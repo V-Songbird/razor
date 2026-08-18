@@ -14,8 +14,8 @@ describe('unit: shouldInject', () => {
     }
   });
 
-  test('default skip list covers forge\'s read-only research roles, scoped or bare', () => {
-    for (const t of ['forge-expert', 'adversarial-critic', 'forge:forge-expert', 'forge:adversarial-critic']) {
+  test('a built-in skip matches scoped or bare', () => {
+    for (const t of ['explore', 'Explore', 'some-plugin:explore', 'SOME-PLUGIN:Explore']) {
       assert.strictEqual(shouldInject(t, {}), false, t);
     }
   });
@@ -24,9 +24,8 @@ describe('unit: shouldInject', () => {
     for (const t of [
       'general-purpose',
       'claude',
-      'forge:forge-implementer',
-      'forge:forge-plan-synthesizer',
-      'forge:forge-plan-reviser',
+      'some-plugin:implementer',
+      'some-plugin:reviser',
       'my-custom-agent',
     ]) {
       assert.strictEqual(shouldInject(t, {}), true, t);
@@ -34,9 +33,9 @@ describe('unit: shouldInject', () => {
   });
 
   test('RAZOR_AGENT_SKIP extends the default list, bare or plugin-scoped', () => {
-    const env = { RAZOR_AGENT_SKIP: 'adversarial-critic, forge-expert' };
-    assert.strictEqual(shouldInject('forge:adversarial-critic', env), false);
-    assert.strictEqual(shouldInject('forge:forge-expert', env), false);
+    const env = { RAZOR_AGENT_SKIP: 'code-reviewer, doc-checker' };
+    assert.strictEqual(shouldInject('some-plugin:code-reviewer', env), false);
+    assert.strictEqual(shouldInject('doc-checker', env), false);
     assert.strictEqual(shouldInject('Explore', env), false); // defaults kept
     assert.strictEqual(shouldInject('general-purpose', env), true);
   });
@@ -151,5 +150,53 @@ describe('integration: injection lifecycle', () => {
       agent_type: 'general-purpose',
     });
     assert.strictEqual(r.stdout.trim(), '');
+  });
+});
+
+// The ladder is frozen by owner decision and the published benchmark numbers
+// are tied to its exact text, but nothing detected a change to it: the only
+// assertion compared the emitted string to the same constant it came from.
+// These pin the content itself, with literals, so a drift fails here.
+describe('the frozen ladder', () => {
+  test('opens with the marker the harness matches on', () => {
+    assert.ok(RULESET.startsWith('RAZOR ACTIVE\n'), RULESET.slice(0, 40));
+  });
+
+  test('carries exactly seven rungs, in order, each with its own first words', () => {
+    const openings = [
+      '1. Not genuinely needed?',
+      '2. Already in this codebase?',
+      '3. Stdlib does it?',
+      '4. Native platform feature does it?',
+      '5. An already-installed dependency does it?',
+      '6. Fits in one line?',
+      '7. Only then: the minimum code that works',
+    ];
+    let at = -1;
+    for (const opening of openings) {
+      const next = RULESET.indexOf(opening);
+      assert.notStrictEqual(next, -1, `missing rung: ${opening}`);
+      assert.ok(next > at, `out of order: ${opening}`);
+      at = next;
+    }
+    assert.strictEqual(RULESET.match(/^\d\. /gm).length, 7);
+  });
+
+  test('keeps the three clauses the measured behaviour rests on', () => {
+    assert.match(RULESET, /Never narrate or deliberate the rungs/);
+    assert.match(RULESET, /One check is enough, anywhere in this task/);
+    assert.match(RULESET, /Never cut: validation at trust boundaries/);
+  });
+});
+
+describe('the ladder does not depend on git finishing', () => {
+  test('session-start emits the ladder even where git cannot run', () => {
+    // cwd points nowhere, so every git() call fails and no ledger is recorded.
+    const r = runHook('session-start.js', {
+      session_id: freshSession(),
+      hook_event_name: 'SessionStart',
+      cwd: '/definitely/not/a/repo/anywhere',
+    });
+    assert.match(r.stdout, /RAZOR ACTIVE/);
   });
 });

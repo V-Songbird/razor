@@ -4,9 +4,10 @@
 // (turn-boundary detection) because each plugin that needs it is an
 // independent repo with no shared code to import from. Every copy must stay
 // behaviorally identical, so this exact fixture is duplicated verbatim in
-// each of those plugins' test suites — a future edit that drifts one copy
-// away from the others fails that plugin's own suite immediately instead of
-// silently desyncing per-turn accounting across the set. Do not resolve a
+// the suite of each plugin that carries the function — today razor and one
+// sibling — and a future edit that drifts one copy away from the others
+// fails that plugin's own suite immediately instead of silently desyncing
+// per-turn accounting across the set. Do not resolve a
 // failure here by editing this fixture; edit the plugin whose
 // isRealUserPrompt actually diverged.
 

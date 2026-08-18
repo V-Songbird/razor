@@ -6,7 +6,7 @@
 // "/razor on" re-arms it and re-injects the ladder. Boolean by design —
 // no lite/full/ultra dial; the ladder either applies or it doesn't.
 
-const { RULESET, readInput, readState, writeState } = require('./razor-lib');
+const { RULESET, readInput, readState, writeState, killed } = require('./razor-lib');
 
 function parseToggle(prompt) {
   const p = String(prompt || '').trim().toLowerCase();
@@ -17,6 +17,7 @@ function parseToggle(prompt) {
 }
 
 function main() {
+  if (killed()) return; // RAZOR_DISABLE=1 silences the toggle too — gates are off either way
   const data = readInput();
   const toggle = parseToggle(data.prompt);
   if (!toggle) return;

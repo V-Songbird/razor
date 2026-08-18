@@ -195,3 +195,53 @@ describe('integration: soft gate', () => {
     assert.strictEqual(hookOutput(r), null);
   });
 });
+
+describe('locations, flag values, and self-upgrades are not dependencies', () => {
+  const cases = [
+    ['npm install ./local-lib', 'a relative path'],
+    ['npm install ../sibling', 'a parent-relative path'],
+    ['npm install file:../lib', 'a file: spec'],
+    ['npm install https://example.com/pkg.tgz', 'a URL archive'],
+    ['go get ./...', "go's own package wildcard"],
+    ['pip install --upgrade pip', 'pip upgrading itself'],
+    ['npm install --prefix /tmp/app', 'a flag value that is a path'],
+  ];
+  for (const [command, why] of cases) {
+    test(`no install parsed from ${why}: ${command}`, () => {
+      assert.strictEqual(parseInstallCommand(command), null);
+    });
+  }
+
+  test('a flag value is never reported as the package', () => {
+    const hit = parseInstallCommand('npm install --tag next axios');
+    assert.deepStrictEqual(hit && hit.packages, ['axios']);
+  });
+
+  test('a real package alongside a path is still caught', () => {
+    const hit = parseInstallCommand('pip install -t ./vendor requests');
+    assert.deepStrictEqual(hit && hit.packages, ['requests']);
+  });
+});
+
+describe('PowerShell is gated exactly like Bash', () => {
+  test('an install issued through PowerShell is denied once, and the retry passes', () => {
+    const call = {
+      session_id: freshSession(),
+      tool_name: 'PowerShell',
+      tool_input: { command: 'npm install axios' },
+    };
+    const out = hookOutput(runHook('pre-tool-use.js', call));
+    assert.strictEqual(out.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(out.hookSpecificOutput.permissionDecisionReason, /axios/);
+    assert.strictEqual(runHook('pre-tool-use.js', call).stdout.trim(), '');
+  });
+
+  test('an ordinary PowerShell command is never gated', () => {
+    const r = runHook('pre-tool-use.js', {
+      session_id: freshSession(),
+      tool_name: 'PowerShell',
+      tool_input: { command: 'Get-ChildItem -Recurse' },
+    });
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+});

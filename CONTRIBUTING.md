@@ -63,7 +63,10 @@ Run this once after cloning:
 git config core.hooksPath scripts/git-hooks
 ```
 
-This enables a `pre-commit` hook that runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory.
+This enables two hooks:
+
+- `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory.
+- `commit-msg` scans the commit message against a private blocklist of reference-project names. The blocklist lives outside this repo, so in a public clone the check finds nothing and passes. If it ever blocks you, rename the project in your message and commit again.
 
 ---
 

@@ -95,6 +95,6 @@ This **can** show whether razor changes what the agent builds and what it costs,
 
 razor's once-per-session ladder is part of the product, so its token cost is included in the measurement, not subtracted. Each arm runs in a fresh throwaway workspace outside any git repo, with only that one plugin loaded (`--setting-sources project,local`, no MCP servers, a scoped tool allowlist) — so a difference between arms is the plugin, nothing else.
 
-## The records
+## Where a run lands
 
-Each run writes per-cell records — task, arm, model, cost, tokens, code size, dependency verdict, and pass/fail per session — into `records/`, which stays on your machine. The front page's numbers came from a run of this same harness; run it yourself to regenerate them from scratch.
+Each run writes `results.json` (one record per session — task, arm, model, cost, tokens, code size, dependency verdict, pass/fail) and `summary.json` into the run directory it prints when it finishes. `report.js` adds `report.md` and `charts.svg` there. That directory sits in your system temp dir unless `RAZOR_BENCH_RUNS` points it elsewhere, so nothing lands in your project and nothing leaves your machine. The front page's numbers came from a run of this same harness; run it yourself to regenerate them from scratch.

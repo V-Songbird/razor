@@ -246,6 +246,10 @@ function gitRepo() {
   g('add', '.');
   g('commit', '-qm', 'base');
   const sha = g('rev-parse', 'HEAD').stdout.trim();
+  // Without this, a git that never ran leaves sha empty and the ledger reads
+  // "not a repo" — every negative assertion below would then pass for the
+  // wrong reason.
+  assert.match(sha, /^[0-9a-f]{7,40}$/, 'git fixture did not produce a commit');
   return { dir, sha };
 }
 
@@ -272,7 +276,7 @@ describe('integration: build ledger', () => {
   test('fires once on sprawl, then stays silent', () => {
     const { dir, sha } = gitRepo();
     const session = freshSession();
-    writeState(session, { ledger: { baseSha: sha, baseUntracked: 0, fired: false } });
+    writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
 
     // sprawl: 600 added lines in a tracked file + several new untracked files
     fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 600 }, (_, i) => `line ${i}`).join('\n'));
@@ -288,7 +292,7 @@ describe('integration: build ledger', () => {
   test('silent on a well-behaved session', () => {
     const { dir, sha } = gitRepo();
     const session = freshSession();
-    writeState(session, { ledger: { baseSha: sha, baseUntracked: 0, fired: false } });
+    writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
     fs.appendFileSync(path.join(dir, 'a.txt'), 'two\nthree\n');
     const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir }));
     assert.strictEqual(out, null);
@@ -302,7 +306,7 @@ describe('integration: build ledger', () => {
 
     const { dir: repo, sha } = gitRepo();
     const s2 = freshSession();
-    writeState(s2, { ledger: { baseSha: sha, baseUntracked: 0, fired: false } });
+    writeState(s2, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
     for (let i = 0; i < 9; i++) fs.writeFileSync(path.join(repo, `n${i}.js`), '// x\n');
     const r = runHook('build-ledger.js', { session_id: s2, cwd: repo }, { RAZOR_LEDGER: 'off' });
     assert.strictEqual(hookOutput(r), null);

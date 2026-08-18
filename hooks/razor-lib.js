@@ -121,22 +121,32 @@ function writeState(sessionId, state) {
   }
 }
 
+// The env kill-switch. Separate from isActive because the toggle hook must
+// stay silent under it while still honouring "/razor on" in an ordinary
+// session that was toggled off.
+function killed() {
+  return process.env.RAZOR_DISABLE === '1';
+}
+
 // Razor is on unless the env kill-switch is set or the session was toggled
 // off via "/razor off". Absent state (e.g. a subagent hook that can't
 // resolve the parent session) fails safe to on.
 function isActive(state) {
-  if (process.env.RAZOR_DISABLE === '1') return false;
+  if (killed()) return false;
   return !(state && state.off === true);
 }
 
 // Best-effort git call; null on any failure (not a repo, no git, timeout).
+// The per-call budget is deliberately small: SessionStart makes four of these
+// and Stop three, and every one of them has to finish inside the hook timeout
+// declared in hooks.json or the harness kills the process mid-work.
 function git(args, cwd) {
   if (!cwd) return null;
   try {
     return execFileSync('git', args, {
       cwd,
       encoding: 'utf-8',
-      timeout: 4000,
+      timeout: 2000,
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
@@ -224,6 +234,7 @@ module.exports = {
   readState,
   writeState,
   isActive,
+  killed,
   isRealUserPrompt,
   turnKey,
   gateStateId,

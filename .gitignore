@@ -1,1 +1,6 @@
 /docs/*
+
+# Crash residue from tests/dispatcher.test.js, which needs a workspace
+# inside the plugin root. Cleaned up on success; ignored so a failed run
+# can never leave a fixture staged.
+/disp-ws-*/

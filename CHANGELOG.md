@@ -4,6 +4,24 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## [Unreleased]
+
+`/razor:unused` now answers to the name the docs give it. It was registered under a longer one and the documented command did nothing.
+
+The checklist now reaches forked sessions, and it is sent before razor looks at your git history — a slow repository can no longer swallow it.
+
+Direct edits to `pyproject.toml` now get the same one-time "do we need this?" question as `package.json` and `requirements.txt`. A Python project that declares everything there was previously unguarded on that path.
+
+Fixed an issue where installing from a local path or a URL, passing a value to a flag, or running `pip install --upgrade pip` was treated as adding a new dependency.
+
+Fixed an issue where test files ending in `.test.tsx`, `.spec.tsx`, `.test.jsx`, `.test.mjs`, and similar were checked for new imports. Only `.test.js` and `.test.ts` were exempt before.
+
+Fixed an issue where `/razor:unused` reported a scoped package like `@scope/cli` as unused even when a script or config file named it.
+
+`RAZOR_DISABLE=1` now silences `/razor on` as well, instead of printing a checklist nothing enforces.
+
+Read-only research agents from a plugin that is no longer published are no longer skipped by default. Use `RAZOR_AGENT_SKIP` to skip your own.
+
 ## 1.1.3 — 2026-08-11
 
 The repository no longer carries benchmark run data. The harness stays — run it yourself to regenerate any figure.
@@ -172,11 +190,11 @@ Doc-only: plugin.json's description now matches the marketplace listing text. No
 
 ## 0.2.4-alpha — 2026-07-07
 
-Doc-only: the pairing limitation noted in 0.2.3 is resolved by [hush](../hush) 0.3.6. Razor's behavior is unchanged.
+Doc-only: the pairing limitation noted in 0.2.3 is resolved by [hush](https://github.com/V-Songbird/hush) 0.3.6. Razor's behavior is unchanged.
 
 ## 0.2.3-alpha — 2026-07-07
 
-Documented a known limitation when pairing razor with [hush](../hush) on hard debugging tasks. No behavior change; resolved by hush 0.3.6.
+Documented a known limitation when pairing razor with [hush](https://github.com/V-Songbird/hush) on hard debugging tasks. No behavior change; resolved by hush 0.3.6.
 
 ## 0.2.2-alpha — 2026-07-07
 
