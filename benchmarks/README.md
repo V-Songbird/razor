@@ -52,7 +52,9 @@ node runner/run.js --full --runs 3        # every task, 3 reps each
 node runner/run.js --default --models sonnet
 ```
 
-Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--runs N` · `--models haiku|sonnet` · `--workers N` · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
+Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--runs N` · `--models haiku|sonnet` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
+
+The setups take turns in a shuffled order rather than one finishing before the next starts, so neither pays more of the cold-start cost than the other. The run prints its seed and saves it — pass `--seed` to repeat the exact same order.
 
 ## Bring your own rival
 

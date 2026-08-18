@@ -21,6 +21,7 @@
 //   node runner/run.js --full --runs 3   # every task, more reps
 //   node runner/run.js --task dep-slug,oh-question --arms baseline,razor --runs 2
 //   node runner/run.js --default --rival-dir /path/to/some/other/plugin
+//   node runner/run.js --full --runs 3 --seed 12345   # replay an earlier run's arm order
 //   node runner/run.js --rescore <run-dir>   # recompute metrics offline, no API
 //   node runner/report.js <run-dir>          # tables + SVG charts -> report.md
 
@@ -87,6 +88,62 @@ function has(name) { return argv.includes(`--${name}`); }
 function flag(name, dflt) {
   const i = argv.indexOf(`--${name}`);
   return i >= 0 && i + 1 < argv.length ? argv[i + 1] : dflt;
+}
+
+// --- run order --------------------------------------------------------------
+//
+// Arms are interleaved inside each task+model+rep block and shuffled there, so
+// no arm systematically runs first into a cold prompt cache or last into a warm
+// one. A cold cell costs roughly twice a warm one, and the queue this replaced
+// put every rep of the first arm ahead of the second arm's first rep — a
+// per-arm bias pointing straight at the cost numbers the README publishes.
+// The seed is printed and recorded, so "shuffled" never means "unreproducible":
+// pass --seed <seed> to replay an earlier run's exact order.
+
+function hashSeed(seed) {
+  const s = String(seed);
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+/** mulberry32: tiny, fast, good enough to shuffle a queue. Same seed, same stream. */
+function makeRng(seed) {
+  let a = hashSeed(seed);
+  return function next() {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Fisher-Yates on a copy. */
+function shuffled(list, rng) {
+  const out = list.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/** The full cell queue: one entry per task x model x rep x arm, arms shuffled within each block. */
+function buildQueue(taskIds, models, arms, runs, seed) {
+  const rng = makeRng(seed);
+  const cells = [];
+  for (const tid of taskIds) {
+    for (const model of models) {
+      for (let r = 0; r < runs; r++) {
+        for (const arm of shuffled(arms, rng)) cells.push([tid, arm, model, r]);
+      }
+    }
+  }
+  return cells;
 }
 
 // --- claude resolution + arg quoting ---------------------------------------
@@ -474,16 +531,16 @@ async function main() {
   const outDir = path.join(RUNS_DIR, stamp);
   fs.mkdirSync(outDir, { recursive: true });
 
-  const cells = [];
-  for (const tid of taskIds) for (const model of models) for (const arm of arms) {
-    for (let r = 0; r < runs; r++) cells.push([tid, arm, model, r]);
-  }
+  const seed = flag('seed', null) ?? String(Date.now());
+  const cells = buildQueue(taskIds, models, arms, runs, seed);
   const total = cells.length;
   const results = [];
   let done = 0;
 
   const writeResults = () => fs.writeFileSync(path.join(outDir, 'results.json'), JSON.stringify({
     date: stamp,
+    seed,
+    order: cells.map(([tid, arm, model, r]) => `${tid}__${arm}__${model}__${r}`),
     models: Object.fromEntries(models.map((m) => [m, MODELS[m] || m])),
     claude: claudeVersion(),
     arms: Object.fromEntries(arms.map((a) => [a, ARM_DIRS[a] || 'none'])),
@@ -491,6 +548,7 @@ async function main() {
   }, null, 2));
 
   console.log(`running ${total} cells, ${workers} at a time -> ${outDir}`);
+  console.log(`arm order seed ${seed} (replay this exact order with --seed ${seed})`);
 
   let idx = 0;
   async function worker() {
@@ -517,4 +575,6 @@ async function main() {
   console.log(`\nnext: node runner/report.js ${outDir}`);
 }
 
-main();
+module.exports = { buildQueue, makeRng, shuffled };
+
+if (require.main === module) main();
