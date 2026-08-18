@@ -13,12 +13,14 @@ It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed
 ## The honest disclaimer, up front
 
 > [!WARNING]
-> This costs real money. The cheap default run is roughly **$1–3 on the small model (Haiku)** and takes a few minutes. The full suite, or running on the bigger model, costs more.
+> This costs real money. The cheap default run is roughly **$5–8 on Sonnet** and takes a few minutes; the same run on Opus is about half again as much. The full suite costs more. Those figures are extrapolated from a two-task calibration on this machine — treat them as an order of magnitude, not a quote.
 
 > [!NOTE]
-> The numbers move between runs — a handful of reps against a live model, not a powered experiment. Haiku is high-variance, and a small sweep is a small sample; add reps for steadier numbers (`--runs 4`).
+> The numbers move between runs — a handful of reps against a live model, not a powered experiment. A small sweep is a small sample; add reps for steadier numbers (`--runs 4`). A result only counts when both models agree on the direction.
 
 **What you should see:** razor landing **at or below baseline on cost and code size**, with **no new dependencies added** and every task still passing — the same *shape* as our published charts. You will **not** reproduce our exact figures, and that's expected. If razor is leaner and no pricier with correctness intact, the claim holds.
+
+A default run uses Sonnet, which is the plugin README's **big model** column — that is the row to compare against. The small-model column there was measured on an earlier, smaller model; pass `--models haiku` if you want to check that one too.
 
 ## Run it
 
@@ -48,11 +50,11 @@ node runner/report.js <the-run-dir-it-printed>
 **4. Go bigger** (optional) — every task, more reps, or the larger model (costs more):
 
 ```bash
-node runner/run.js --full --runs 3        # every task, 3 reps each
-node runner/run.js --default --models sonnet
+node runner/run.js --full --runs 3      # every task, 3 reps each
+node runner/run.js --default --models opus
 ```
 
-Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--runs N` · `--models haiku|sonnet` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
+Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--runs N` · `--models sonnet|opus` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
 
 The setups take turns in a shuffled order rather than one finishing before the next starts, so neither pays more of the cold-start cost than the other. The run prints its seed and saves it — pass `--seed` to repeat the exact same order.
 

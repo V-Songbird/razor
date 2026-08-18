@@ -17,7 +17,7 @@
 //
 //   node runner/run.js --selftest        # prove every instrument, no API spend. Run first.
 //   node runner/run.js --smoke           # 1 cheap task x each arm x 1, verifies activation
-//   node runner/run.js --default         # the default sweep (small, ~$1-3 on haiku)
+//   node runner/run.js --default         # the default sweep (~$5-8 on sonnet)
 //   node runner/run.js --full --runs 3   # every task, more reps
 //   node runner/run.js --task dep-slug,oh-question --arms baseline,razor --runs 2
 //   node runner/run.js --default --rival-dir /path/to/some/other/plugin
@@ -525,7 +525,7 @@ async function main() {
   const badArms = arms.filter((a) => a !== 'baseline' && !(a in ARM_DIRS));
   if (badArms.length) { console.error(`unknown arms ${badArms} (rival needs --rival-dir)`); process.exit(1); }
 
-  const models = flag('models', 'haiku').split(',').map((m) => m.trim());
+  const models = flag('models', 'sonnet').split(',').map((m) => m.trim());
   const workers = Number(flag('workers', 4));
   const stamp = stampNow();
   const outDir = path.join(RUNS_DIR, stamp);
