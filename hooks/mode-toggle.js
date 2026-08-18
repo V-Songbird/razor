@@ -6,7 +6,7 @@
 // "/razor on" re-arms it and re-injects the ladder. Boolean by design —
 // no lite/full/ultra dial; the ladder either applies or it doesn't.
 
-const { RULESET, readInput, readState, writeState, killed } = require('./razor-lib');
+const { RULESET, readInput, emitContext, readState, writeState, killed } = require('./razor-lib');
 
 function parseToggle(prompt) {
   const p = String(prompt || '').trim().toLowerCase();
@@ -26,8 +26,8 @@ function main() {
   state.off = toggle === 'off';
   writeState(data.session_id, state);
 
-  // UserPromptSubmit stdout is added to context.
-  process.stdout.write(
+  emitContext(
+    'UserPromptSubmit',
     toggle === 'off' ? 'RAZOR OFF — the ladder and guards no longer apply this session.' : RULESET
   );
 }

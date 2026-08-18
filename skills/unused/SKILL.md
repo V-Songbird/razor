@@ -19,20 +19,31 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/unused-deps.js" <projectDir>
 Default `<projectDir>` to the current working directory if the user didn't name one. The script:
 - reads declared deps for whichever ecosystems have a manifest present (node, python — the ecosystems razor's write-time import gate covers),
 - walks source files (skipping `node_modules`, `dist`, `.git`, and other generated/vendored dirs; test files ARE included — a test-only import still counts as used),
+- counts type-only imports and imports living in `.vue`/`.svelte`/`.astro`/`.mdx` source as real usage,
+- audits each workspace package of a monorepo against its own manifest and its own files, never the root's,
+- honours the ignore list the project already declares for its own resolver, so a dependency you already answered for is not asked about again,
 - normalizes declared names against import roots in the suppressing direction (e.g. `python-dotenv` counts as used when the code imports `dotenv`, `pillow` when it imports `PIL`) — normalization only ever hides a finding, never invents one; the blind spots that remain are named in the script's known-limits line,
-- splits misses into two buckets: **unused** (no mention anywhere — source imports, `package.json` scripts, or a root config file) and **needs a resolver-grade check** (the name turns up in a script or config file — eslint/babel/webpack/vite/jest/etc. — or is a `@types/*`/toolchain dep, meaning it's likely invoked as a CLI tool, plugin, or type-only package rather than imported).
+- splits misses into **three** buckets by how much could actually be proved.
 
-For a node project, the script also detects whether **knip** is installed or resolvable from the target project. Grep genuinely cannot resolve four classes: binaries invoked from `package.json` scripts, config-only plugins, true `@types` pairing, and dependencies that only satisfy another package's `peerDependencies` (this last one can produce a false "unused" verdict, since grep has no visibility into installed packages' own manifests). When knip is present, the report names it by name as the authoritative escalation for those classes. When it isn't, the report says nothing about it — razor never suggests installing a new tool into the target project.
+The three buckets, and what separates them:
+
+| Bucket | What it means |
+| --- | --- |
+| **Confirmed unused** | The installed tree was read: no import, the package ships no command, and no installed package peer-requires it. Only possible when dependencies are installed. |
+| **Likely unused** | Nothing referenced it, but nothing could prove it — no installed tree to read, or a python project, where no package metadata was available. A lead, not a verdict. |
+| **Unknown** | Something references it, or only a resolver can settle it: named in a script or config file, a `@types/*`/toolchain dep, a package that ships a command, or one that satisfies another package's peer dependency. |
+
+For a node project, the script also detects whether **knip** is installed or resolvable from the target project. It resolves what this audit still cannot: entry-point reachability, config-only plugin loading, and true `@types` pairing. When knip is present, the report names it as the authoritative escalation for those classes. When it isn't, the report says nothing about it — razor never suggests installing a new tool into the target project.
 
 ## 2. Present the findings
 
-Report the **unused** bucket as the actual findings — these are high-confidence. Report the **needs a resolver-grade check** bucket separately, each one marked `(check)`, and say why: the name showed up outside any import, or is a toolchain/`@types` dep, so removing it needs a manual look, not a mechanical one.
+Lead with **Confirmed unused** — that is the bucket a resolver checked. Report **Likely unused** as leads, and say plainly why they are only leads: nothing referenced them and nothing proved it. Report **Unknown** separately with the reason the script printed for each.
 
-Favor fewer, high-confidence findings over a long speculative list — if the unused bucket is empty, say so plainly rather than padding the report with the needs-check bucket dressed up as findings.
+Never describe a likely-unused or unknown entry as high confidence — if no resolver ran, the report does not claim one did. If the confirmed bucket is empty, say so plainly rather than promoting the other two buckets to fill the space.
 
 If the script's output names knip as available, relay that escalation verbatim (including the `npx knip` command it prints) — do not run knip yourself, install it, or add it to any manifest; it stays the user's call.
 
-Always include the script's known-limits line verbatim (static import scanning can't see `import(variable)`, runtime `require()`-by-string, CLI tools invoked via `npx`/`exec`, peer-satisfied dependencies, or imports living only in `.vue`/`.svelte`/`.astro`/`.mdx` source) so the user knows what a clean report doesn't guarantee.
+Always include the script's known-limits line verbatim, so the user knows what a clean report doesn't guarantee.
 
 ## 3. Never remove anything
 

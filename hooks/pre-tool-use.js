@@ -13,7 +13,7 @@
 // writes never spend the main thread's budgets, and vice versa. The /razor
 // toggle stays session-wide.
 
-const { readInput, readState, writeState, isActive, gateStateId } = require('./razor-lib');
+const { readInput, emitDeny, readState, writeState, isActive, gateStateId } = require('./razor-lib');
 
 const GATES = [
   require('./dep-guard'),
@@ -37,16 +37,7 @@ function main() {
   }
   writeState(stateId, state);
 
-  if (!reason) return;
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        permissionDecision: 'deny',
-        permissionDecisionReason: reason,
-      },
-    })
-  );
+  emitDeny('PreToolUse', reason);
 }
 
 if (require.main === module) main();

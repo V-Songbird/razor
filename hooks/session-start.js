@@ -6,9 +6,9 @@
 // keep the original baseline). The snapshot includes the tree's pre-existing
 // dirt — dirty insertions, deletions, added and untracked files — so the
 // ledger only ever charges the session for its own delta.
-// SessionStart accepts raw stdout as context, so no JSON envelope needed.
+// The emitter owns the wire shape; this file only decides what to say.
 
-const { RULESET, readInput, readState, writeState, isActive, settingOff, gcStateFiles, git } = require('./razor-lib');
+const { RULESET, readInput, emitContext, readState, writeState, isActive, settingOff, gcStateFiles, git } = require('./razor-lib');
 const { parseShortstat } = require('./build-ledger');
 
 function main() {
@@ -20,7 +20,7 @@ function main() {
   // The ladder goes out first. Everything below it is git, and a repo slow
   // enough to burn the hook's timeout must cost at most the ledger baseline —
   // never the injection, which is the whole product.
-  process.stdout.write(RULESET);
+  emitContext('SessionStart', RULESET);
 
   if (!state.ledger && !settingOff('LEDGER')) {
     const baseSha = git(['rev-parse', 'HEAD'], data.cwd);

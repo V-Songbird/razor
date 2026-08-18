@@ -236,8 +236,16 @@ function pyprojectDepNames(text) {
     }
     const startsArray =
       (section === 'project' && /^\s*dependencies\s*=\s*\[/.test(line)) ||
-      (section === 'project.optional-dependencies' && /^\s*[A-Za-z0-9_.-]+\s*=\s*\[/.test(line));
+      ((section === 'project.optional-dependencies' || section === 'dependency-groups') &&
+        /^\s*[A-Za-z0-9_.-]+\s*=\s*\[/.test(line));
     if (arrayDepth > 0 || startsArray) {
+      // A PEP 735 group can pull in another group by name; that name is not
+      // a package, so quoting it must not declare a phantom dependency.
+      if (/include-group/.test(line)) {
+        arrayDepth += (line.match(/\[/g) || []).length - (line.match(/\]/g) || []).length;
+        if (arrayDepth < 0) arrayDepth = 0;
+        continue;
+      }
       for (const q of line.matchAll(/["']([^"']+)["']/g)) {
         const name = specName(q[1]);
         if (name) names.add(name.toLowerCase());
@@ -249,19 +257,37 @@ function pyprojectDepNames(text) {
   return names;
 }
 
+// Names declared by one requirements file, following `-r other.txt` and
+// `--requirement other.txt` includes: a dependency pinned in an included file
+// is just as declared as one written inline. Depth- and cycle-bounded.
+function requirementsNames(file, names, seen) {
+  const resolved = path.resolve(file);
+  if (seen.has(resolved) || seen.size > 16) return;
+  seen.add(resolved);
+  const text = readText(resolved);
+  if (text === null) return;
+  for (const line of text.split(/\r?\n/)) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const include = t.match(/^(?:-r|--requirement)[=\s]+(\S+)/);
+    if (include) {
+      requirementsNames(path.join(path.dirname(resolved), include[1]), names, seen);
+      continue;
+    }
+    if (t.startsWith('-')) continue;
+    const name = specName(t);
+    if (name) names.add(name);
+  }
+}
+
 function readPythonDeps(dir) {
   const names = new Set();
   const toml = readText(path.join(dir, 'pyproject.toml'));
   if (toml !== null) for (const n of pyprojectDepNames(toml)) names.add(n);
   if (names.size) return [...names];
-  const req = readText(path.join(dir, 'requirements.txt'));
-  if (req !== null) {
-    for (const line of req.split(/\r?\n/)) {
-      const t = line.trim();
-      if (!t || t.startsWith('#') || t.startsWith('-')) continue;
-      const name = specName(t);
-      if (name) names.add(name);
-    }
+  const reqPath = path.join(dir, 'requirements.txt');
+  if (readText(reqPath) !== null) {
+    requirementsNames(reqPath, names, new Set());
     return [...names];
   }
   return toml !== null ? [] : null;

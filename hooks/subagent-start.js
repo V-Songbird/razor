@@ -12,7 +12,7 @@
 // Unknown agent types get the ruleset: most custom agents write code, and
 // the fail-safe direction is guarded, not lean.
 
-const { RULESET, readInput, readState, isActive } = require('./razor-lib');
+const { RULESET, readInput, emitContext, readState, isActive } = require('./razor-lib');
 
 // Read-only / non-coding built-ins. Extend with RAZOR_AGENT_SKIP.
 const DEFAULT_SKIP = [
@@ -48,15 +48,7 @@ function main() {
   const data = readInput();
   if (!isActive(readState(data.session_id))) return;
   if (!shouldInject(data.agent_type, process.env)) return;
-  // Raw stdout is dropped for SubagentStart — the JSON envelope is mandatory.
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'SubagentStart',
-        additionalContext: RULESET,
-      },
-    })
-  );
+  emitContext('SubagentStart', RULESET);
 }
 
 if (require.main === module) main();

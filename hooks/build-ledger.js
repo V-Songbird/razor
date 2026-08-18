@@ -10,7 +10,7 @@
 // Silent while the session behaves; the thresholds are generous on purpose
 // so a legitimately large requested task never trips it.
 
-const { readInput, readState, writeState, isActive, settingOff, settingNumber, git } = require('./razor-lib');
+const { readInput, emitContext, readState, writeState, isActive, settingOff, settingNumber, git } = require('./razor-lib');
 
 const LOC_BUDGET = (() => {
   const n = settingNumber('LEDGER_LOC', 500);
@@ -82,17 +82,12 @@ function main() {
   ledger.fired = true;
   writeState(data.session_id, state);
 
-  process.stdout.write(
-    JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'Stop',
-        additionalContext:
-          `razor ledger: +${stats.insertions} / -${stats.deletions} LOC, ` +
-          `${stats.newFiles} new files since session start. ` +
-          'Deletion-positive diffs are the goal — is all of this needed? ' +
-          '(fires once per session; RAZOR_LEDGER=off to silence)',
-      },
-    })
+  emitContext(
+    'Stop',
+    `razor ledger: +${stats.insertions} / -${stats.deletions} LOC, ` +
+      `${stats.newFiles} new files since session start. ` +
+      'Deletion-positive diffs are the goal — is all of this needed? ' +
+      '(fires once per session; RAZOR_LEDGER=off to silence)'
   );
 }
 

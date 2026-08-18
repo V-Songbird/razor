@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"Stop","additionalContext":"razor ledger: +600 / -0 LOC, 9 new files since session start. Deletion-positive diffs are the goal — is all of this needed? (fires once per session; RAZOR_LEDGER=off to silence)"}}

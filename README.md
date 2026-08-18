@@ -53,7 +53,7 @@ Three checks make sure the list isn't just a suggestion Claude quietly drops lat
 | Moment | What happens |
 | --- | --- |
 | Reaching for a new dependency (an install command, an `import` line, a hand-edit to the manifest) | Challenged once, with your project's declared-dependency list right in the message |
-| Spawning a lot of new files in one turn | A "does this all need to exist?" nudge |
+| Spawning a lot of new production files in one turn | A "does this all need to exist?" nudge, naming the shape of the change. Tests, migrations, config and generated files never count |
 | A session's new code piles up | A git-grounded check, once per session, on whether all of it was actually needed |
 
 If Claude still thinks it's right after the nudge, it goes ahead. razor asks once — it doesn't argue.
@@ -80,7 +80,7 @@ razor runs itself. These are the only controls:
 | Turn razor off or back on for the session | `/razor off` · `/razor on` |
 | Find dependencies in your manifest that nothing imports | `/razor:unused` |
 
-`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Anything it can spot as ambiguous gets flagged for a manual check.
+`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Findings come in three buckets: confirmed unused when it could read your installed packages and prove nothing needs them, likely unused when nothing referenced them but nothing could prove it, and unknown for everything a script, a config file or another package still points at.
 
 ## Benchmarks
 
@@ -197,7 +197,7 @@ Most people never touch these. razor asks about most of them when you enable it 
 | `RAZOR_DEP_GUARD=off` | Stops the new-dependency nudge for install commands |
 | `RAZOR_IMPORT_GUARD=off` | Stops the new-dependency nudge for `import`/`require` lines |
 | `RAZOR_MANIFEST_GUARD=off` | Stops the new-dependency nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
-| `RAZOR_FILE_BUDGET=4` | New files allowed in one turn before it speaks up |
+| `RAZOR_FILE_BUDGET=4` | New production files allowed in one turn before it speaks up. Set it yourself and every new file counts, tests included |
 | `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
 | `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
 

@@ -4,6 +4,16 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## [Unreleased]
+
+The new-file check now counts production files only. A feature that ships with its tests, a migration and a config file is no longer treated as sprawl, and when the check does speak it names what the turn actually produced. Set `RAZOR_FILE_BUDGET` yourself and it goes back to counting every new file.
+
+`/razor:unused` now reports three buckets instead of two. **Confirmed unused** means your installed packages were read and none of them needs it. **Likely unused** means nothing referenced it and nothing could prove it — the report no longer calls that high confidence. **Unknown** is everything a script, config file, command or peer dependency still points at.
+
+`/razor:unused` also sees more: type-only imports, imports inside `.vue`, `.svelte`, `.astro` and `.mdx` files, and each workspace package of a monorepo audited against its own manifest. It honours the ignore list your project already declares, so a dependency you have answered for is not raised again.
+
+Python dependencies declared in a `-r` included requirements file, or in a PEP 735 dependency group, now count as declared everywhere razor looks at them.
+
 ## 1.2.0 — 2026-08-18
 
 `/razor:unused` now answers to the name the docs give it. It was registered under a longer one and the documented command did nothing.

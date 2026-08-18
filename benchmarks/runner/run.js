@@ -46,7 +46,7 @@ const TASKS = RAZOR_TASKS;
 
 // Arms: baseline + razor always, plus an optional user-supplied rival.
 const ARM_DIRS = { razor: RAZOR_DIR };
-const MODELS = { haiku: 'claude-haiku-4-5-20251001', sonnet: 'claude-sonnet-5', opus: 'claude-opus-4-8' };
+const MODELS = { haiku: 'claude-haiku-4-5-20251001', sonnet: 'claude-sonnet-5', opus: 'claude-opus-5' };
 
 // A small default subset across the tiers so a curious run is cheap; --full runs everything.
 const DEFAULT_TASKS = ['dep-slug', 'dep-querystring', 'reuse-scan', 'sprawl-todo', 'oh-question', 'oh-typo'];

@@ -96,6 +96,34 @@ function isTestFile(filePath) {
   );
 }
 
+// The package a specifier belongs to, or null when it can never be one
+// (relative, absolute, subpath-imports, or a runtime builtin).
+function specRoot(spec) {
+  if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('#')) return null;
+  // A node:/bun: prefix can only resolve a runtime builtin, never a package.
+  if (/^(node|bun):/.test(spec)) return null;
+  const root = spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0];
+  if (!root || NODE_BUILTINS.has(root) || NODE_BUILTINS.has(spec)) return null;
+  return root;
+}
+
+// Roots imported for their TYPES only. The gate deliberately ignores these —
+// a type-only import ships nothing — but the unused audit must not: tsc
+// consumes them, so the dependency is genuinely used.
+function jsTypeImportRoots(text) {
+  const roots = new Set();
+  const src = String(text || '')
+    .replace(/^[ \t]*\/\*[\s\S]*?\*\//gm, '')
+    .replace(/(^|\s)\/\/[^\n]*/g, '$1');
+  const pat = /\b(?:import|export)\s+type\b[^'"\n]*?from\s+['"]([^'"\n]+)['"]/g;
+  let m;
+  while ((m = pat.exec(src)) !== null) {
+    const root = specRoot(m[1]);
+    if (root) roots.add(root);
+  }
+  return roots;
+}
+
 // Top-level module roots imported by a chunk of JS/TS source.
 function jsImportRoots(text) {
   const roots = new Set();
@@ -120,13 +148,8 @@ function jsImportRoots(text) {
   for (const pat of pats) {
     let m;
     while ((m = pat.exec(stripped)) !== null) {
-      const spec = m[1];
-      if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('#')) continue;
-      // A node:/bun: prefix can only resolve a runtime builtin, never a package.
-      if (/^(node|bun):/.test(spec)) continue;
-      const root = spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0];
-      if (!root || NODE_BUILTINS.has(root) || NODE_BUILTINS.has(spec)) continue;
-      roots.add(root);
+      const root = specRoot(m[1]);
+      if (root) roots.add(root);
     }
   }
   return roots;
@@ -274,4 +297,4 @@ function check(data, state) {
   return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 
-module.exports = { check, jsImportRoots, pyImportRoots, newImports, isDeclared, isLocalPyModule, isTestFile, ecosystemOf, findManifest };
+module.exports = { check, jsImportRoots, jsTypeImportRoots, pyImportRoots, newImports, isDeclared, isLocalPyModule, isTestFile, ecosystemOf, findManifest };
