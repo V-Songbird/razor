@@ -4,3 +4,8 @@
 # inside the plugin root. Cleaned up on success; ignored so a failed run
 # can never leave a fixture staged.
 /disp-ws-*/
+
+# Plugin-local session state — written at run time, never published.
+.assay/
+.foreman/
+.scribe/
