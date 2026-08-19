@@ -4,6 +4,12 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## Unreleased
+
+The published benchmark tables now cover Claude Sonnet and Claude Opus.
+
+The benchmark report now writes one section per model. A run covering more than one model previously showed a single model's rows under a heading that named a different one.
+
 ## 1.3.0 — 2026-08-18
 
 The new-file check now counts production files only. A feature that ships with its tests, a migration and a config file is no longer treated as sprawl, and when the check does speak it names what the turn actually produced. Set `RAZOR_FILE_BUDGET` yourself and it goes back to counting every new file.

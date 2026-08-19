@@ -36,13 +36,16 @@ function median(xs) {
   return v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
 }
 
+// Key by model first. summary.json carries one row per task/arm/model, so a
+// flat task->arm map silently drops every model but the last one written.
 function load(runDir) {
   const rows = JSON.parse(fs.readFileSync(path.join(runDir, 'summary.json'), 'utf8'));
-  const byTask = {};
+  const byModel = {};
   for (const r of rows) {
+    const byTask = byModel[r.model] || (byModel[r.model] = {});
     (byTask[r.task] || (byTask[r.task] = {}))[r.arm] = r;
   }
-  return { rows, byTask };
+  return { rows, byModel };
 }
 
 // Median over tasks of arm_value / baseline_value (tasks where baseline > 0).
@@ -115,16 +118,32 @@ function main() {
     ? path.resolve(process.argv[2])
     : fs.readdirSync(RUNS_BASE).map((n) => path.join(RUNS_BASE, n)).sort().pop();
   if (!runDir || !fs.existsSync(runDir)) runDir = path.join(RUNS_BASE, path.basename(process.argv[2] || ''));
-  const { rows, byTask } = load(runDir);
+  const { rows, byModel } = load(runDir);
   const arms = ARM_ORDER.filter((a) => rows.some((r) => r.arm === a));
   for (const r of rows) if (!arms.includes(r.arm)) arms.push(r.arm); // any --rival-name label
-  const model = rows.length ? rows[0].model : '?';
-  const n = rows.length ? rows[0].n : 0;
   const md = [`# razor benchmark — run \`${path.basename(runDir)}\``,
-    `\nModel \`${model}\`, n=${n} per cell. Headless Claude Code sessions, one plugin per arm`
-    + ' via `--plugin-dir`, global plugins excluded. LOC = delivered code (tests excluded),'
-    + ' tokens/cost/time from the CLI\'s own usage JSON.\n'];
+    '\nHeadless Claude Code sessions, one plugin per arm via `--plugin-dir`, global plugins'
+    + ' excluded. LOC = delivered code (tests excluded), tokens/cost/time from the CLI\'s own'
+    + ' usage JSON. Each model gets its own section; rows are never pooled across models.\n',
+    '\n![charts](charts.svg)\n'];
+  const charts = [];
+  for (const model of Object.keys(byModel)) {
+    const row = rows.find((r) => r.model === model);
+    md.push(`\n# Model \`${model}\`, n=${row ? row.n : 0} per cell\n`);
+    charts.push(...renderModel(byModel[model], arms, model, row ? row.n : 0, md));
+  }
 
+  const stacked = charts.filter(Boolean);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 ${stacked.length * 320 + 20}" font-family="Segoe UI, sans-serif">`
+    + stacked.map((c, i) => `<g transform="translate(0,${i * 320})">${c}</g>`).join('')
+    + '</svg>';
+  fs.writeFileSync(path.join(runDir, 'charts.svg'), svg);
+  fs.writeFileSync(path.join(runDir, 'report.md'), md.join('\n') + '\n');
+  console.log(`wrote ${path.join(runDir, 'report.md')}, charts.svg`);
+}
+
+// One model's headline table, tier tables and three charts. Appends to `md`.
+function renderModel(byTask, arms, model, n, md) {
   // headline: % of baseline on the code-writing tiers
   const codeTasks = [];
   for (const [tier, ts] of Object.entries(TIERS)) {
@@ -193,15 +212,7 @@ function main() {
     chart3 = barChart('Injection overhead: total tokens on no-code tasks', ohTasks, arms, vals, 'tok');
   }
 
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 940" font-family="Segoe UI, sans-serif">'
-    + (chart1 ? `<g transform="translate(0,0)">${chart1}</g>` : '')
-    + (chart2 ? `<g transform="translate(0,320)">${chart2}</g>` : '')
-    + (chart3 ? `<g transform="translate(0,640)">${chart3}</g>` : '')
-    + '</svg>';
-  fs.writeFileSync(path.join(runDir, 'charts.svg'), svg);
-  md.splice(2, 0, '\n![charts](charts.svg)\n');
-  fs.writeFileSync(path.join(runDir, 'report.md'), md.join('\n') + '\n');
-  console.log(`wrote ${path.join(runDir, 'report.md')}, charts.svg`);
+  return [chart1, chart2, chart3];
 }
 
 main();

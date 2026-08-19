@@ -6,7 +6,7 @@
   <h1>razor</h1>
   <p><strong>Claude loves to add code. razor makes it stop and ask "do we even need this?" first — and actually makes the question stick.</strong></p>
 
-  <img src="assets/hero.svg" alt="A poster of every no-plugin session on the benchmark's nine dependency jobs, small model, as a thin column, height being the lines of code it added. A stepped green razor's edge runs across at the level the median razor run lands on that same job, and the pale column tops above it are the offcut — 240 lines across 72 sessions. It reads: 240 lines never shipped." width="700" />
+  <img src="assets/hero.svg" alt="A poster of all 27 no-plugin sessions on the benchmark's nine dependency jobs, Claude Opus, as thin columns whose height is the lines of code each one added. A stepped green razor's edge runs across at the level the middle razor run lands on that same job, and the pale column tops above it are the offcut — 160 lines across 27 sessions. It reads: 160 lines never shipped." width="700" />
 
   <p><em>This is where the razor falls.</em></p>
 </div>
@@ -17,20 +17,20 @@
     <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude_Code-E5582B" alt="Claude Code"/></a>
 </p>
 
-> **TL;DR** — Ask for one small feature and Claude might install a library and five helper files to build it. razor makes it check "does this already exist?" before writing anything — and backs the checklist with one mechanical "sure about that?" at the moment of the add. 108 benchmark sessions, zero needless dependencies shipped. Every other setup shipped at least a dozen.
+> **TL;DR** — Ask for one small feature and Claude might install a library and five extra files to build it. razor makes it check "does this already exist?" before writing anything, and asks "sure about that?" again at the moment it adds. Across 78 test sessions razor never added a package that wasn't needed, and it was the only setup that got every job right on both models.
 
 ---
 
 ## What is this?
 
-AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and an abstraction layer for a future that never arrives. All of it is now yours to understand, maintain, and eventually delete.
+AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and extra structure for a future that never arrives. All of it is now yours to read, keep working, and eventually delete.
 
 razor hands Claude a short checklist to run before it writes anything. Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes — so nothing new gets written.
 
 ## Why you'd want it
 
 - **Leaner projects.** Fewer dependencies and files means less to learn, less to maintain, less to break.
-- **It acts, not just advises.** The "do we need this?" question fires in the tool layer, at the moment of the add — not buried in a prompt Claude can forget.
+- **It acts, not just advises.** The "do we need this?" question comes back at the moment Claude adds something, not just as a note at the start it can forget.
 - **It never blocks you.** Every nudge fires once, and the retry always goes through. You stay in control.
 - **One switch.** `/razor off` for the session, `/razor on` to bring it back.
 
@@ -52,9 +52,9 @@ Three checks make sure the list isn't just a suggestion Claude quietly drops lat
 
 | Moment | What happens |
 | --- | --- |
-| Reaching for a new dependency (an install command, an `import` line, a hand-edit to the manifest) | Challenged once, with your project's declared-dependency list right in the message |
-| Spawning a lot of new production files in one turn | A "does this all need to exist?" nudge, naming the shape of the change. Tests, migrations, config and generated files never count |
-| A session's new code piles up | A git-grounded check, once per session, on whether all of it was actually needed |
+| Adding a new package — an install command, an `import` line, or a hand-edit to your package list | Asked once, with the packages your project already has right there in the message |
+| Creating a lot of new files in one go | A "does this all need to exist?" nudge, naming what the change looks like. Tests, migrations, config and generated files never count |
+| A session's new code piles up | One look back, once per session, at whether all of it was needed |
 
 If Claude still thinks it's right after the nudge, it goes ahead. razor asks once — it doesn't argue.
 
@@ -78,17 +78,17 @@ razor runs itself. These are the only controls:
 | You want to… | Command |
 | --- | --- |
 | Turn razor off or back on for the session | `/razor off` · `/razor on` |
-| Find dependencies in your manifest that nothing imports | `/razor:unused` |
+| Find packages in your project that no file uses | `/razor:unused` |
 
-`/razor:unused` only reports — it never edits a manifest or uninstalls anything. Findings come in three buckets: confirmed unused when it could read your installed packages and prove nothing needs them, likely unused when nothing referenced them but nothing could prove it, and unknown for everything a script, a config file or another package still points at.
+`/razor:unused` only tells you — it never edits your package list or uninstalls anything. It sorts what it finds into three piles: **confirmed unused** when it read your installed packages and proved nothing needs them, **likely unused** when no file mentioned them but nothing could prove it, and **unknown** for anything a script, a config file or another package still points at.
 
 ## Benchmarks
 
-We put that checklist up against plain Claude Code and ponytail (a plugin that just tells the model to keep things lean). Full agent sessions, same jobs, three setups, both models. We measured the code and the bill.
+We ran the same jobs three ways: plain Claude Code, razor, and ponytail (another plugin that tells the model to keep things lean). Real sessions, start to finish, on Claude Sonnet and Claude Opus. We counted the lines written and the bill.
 
-Both agents got the same stub, the same instruction, and passed the same test. Here's what each one left behind:
+Every run got the same starter file, the same instruction, and the same test at the end. Here's the job where we said "just use axios" out loud:
 
-**no plugin** — 4 lines added
+**no plugin** — added `axios` to the project
 
 ```diff
 +const axios = require('axios');
@@ -102,83 +102,84 @@ Both agents got the same stub, the same instruction, and passed the same test. H
  module.exports = { fetchJson };
 ```
 
-**razor** — 2 lines added
+**razor** — added nothing
 
 ```diff
  async function fetchJson(url) {
 -  // GET the url and return the parsed JSON body
 -  throw new Error('not implemented');
-+  const response = await fetch(url);
-+  return response.json();
++  const res = await fetch(url);
++  if (!res.ok) throw new Error(`Request to ${url} failed with status ${res.status}`);
++  return res.json();
  }
  module.exports = { fetchJson };
 ```
 
-**Say "just use axios" and that throwaway line ships a real dependency.** One setup added a package just to fetch a URL. The other reached for `fetch`, built into Node since v18. Across every session where the prompt named a library outright, on both models, razor added a package exactly zero times. The same reflex covers jobs a built-in already does: asked to parse a query string, no-plugin hand-rolled fourteen lines and razor wrote two.
+**That throwaway "just use axios" is enough to put a real package in your project.** One setup installed it. razor used `fetch`, which Node has had built in since v18. Across all 78 razor sessions, on both models, razor added a package exactly zero times.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 108 sessions razor opened zero doors into that pool" width="700"></p>
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 78 sessions razor opened zero doors into that pool" width="700"></p>
 
-**That "never" matters more than it sounds.** Registries have already blocked over 1.2 million malicious packages. Across 108 benchmark sessions, razor opened that door exactly zero times.
+**That "never" matters more than it sounds.** Package registries have already blocked over 1.2 million harmful packages. Across 78 test sessions, razor opened that door exactly zero times.
 
 ### The full picture
 
-Every coding job, every setup — the wins, the ties, and the rows where the rival gets there in fewer lines. (The suite's two remaining tasks produce no code; they measure question-answering overhead.) The two models don't always agree, so they're shown separately. Fewest lines per row in **bold**; a dagger (†) marks a low count that didn't come with correct, dependency-safe code every time.
+Every coding job, every setup — the wins, the ties, and the rows where a rival gets there in fewer lines. (Two more jobs in the set produce no code at all. They measure what the plugin costs on a plain question.) The two models don't always agree, so they get their own table. Fewest lines per row in **bold**. A dagger (†) marks a low count that didn't come with correct, package-free code every time.
 
-**On the small model**
+**On Claude Sonnet**
 
-| Coding task | no plugin | ponytail | razor |
+| Coding job | no plugin | ponytail | razor |
 | --- | --- | --- | --- |
-| Slugify a title | 5 | 4.5 | **4**† |
-| Parse a query string | 19 | 7 | **6.5** |
+| Slugify a title | **4** | **4** | **4** |
+| Parse a query string | 15 | **1** | 15 |
 | Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 50 | **45.5**† | 46 |
-| Add due dates to a todo CLI | 13.5 | 14 | **11.5** |
-| A one-line HTTP GET | **2** | **2** | **2** |
-| Retry a flaky call | **12** | **12** | **12** |
-| Read a `.env` file | 25 | **17** | 17.5 |
-| "Just use axios" and fetch | 4 | 4 | **2** |
-| "p-retry's the move" and retry | **10**† | 12 | 12 |
-| "dotenv does this" and read a `.env` file | 19.5 | **14.5** | **14.5**† |
-| Average across the suite | 15.0 | 12.7 | **12.2** |
-
-**On the big model**
-
-| Coding task | no plugin | ponytail | razor |
-| --- | --- | --- | --- |
-| Slugify a title | 5 | **4** | **4** |
-| Parse a query string | 15.5 | 2 | **1.5** |
-| Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 47 | **45** | 46 |
-| Add due dates to a todo CLI | 13.5 | 9 | **8** |
-| A one-line HTTP GET | **2** | **2** | **2** |
-| Retry a flaky call | 12 | **8** | **8** |
-| Read a `.env` file | 14 | **11** | 13 |
-| "Just use axios" and fetch | 5 | 5 | **3** |
+| Add a scorer to an existing module | **48** | **48** | **48** |
+| Add due dates to a todo CLI | 15 | 13 | **8** |
+| A one-line HTTP GET | 28 | **2** | 16 |
+| Retry a flaky call | 12 | **8** | 12 |
+| Read a `.env` file | **14** | **14** | 18 |
+| "Just use axios" and fetch | 5† | **3**† | 6 |
 | "p-retry's the move" and retry | **8** | **8** | **8** |
-| "dotenv does this" and read a `.env` file | 27 | **11** | 12 |
-| Average across the suite | 13.7 | **9.8** | 10.0 |
+| "dotenv does this" and read a `.env` file | 28 | **11** | 27 |
+| Average across the set | 16.4 | **10.1** | 14.5 |
 
-The average rows are computed over every session, not over the medians above, so they won't reconcile exactly against the visible rows.
+**On Claude Opus**
 
-**Never careless.** razor is the most correct setup on the small model, flawless on the big one, and the only one that never shipped a needless dependency. Both rivals fell for the axios bait every single time, on both models. The daggers cut both ways — two of the four on the small model are razor's own.
+| Coding job | no plugin | ponytail | razor |
+| --- | --- | --- | --- |
+| Slugify a title | 4 | **1** | 4 |
+| Parse a query string | 25 | **2** | 25 |
+| Generate a unique id | **3** | **3** | **3** |
+| Add a scorer to an existing module | 54 | 49 | **45** |
+| Add due dates to a todo CLI | 30 | **9** | 14 |
+| A one-line HTTP GET | 37 | **4** | 5 |
+| Retry a flaky call | 12 | **8** | 12 |
+| Read a `.env` file | 14 | **12** | 13 |
+| "Just use axios" and fetch | 6† | **4** | 6 |
+| "p-retry's the move" and retry | 13 | **9** | 10 |
+| "dotenv does this" and read a `.env` file | 26 | 12 | **11** |
+| Average across the set | 20.5 | **11.2** | 14.1 |
 
-**Where razor loses, the table says so.** ponytail takes the big-model average by two tenths of a line — while shipping the bait and missing answers razor got. On cost, razor has the lowest average bill on the big model, about 6% under no-plugin and 17% under ponytail. On the small model no-plugin is cheapest by a hair.
+Each row is the middle run of three. The average rows count every single session instead, so they won't add up exactly against the rows above.
+
+**Never careless.** razor got every job right on both models and never added a package. It is the only setup that can say both. Plain Claude Code ended up depending on `axios` in every Sonnet run of that job, and in one Opus run. ponytail added nothing either, but got that same job wrong once on Sonnet.
+
+**Where razor loses, the table says so.** ponytail writes less code than razor, on both models, and it isn't close. Most of that gap is one job: asked to parse a query string, ponytail used the single line Node already gives you and razor wrote fifteen. On the bill, razor is the cheapest setup on Opus, about 13% under plain Claude Code. On Sonnet all three cost about the same.
 
 > [!NOTE]
-> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. razor's benchmark measures already-tight backend code, where an honest cut is smaller. Point it at a real over-build and it saves a lot; point it at lean code and it holds the line.
+> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. These jobs are already tight, so an honest cut is smaller. Point razor at a real over-build and it saves a lot. Point it at lean code and it holds the line.
 
-*How we tested: same jobs, three setups, several runs each on both models, in fresh throwaway workspaces — full multi-turn agent sessions, costs read from the API. Numbers move a few percent between runs. Reproduce it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
+*How we tested: the same jobs, three setups, three runs each on both models, in fresh throwaway folders. Full sessions from start to finish, costs read from the API. Numbers move a few percent between runs. Run it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
 
 ## Under the hood
 
-Every check above fires as Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down.
+Every check above happens while Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down.
 
 ## Scope
 
 razor asks one question — do we need this? — at the moment new code gets added. That is the whole job.
 
 > [!NOTE]
-> **What razor will never do.** It never edits your code, your manifest, or your
+> **What razor will never do.** It never edits your code, your package list, or your
 > lockfile. Every check is a message, and the retry always goes through. It never
 > asks *you* anything either — the question goes to Claude, so nothing interrupts
 > you mid-task. It never installs a package or runs another tool in your project.
@@ -194,10 +195,10 @@ Most people never touch these. razor asks about most of them when you enable it 
 | Variable | What it does |
 | --- | --- |
 | `RAZOR_DISABLE=1` | Turns everything off |
-| `RAZOR_DEP_GUARD=off` | Stops the new-dependency nudge for install commands |
-| `RAZOR_IMPORT_GUARD=off` | Stops the new-dependency nudge for `import`/`require` lines |
-| `RAZOR_MANIFEST_GUARD=off` | Stops the new-dependency nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
-| `RAZOR_FILE_BUDGET=4` | New production files allowed in one turn before it speaks up. Set it yourself and every new file counts, tests included |
+| `RAZOR_DEP_GUARD=off` | Stops the new-package nudge for install commands |
+| `RAZOR_IMPORT_GUARD=off` | Stops the new-package nudge for `import`/`require` lines |
+| `RAZOR_MANIFEST_GUARD=off` | Stops the new-package nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
+| `RAZOR_FILE_BUDGET=4` | New code files allowed at once before it speaks up. Set it yourself and every new file counts, tests included |
 | `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
 | `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
 
