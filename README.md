@@ -29,7 +29,7 @@ razor hands Claude a short checklist to run before it writes anything. Do we nee
 
 ## Why you'd want it
 
-- **Leaner projects.** Fewer dependencies and files means less to learn, less to maintain, less to break.
+- **Leaner projects.** Fewer packages and files means less to learn, less to keep working, less to break.
 - **It acts, not just advises.** The "do we need this?" question comes back at the moment Claude adds something, not just as a note at the start it can forget.
 - **It never blocks you.** Every nudge fires once, and the retry always goes through. You stay in control.
 - **One switch.** `/razor off` for the session, `/razor on` to bring it back.

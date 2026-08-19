@@ -13,14 +13,14 @@ It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed
 ## The honest disclaimer, up front
 
 > [!WARNING]
-> This costs real money. The cheap default run is roughly **$5–8 on Sonnet** and takes a few minutes; the same run on Opus is about half again as much. The full suite costs more. Those figures are extrapolated from a two-task calibration on this machine — treat them as an order of magnitude, not a quote.
+> This costs real money. The cheap default run measured about **$3 on Sonnet** and takes a few minutes; the same run on Opus is roughly twice that. The full set — every task, three arms, three reps, both models, 234 sessions — measured **$36**. Those are real bills from this machine, not a quote; yours will differ.
 
 > [!NOTE]
 > The numbers move between runs — a handful of reps against a live model, not a powered experiment. A small sweep is a small sample; add reps for steadier numbers (`--runs 4`). A result only counts when both models agree on the direction.
 
 **What you should see:** razor landing **at or below baseline on cost and code size**, with **no new dependencies added** and every task still passing — the same *shape* as our published charts. You will **not** reproduce our exact figures, and that's expected. If razor is leaner and no pricier with correctness intact, the claim holds.
 
-A default run uses Sonnet, which is the plugin README's **big model** column — that is the row to compare against. The small-model column there was measured on an earlier, smaller model that this harness no longer targets; `--models` accepts `sonnet` and `opus`.
+A default run uses Sonnet, so the plugin README's **On Claude Sonnet** table is the one to compare against. `--models` accepts `sonnet` and `opus`, and both published tables come from a single interleaved run across the two.
 
 ## Run it
 
