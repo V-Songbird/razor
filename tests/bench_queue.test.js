@@ -11,7 +11,7 @@ const { buildQueue, makeRng, shuffled } = require('../benchmarks/runner/run.js')
 
 const ARMS = ['baseline', 'razor'];
 const TASKS = ['dep-slug', 'oh-question'];
-const MODELS = ['haiku'];
+const MODELS = ['sonnet'];
 
 describe('benchmark run order', () => {
   test('every task x model x rep x arm cell is queued exactly once', () => {

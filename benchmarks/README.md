@@ -20,7 +20,7 @@ It drives **real headless Claude Code sessions** (`claude -p`) on the same fixed
 
 **What you should see:** razor landing **at or below baseline on cost and code size**, with **no new dependencies added** and every task still passing — the same *shape* as our published charts. You will **not** reproduce our exact figures, and that's expected. If razor is leaner and no pricier with correctness intact, the claim holds.
 
-A default run uses Sonnet, which is the plugin README's **big model** column — that is the row to compare against. The small-model column there was measured on an earlier, smaller model; pass `--models haiku` if you want to check that one too.
+A default run uses Sonnet, which is the plugin README's **big model** column — that is the row to compare against. The small-model column there was measured on an earlier, smaller model that this harness no longer targets; `--models` accepts `sonnet` and `opus`.
 
 ## Run it
 
