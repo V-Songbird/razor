@@ -47,6 +47,11 @@ node runner/report.js <the-run-dir-it-printed>
 
 `run.js` prints the exact run directory when it finishes. (Runs land in your system temp dir, *outside* your project, on purpose: each cell is a real Claude session with permissions bypassed, so keeping the workspaces out of any git tree means a sandboxed run can never touch your repo. Set `RAZOR_BENCH_RUNS` to put them elsewhere.)
 
+One consequence worth knowing: razor treats anything under your system temp
+directory as scratch, so the new-file check never speaks there. A run left at
+its default location cannot exercise that check. Point `RAZOR_BENCH_RUNS`
+somewhere outside the temp directory if that is what you are testing.
+
 **4. Go bigger** (optional) — every task, more reps, or the larger model (costs more):
 
 ```bash
