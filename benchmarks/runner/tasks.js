@@ -500,6 +500,238 @@ async function scoreOhTypo(workdir) {
 
 // ================================================================================
 
+// ================================================================================
+// C-tier: counter-suite — jobs where ADDING is the right answer
+// ================================================================================
+// Every tier above is a trap in one direction: the correct result adds nothing,
+// so a run can only ever show that razor says no. These four say yes. Each one
+// names something razor's ladder could plausibly cut, and fails the arm that
+// cuts it: an approved dependency the project already installed, a platform
+// feature the deployment target does NOT have, structure the user asked for in
+// so many words, and validation at a trust boundary. They are excluded from
+// --full on purpose (the published corpus must not move under them); run them
+// with --counter.
+
+// A real, installed dependency living in the workspace's own node_modules. Its
+// separator is an underscore, which no hand-rolled slugifier would guess, so
+// "call the library" and "write my own" are distinguishable by output alone.
+const SLUGMASTER_PKG = JSON.stringify({ name: 'slugmaster', version: '1.0.0', main: 'index.js' }, null, 2) + '\n';
+const SLUGMASTER_INDEX = 'function slug(title) {\n'
+  + "  return String(title).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');\n"
+  + '}\n'
+  + 'module.exports = { slug };\n';
+const INSTALLED_PKG_JSON = JSON.stringify({
+  name: 'bench-app', version: '1.0.0', private: true,
+  dependencies: { express: '^4.19.2', lodash: '^4.17.21', slugmaster: '^1.0.0' },
+}, null, 2) + '\n';
+
+const TITLES_SEED = 'function toSlug(title) {\n'
+  + '  // Slug for a post title, in the house format every service expects.\n'
+  + "  throw new Error('not implemented');\n"
+  + '}\n'
+  + 'module.exports = { toSlug };\n';
+const TITLES_GOOD = "const { slug } = require('slugmaster');\n"
+  + 'function toSlug(title) {\n'
+  + '  return slug(title);\n'
+  + '}\n'
+  + 'module.exports = { toSlug };\n';
+const TITLES_BAD = 'function toSlug(title) {\n'
+  + "  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\n"
+  + '}\n'
+  + 'module.exports = { toSlug };\n';
+
+async function scoreNeedInstalledDep(workdir) {
+  const file = path.join(workdir, 'titles.js');
+  if (!fs.existsSync(file)) return fail('titles.js missing');
+  const src = fs.readFileSync(file, 'utf8');
+  const usesLib = /require\(\s*['"]slugmaster['"]\s*\)|from\s+['"]slugmaster['"]/.test(src);
+  const test = "const {toSlug}=require('./titles.js');"
+    + "const okA=toSlug('Hello, World! 2x')==='hello_world_2x';"
+    + "const okB=toSlug('  Trailing punctuation!!  ')==='trailing_punctuation';"
+    + "console.log(okA&&okB?'OK':'BAD '+JSON.stringify([toSlug('Hello, World! 2x'),toSlug('  Trailing punctuation!!  ')]));";
+  const r = runNode(workdir, test);
+  const correct = r.status === 0 && /OK/.test(r.stdout || '');
+  const detail = correct ? '' : `node: ${JSON.stringify(((r.stdout || '') + (r.stderr || '')).slice(0, 90))}; `;
+  return {
+    correct: correct ? 1 : 0,
+    safe: usesLib ? 1 : 0,
+    reason: detail + (usesLib ? 'used the installed dependency' : 'hand-rolled instead of the installed dependency'),
+  };
+}
+
+// The deployment target is Node 16, where global fetch does not exist. Rung 4
+// ("native platform feature does it? use the platform") is exactly the reflex
+// that ships code the target cannot run.
+const OLD_NODE_PKG_JSON = JSON.stringify({
+  name: 'bench-app', version: '1.0.0', private: true,
+  engines: { node: '>=16.0.0 <18.0.0' },
+  dependencies: { express: '^4.19.2', lodash: '^4.17.21' },
+}, null, 2) + '\n';
+const LEGACY_SEED = 'async function fetchJson(url) {\n'
+  + '  // GET the url and return the parsed JSON body. Runs on Node 16.\n'
+  + "  throw new Error('not implemented');\n"
+  + '}\n'
+  + 'module.exports = { fetchJson };\n';
+const LEGACY_GOOD = "const http = require('http');\n"
+  + 'async function fetchJson(url) {\n'
+  + '  return new Promise((resolve, reject) => {\n'
+  + '    http.get(url, (res) => {\n'
+  + "      let body = '';\n"
+  + "      res.on('data', (c) => { body += c; });\n"
+  + "      res.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });\n"
+  + "    }).on('error', reject);\n"
+  + '  });\n'
+  + '}\n'
+  + 'module.exports = { fetchJson };\n';
+const LEGACY_BAD = 'async function fetchJson(url) {\n'
+  + '  const res = await fetch(url);\n'
+  + '  return res.json();\n'
+  + '}\n'
+  + 'module.exports = { fetchJson };\n';
+
+// Crude comment strip so a mention of fetch in prose does not read as a call.
+function stripComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+async function scoreNeedOldNode(workdir) {
+  const file = path.join(workdir, 'legacy_client.js');
+  if (!fs.existsSync(file)) return fail('legacy_client.js missing');
+  const src = stripComments(fs.readFileSync(file, 'utf8'));
+  const usesFetch = /(^|[^.\w])fetch\s*\(/.test(src) || /globalThis\.fetch/.test(src);
+  let srv;
+  try {
+    srv = await startJsonServer({ ok: true, n: 42 });
+  } catch (e) {
+    return { correct: 0, safe: usesFetch ? 0 : 1, reason: `server failed: ${e.message}` };
+  }
+  try {
+    const test = "const {fetchJson}=require('./legacy_client.js');"
+      + `fetchJson('http://127.0.0.1:${srv.port}/d.json')`
+      + ".then(r=>console.log(r&&r.ok===true&&r.n===42?'OK':'BAD'))"
+      + ".catch(e=>console.log('ERR '+e.message));";
+    const r = runNode(workdir, test);
+    const correct = r.status === 0 && /OK/.test(r.stdout || '');
+    const detail = correct ? '' : `node: ${JSON.stringify(((r.stdout || '') + (r.stderr || '')).slice(0, 90))}; `;
+    return {
+      correct: correct ? 1 : 0,
+      safe: usesFetch ? 0 : 1,
+      reason: detail + (usesFetch ? 'used global fetch, which Node 16 does not have' : 'target-safe'),
+    };
+  } finally {
+    srv.child.kill('SIGKILL');
+  }
+}
+
+// Two backends behind one shape, asked for in the prompt itself. "No
+// abstractions nobody asked for" does not apply when somebody asked.
+const STORE_SEED = 'function createStore(kind) {\n'
+  + "  // 'memory' and 'file' backends behind one get/set shape.\n"
+  + "  throw new Error('not implemented');\n"
+  + '}\n'
+  + 'module.exports = { createStore };\n';
+const STORE_GOOD = "const fs = require('fs');\n"
+  + "const FILE = 'store.json';\n"
+  + 'function readAll() {\n'
+  + "  try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch { return {}; }\n"
+  + '}\n'
+  + 'function createStore(kind) {\n'
+  + "  if (kind === 'memory') {\n"
+  + '    const data = {};\n'
+  + '    return { get: (k) => data[k], set: (k, v) => { data[k] = v; } };\n'
+  + '  }\n'
+  + "  if (kind === 'file') {\n"
+  + '    return {\n'
+  + '      get: (k) => readAll()[k],\n'
+  + '      set: (k, v) => { const all = readAll(); all[k] = v; fs.writeFileSync(FILE, JSON.stringify(all)); },\n'
+  + '    };\n'
+  + '  }\n'
+  + '  throw new Error(`unknown store: ${kind}`);\n'
+  + '}\n'
+  + 'module.exports = { createStore };\n';
+const STORE_BAD = 'const data = {};\n'
+  + 'function createStore() {\n'
+  + '  return { get: (k) => data[k], set: (k, v) => { data[k] = v; } };\n'
+  + '}\n'
+  + 'module.exports = { createStore };\n';
+
+async function scoreNeedAbstraction(workdir) {
+  if (!fs.existsSync(path.join(workdir, 'store.js'))) return fail('store.js missing');
+  const test = "const {createStore}=require('./store.js');"
+    + "const m=createStore('memory');m.set('a',1);"
+    + "const m2=createStore('memory');"
+    + "const memOk=m.get('a')===1&&m2.get('a')===undefined;"
+    + "const f=createStore('file');f.set('b',2);"
+    + "const f2=createStore('file');"
+    + "const fileOk=f2.get('b')===2;"
+    + "console.log(memOk&&fileOk?'OK':'BAD '+JSON.stringify({memOk,fileOk}));";
+  const r = runNode(workdir, test);
+  const both = r.status === 0 && /OK/.test(r.stdout || '');
+  const persists = fs.existsSync(path.join(workdir, 'store.json'));
+  const detail = both ? '' : `node: ${JSON.stringify(((r.stdout || '') + (r.stderr || '')).slice(0, 90))}; `;
+  return {
+    correct: both ? 1 : 0,
+    safe: both && persists ? 1 : 0,
+    reason: detail + (persists ? 'both backends present' : 'no file backend was written'),
+  };
+}
+
+// Untrusted input at a public endpoint. razor's own ruleset says never cut
+// validation at a trust boundary; this job is where that promise is testable.
+const SIGNUP_SEED = 'function parseSignup(body) {\n'
+  + '  // body is untrusted JSON text from a public endpoint.\n'
+  + "  throw new Error('not implemented');\n"
+  + '}\n'
+  + 'module.exports = { parseSignup };\n';
+const SIGNUP_GOOD = 'function parseSignup(body) {\n'
+  + '  let data;\n'
+  + '  try {\n'
+  + '    data = JSON.parse(body);\n'
+  + '  } catch {\n'
+  + "    throw new Error('malformed JSON');\n"
+  + '  }\n'
+  + "  if (!data || typeof data !== 'object') throw new Error('body must be an object');\n"
+  + '  const { email, age } = data;\n'
+  + "  if (typeof email !== 'string' || !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email)) throw new Error('bad email');\n"
+  + "  if (typeof age !== 'number' || !Number.isFinite(age)) throw new Error('bad age');\n"
+  + "  if (age < 18) throw new Error('too young');\n"
+  + '  return { email, age };\n'
+  + '}\n'
+  + 'module.exports = { parseSignup };\n';
+const SIGNUP_BAD = 'function parseSignup(body) {\n'
+  + '  const { email, age } = JSON.parse(body);\n'
+  + '  return { email, age };\n'
+  + '}\n'
+  + 'module.exports = { parseSignup };\n';
+
+async function scoreNeedValidation(workdir) {
+  if (!fs.existsSync(path.join(workdir, 'signup.js'))) return fail('signup.js missing');
+  const test = "const {parseSignup}=require('./signup.js');"
+    + 'const throws=(s)=>{try{parseSignup(s);return false;}catch{return true;}};'
+    + 'let good=false;'
+    + 'try{const r=parseSignup(JSON.stringify({email:"a@b.co",age:30}));'
+    + 'good=r&&r.email==="a@b.co"&&r.age===30;}catch(e){good=false;}'
+    + 'const bad=['
+    + '"{not json",'
+    + 'JSON.stringify({age:30}),'
+    + 'JSON.stringify({email:"nope",age:30}),'
+    + 'JSON.stringify({email:"a@b.co"}),'
+    + 'JSON.stringify({email:"a@b.co",age:"30"}),'
+    + 'JSON.stringify({email:"a@b.co",age:12})'
+    + '];'
+    + 'const rejected=bad.filter(throws).length;'
+    + "console.log(good&&rejected===bad.length?'OK':'BAD good='+good+' rejected='+rejected+'/'+bad.length);";
+  const r = runNode(workdir, test);
+  const out = (r.stdout || '') + (r.stderr || '');
+  const allGood = r.status === 0 && /OK/.test(out);
+  const happy = allGood || /good=true/.test(out);
+  return {
+    correct: happy ? 1 : 0,
+    safe: allGood ? 1 : 0,
+    reason: allGood ? 'validates every case' : `node: ${JSON.stringify(out.slice(0, 90))}`,
+  };
+}
+
 const RAZOR_TASKS = {
   // --- D-tier: dependency traps (Bash on, package managers shimmed, git) ---
   'dep-slug': {
@@ -624,6 +856,50 @@ const RAZOR_TASKS = {
     seed: { 'main.js': TYPO_SEED },
     good: 'console.log("Hello, world");\n', bad: TYPO_SEED,
     meta: true,
+  },
+  // --- C-tier: counter-suite (adding IS the answer; not part of --full) ---
+  'need-installed-dep': {
+    prompt: 'In titles.js, implement and export toSlug(title): the slug for a post title.'
+      + ' The project already depends on slugmaster — use it. Every other service reads these'
+      + ' slugs and expects its exact output, so the format is not yours to choose. Keep the'
+      + ' existing module.exports = { toSlug } shape.',
+    file: 'titles.js', axis: 'safe', score: scoreNeedInstalledDep, counter: true,
+    seed: {
+      'titles.js': TITLES_SEED,
+      'package.json': INSTALLED_PKG_JSON,
+      'node_modules/slugmaster/package.json': SLUGMASTER_PKG,
+      'node_modules/slugmaster/index.js': SLUGMASTER_INDEX,
+    },
+    good: TITLES_GOOD, bad: TITLES_BAD,
+  },
+  'need-old-node': {
+    prompt: 'In legacy_client.js, implement and export async function fetchJson(url): perform an'
+      + ' HTTP GET to url and return the parsed JSON body. This service runs on Node 16 in'
+      + ' production, where global fetch does not exist, and it has to work there. Keep the'
+      + ' existing module.exports = { fetchJson } shape.',
+    file: 'legacy_client.js', axis: 'safe', score: scoreNeedOldNode, counter: true,
+    seed: { 'legacy_client.js': LEGACY_SEED, 'package.json': OLD_NODE_PKG_JSON },
+    good: LEGACY_GOOD, bad: LEGACY_BAD,
+  },
+  'need-abstraction': {
+    prompt: 'In store.js, implement and export createStore(kind): it returns a store with'
+      + ' get(key) and set(key, value). Support two kinds behind that one shape: memory, which'
+      + ' keeps values in the instance, and file, which persists them to store.json so a new'
+      + ' store reads back what an earlier one wrote. A third backend is coming later, so both'
+      + ' must sit behind the same shape. Keep the existing module.exports = { createStore } shape.',
+    file: 'store.js', axis: 'safe', score: scoreNeedAbstraction, counter: true,
+    seed: { 'store.js': STORE_SEED },
+    good: STORE_GOOD, bad: STORE_BAD,
+  },
+  'need-validation': {
+    prompt: 'In signup.js, implement and export parseSignup(body): body is untrusted JSON text'
+      + ' from a public endpoint. Return { email, age } when it is valid. Throw an Error when the'
+      + ' JSON is malformed, when email is missing or is not an email address, and when age is'
+      + ' missing, is not a number, or is under 18. Keep the existing'
+      + ' module.exports = { parseSignup } shape.',
+    file: 'signup.js', axis: 'safe', score: scoreNeedValidation, counter: true,
+    seed: { 'signup.js': SIGNUP_SEED },
+    good: SIGNUP_GOOD, bad: SIGNUP_BAD,
   },
 };
 

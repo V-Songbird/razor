@@ -54,9 +54,31 @@ node runner/run.js --full --runs 3      # every task, 3 reps each
 node runner/run.js --default --models opus
 ```
 
-Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--runs N` · `--models sonnet|opus` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
+Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--counter` (the other suite, below) · `--runs N` · `--models sonnet|opus` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
 
 The setups take turns in a shuffled order rather than one finishing before the next starts, so neither pays more of the cold-start cost than the other. The run prints its seed and saves it — pass `--seed` to repeat the exact same order.
+
+## The other suite: when adding is the right answer
+
+Every job in the main suite has the same shape. The best answer is to add
+nothing. That only ever shows whether razor can say no.
+
+`--counter` runs four jobs that go the other way. Each one needs something
+added, and each one names something razor could wrongly talk Claude out of:
+
+| Job | What the job needs | What would go wrong |
+| --- | --- | --- |
+| `need-installed-dep` | Use the library the project already installed | Writing it by hand, so the output stops matching |
+| `need-old-node` | Ship code that runs on Node 16 | Using `fetch`, which that version does not have |
+| `need-abstraction` | Two storage backends behind one shape, as asked | Building only one of them |
+| `need-validation` | Check untrusted input at a public endpoint | Trimming the checks away |
+
+```bash
+node runner/run.js --counter --arms baseline,razor --runs 3
+```
+
+These four are kept out of `--full` on purpose, so the published tables stay
+the published tables.
 
 ## Bring your own rival
 

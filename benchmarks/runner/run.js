@@ -19,6 +19,7 @@
 //   node runner/run.js --smoke           # 1 cheap task x each arm x 1, verifies activation
 //   node runner/run.js --default         # the default sweep (~$5-8 on sonnet)
 //   node runner/run.js --full --runs 3   # every task, more reps
+//   node runner/run.js --counter --runs 3 # the counter-suite: jobs where adding IS right
 //   node runner/run.js --task dep-slug,oh-question --arms baseline,razor --runs 2
 //   node runner/run.js --default --rival-dir /path/to/some/other/plugin
 //   node runner/run.js --full --runs 3 --seed 12345   # replay an earlier run's arm order
@@ -50,7 +51,10 @@ const MODELS = { sonnet: 'claude-sonnet-5', opus: 'claude-opus-5' };
 
 // A small default subset across the tiers so a curious run is cheap; --full runs everything.
 const DEFAULT_TASKS = ['dep-slug', 'dep-querystring', 'reuse-scan', 'sprawl-todo', 'oh-question', 'oh-typo'];
-const FULL_TASKS = Object.keys(TASKS);
+// --full is the published corpus and must keep meaning exactly that, so the
+// counter-suite (jobs where adding IS the right answer) is its own group.
+const FULL_TASKS = Object.keys(TASKS).filter((t) => !TASKS[t].counter);
+const COUNTER_TASKS = Object.keys(TASKS).filter((t) => TASKS[t].counter);
 
 // Cells run in a scratch dir OUTSIDE this repo's git tree, on purpose. A cell is
 // a real Claude session with bypassPermissions; if it sat inside your project's
@@ -317,7 +321,9 @@ function killTree(child) {
 function runCell(taskId, arm, model, ws) {
   const task = TASKS[taskId];
   for (const [fn, content] of Object.entries(task.seed || {})) {
-    fs.writeFileSync(path.join(ws, fn), content);
+    const dest = path.join(ws, fn);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.writeFileSync(dest, content);
   }
   const shimDir = task.shims ? writeShims(ws) : null;
   if (task.git) gitSnapshot(ws);
@@ -364,7 +370,9 @@ async function selftest() {
       const d = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-selftest-'));
       try {
         for (const [fn, content] of Object.entries(task.seed || {})) {
-          fs.writeFileSync(path.join(d, fn), content);
+          const dest = path.join(d, fn);
+          fs.mkdirSync(path.dirname(dest), { recursive: true });
+          fs.writeFileSync(dest, content);
         }
         fs.writeFileSync(path.join(d, task.file), task[kind]);
         const r = await task.score(d);
@@ -513,8 +521,9 @@ async function main() {
   if (has('smoke')) { taskIds = ['oh-question']; runs = 1; }
   else if (has('default')) taskIds = DEFAULT_TASKS;
   else if (has('full')) taskIds = FULL_TASKS;
+  else if (has('counter')) taskIds = COUNTER_TASKS;
   else if (flag('task', null)) taskIds = flag('task').split(',').map((t) => t.trim());
-  else { console.error('give --default, --full, --task, --smoke, or --rescore'); process.exit(1); }
+  else { console.error('give --default, --full, --counter, --task, --smoke, or --rescore'); process.exit(1); }
 
   const unknown = taskIds.filter((t) => !(t in TASKS));
   if (unknown.length) { console.error(`unknown tasks: ${unknown}`); process.exit(1); }
