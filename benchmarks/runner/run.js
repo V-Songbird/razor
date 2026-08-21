@@ -22,6 +22,7 @@
 //   node runner/run.js --counter --runs 3 # the counter-suite: jobs where adding IS right
 //   node runner/run.js --task dep-slug,oh-question --arms baseline,razor --runs 2
 //   node runner/run.js --default --rival-dir /path/to/some/other/plugin
+//   node runner/run.js --default --arm-dir cut=/path/to/a/cut-down/build --arms baseline,razor,cut
 //   node runner/run.js --full --runs 3 --seed 12345   # replay an earlier run's arm order
 //   node runner/run.js --rescore <run-dir>   # recompute metrics offline, no API
 //   node runner/report.js <run-dir>          # tables + SVG charts -> report.md
@@ -506,6 +507,15 @@ function stampNow() {
 async function main() {
   const rivalDir = flag('rival-dir', null);
   if (rivalDir) ARM_DIRS[flag('rival-name', 'rival')] = path.resolve(rivalDir);
+
+  // Repeatable --arm-dir <name>=<path>: an ablation needs several cut-down
+  // builds in ONE batch, and --rival-dir only ever names a single extra arm.
+  for (let i = 0; i < argv.length - 1; i++) {
+    if (argv[i] !== '--arm-dir') continue;
+    const eq = argv[i + 1].indexOf('=');
+    if (eq < 1) { console.error(`--arm-dir wants <name>=<path>, got ${argv[i + 1]}`); process.exit(1); }
+    ARM_DIRS[argv[i + 1].slice(0, eq)] = path.resolve(argv[i + 1].slice(eq + 1));
+  }
 
   if (has('selftest')) process.exit((await selftest()) ? 1 : 0);
   const rescoreArg = flag('rescore', null);

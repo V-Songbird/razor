@@ -86,6 +86,15 @@ Want to see how razor stacks up against some *other* plugin? Point `--rival-dir`
 
 ```bash
 node runner/run.js --default --rival-dir /path/to/other-plugin
+```
+
+One rival is the common case. To race several builds at once — say three
+cut-down copies of a plugin against the real one — name each with its own
+`--arm-dir`:
+
+```bash
+node runner/run.js --default --arms baseline,razor,cutA,cutB \
+  --arm-dir cutA=/path/to/build-a --arm-dir cutB=/path/to/build-b
 node runner/report.js <the-run-dir-it-printed>
 ```
 
