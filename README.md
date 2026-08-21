@@ -6,7 +6,7 @@
   <h1>razor</h1>
   <p><strong>Claude loves to add code. razor makes it stop and ask "do we even need this?" first — and actually makes the question stick.</strong></p>
 
-  <img src="assets/hero.svg" alt="A poster of all 27 no-plugin sessions on the benchmark's nine dependency jobs, Claude Opus, as thin columns whose height is the lines of code each one added. A stepped green razor's edge runs across at the level the middle razor run lands on that same job, and the pale column tops above it are the offcut — 160 lines across 27 sessions. It reads: 160 lines never shipped." width="700" />
+  <img src="assets/hero.svg" alt="A poster of all 27 no-plugin sessions on the benchmark's nine dependency jobs, Claude Opus, as thin columns whose height is the lines of code each one added. A stepped green razor's edge runs across at the level the middle razor run lands on that same job, and the pale column tops above it are the offcut — 176 lines across 27 sessions. It reads: 176 lines never shipped." width="700" />
 
   <p><em>This is where the razor falls.</em></p>
 </div>
@@ -17,7 +17,7 @@
     <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/Claude_Code-E5582B" alt="Claude Code"/></a>
 </p>
 
-> **TL;DR** — Ask for one small feature and Claude might install a library and five extra files to build it. razor makes it check "does this already exist?" before writing anything, and asks "sure about that?" again at the moment it adds. Across 78 test sessions razor never added a package that wasn't needed, and it was the only setup that got every job right on both models.
+> **TL;DR** — Ask for one small feature and Claude might install a library and five extra files to build it. razor makes it check "does this already exist?" before writing anything, and asks "sure about that?" again at the moment it adds. Across 78 test sessions razor never added a package that wasn't needed, got every job right on both models, and wrote the fewest lines of the three setups.
 
 ---
 
@@ -123,52 +123,52 @@ Every run got the same starter file, the same instruction, and the same test at 
 
 ### The full picture
 
-Every coding job, every setup — the wins, the ties, and the rows where a rival gets there in fewer lines. (Two more jobs in the set produce no code at all. They measure what the plugin costs on a plain question.) The two models don't always agree, so they get their own table. Fewest lines per row in **bold**. A dagger (†) marks a low count that didn't come with correct, package-free code every time.
+Every coding job, every setup — the wins and the ties. (Two more jobs in the set produce no code at all. They measure what the plugin costs on a plain question.) The two models don't always agree, so they get their own table. Fewest lines per row in **bold**. A dagger (†) marks a low count that didn't come with correct, package-free code every time.
 
 **On Claude Sonnet**
 
 | Coding job | no plugin | ponytail | razor |
 | --- | --- | --- | --- |
 | Slugify a title | **4** | **4** | **4** |
-| Parse a query string | 15 | **1** | 15 |
+| Parse a query string | 17 | 2 | **1** |
 | Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | **48** | **48** | **48** |
-| Add due dates to a todo CLI | 15 | 13 | **8** |
-| A one-line HTTP GET | 28 | **2** | 16 |
-| Retry a flaky call | 12 | **8** | 12 |
-| Read a `.env` file | **14** | **14** | 18 |
-| "Just use axios" and fetch | 5† | **3**† | 6 |
-| "p-retry's the move" and retry | **8** | **8** | **8** |
-| "dotenv does this" and read a `.env` file | 28 | **11** | 27 |
-| Average across the set | 16.4 | **10.1** | 14.5 |
+| Add a scorer to an existing module | 48 | **46** | **46** |
+| Add due dates to a todo CLI | 15 | **9** | **9** |
+| A one-line HTTP GET | 20 | 3 | **2** |
+| Retry a flaky call | 12 | **8** | **8** |
+| Read a `.env` file | 14 | 14 | **11** |
+| "Just use axios" and fetch | 5† | 4 | **3** |
+| "p-retry's the move" and retry | 12 | 10 | **8** |
+| "dotenv does this" and read a `.env` file | 27 | **12** | **12** |
+| Average across the set | 15.6 | 10.2 | **10.1** |
 
 **On Claude Opus**
 
 | Coding job | no plugin | ponytail | razor |
 | --- | --- | --- | --- |
-| Slugify a title | 4 | **1** | 4 |
-| Parse a query string | 25 | **2** | 25 |
-| Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 54 | 49 | **45** |
-| Add due dates to a todo CLI | 30 | **9** | 14 |
-| A one-line HTTP GET | 37 | **4** | 5 |
-| Retry a flaky call | 12 | **8** | 12 |
-| Read a `.env` file | 14 | **12** | 13 |
-| "Just use axios" and fetch | 6† | **4** | 6 |
-| "p-retry's the move" and retry | 13 | **9** | 10 |
-| "dotenv does this" and read a `.env` file | 26 | 12 | **11** |
-| Average across the set | 20.5 | **11.2** | 14.1 |
+| Slugify a title | 4 | 5 | **1** |
+| Parse a query string | 8 | 3 | **1** |
+| Generate a unique id | **3** | 4 | **3** |
+| Add a scorer to an existing module | 55 | 48 | **45** |
+| Add due dates to a todo CLI | 29 | 16 | **13** |
+| A one-line HTTP GET | 8 | **3** | **3** |
+| Retry a flaky call | 12 | 9 | **8** |
+| Read a `.env` file | 14 | **11** | **11** |
+| "Just use axios" and fetch | 5† | 4 | **3** |
+| "p-retry's the move" and retry | 11† | 9 | **8** |
+| "dotenv does this" and read a `.env` file | 22 | 13 | **4** |
+| Average across the set | 16.8 | 11.9 | **9.2** |
 
 Each row is the middle run of three. The average rows count every single session instead, so they won't add up exactly against the rows above.
 
-**Never careless.** razor got every job right on both models and never added a package. It is the only setup that can say both. Plain Claude Code ended up depending on `axios` in every Sonnet run of that job, and in one Opus run. ponytail added nothing either, but got that same job wrong once on Sonnet.
+**Never careless.** razor got every job right on both models, and never added a package. ponytail came out clean too. Plain Claude Code pulled in `axios` on three Sonnet runs and one Opus run, and it tried to install a retry package twice.
 
-**Where razor loses, the table says so.** ponytail writes less code than razor, on both models, and it isn't close. Most of that gap is one job: asked to parse a query string, ponytail used the single line Node already gives you and razor wrote fifteen. On the bill, razor is the cheapest setup on Opus, about 13% under plain Claude Code. On Sonnet all three cost about the same.
+**The least code, on both models.** razor writes the fewest lines on every job, or ties for it. On Opus it writes a bit over half what plain Claude Code writes. On Sonnet it and ponytail come out level. It costs the least to run, too — about 9% less than plain Claude Code on Sonnet, and about 26% less on Opus.
 
 > [!NOTE]
 > You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. These jobs are already tight, so an honest cut is smaller. Point razor at a real over-build and it saves a lot. Point it at lean code and it holds the line.
 
-*How we tested: the same jobs, three setups, three runs each on both models, in fresh throwaway folders. Full sessions from start to finish, costs read from the API. Numbers move a few percent between runs. Run it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
+*How we tested: the same jobs, three setups, three runs each on both models, in fresh throwaway folders. Full sessions from start to finish, costs read from the API. Numbers move between runs, sometimes by a lot. Run it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
 
 ## Under the hood
 

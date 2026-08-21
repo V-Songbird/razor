@@ -4,11 +4,13 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
-## Unreleased
+## 1.3.1 — 2026-08-21
+
+The numbers and charts in the README are freshly measured. razor now writes the least code of the three setups on both models, and it is the cheapest of the three to run.
 
 The published benchmark tables now cover Claude Sonnet and Claude Opus.
 
-The benchmark report now writes one section per model. A run covering more than one model previously showed a single model's rows under a heading that named a different one.
+If you run the benchmark yourself across more than one model, the report now gives each model its own table. It used to show one model's results under a heading naming another.
 
 ## 1.3.0 — 2026-08-18
 
