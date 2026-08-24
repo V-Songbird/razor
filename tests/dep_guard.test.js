@@ -6,8 +6,31 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { runHook, hookOutput, freshSession } = require('./helpers');
-const { parseInstallCommand, depKey, packageName } = require('../hooks/dep-guard');
+const { parseInstallCommand, parseInstallCommands, check, depKey, packageName } = require('../hooks/dep-guard');
 const { readState } = require('../hooks/razor-lib');
+
+// A chained command used to be checkpointed for its first install alone, and
+// the retry that cleared that one carried the rest in unexamined.
+describe('unit: every install on the line', () => {
+  const CHAINED = 'npm install axios && npm install lodash';
+
+  test('parseInstallCommands returns each install, in order', () => {
+    const hits = parseInstallCommands(CHAINED);
+    assert.deepStrictEqual(hits.map((h) => h.packages), [['axios'], ['lodash']]);
+  });
+
+  test('parseInstallCommand still answers with the first one', () => {
+    assert.deepStrictEqual(parseInstallCommand(CHAINED).packages, ['axios']);
+  });
+
+  test('each package is checkpointed once, then the command passes', () => {
+    const state = {};
+    const data = { tool_name: 'Bash', cwd: os.tmpdir(), tool_input: { command: CHAINED } };
+    assert.match(check(data, state), /axios/);
+    assert.match(check(data, state), /lodash/);
+    assert.strictEqual(check(data, state), null);
+  });
+});
 
 describe('unit: parseInstallCommand', () => {
   const adds = [

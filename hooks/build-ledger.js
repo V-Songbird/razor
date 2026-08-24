@@ -43,6 +43,18 @@ function parseShortstat(shortstat) {
 // them mid-session must not move their content onto the session's bill.
 // razor: count-level subtraction for edits to pre-existing files; per-line
 // attribution needs a full diff snapshot at session start.
+// A regenerated lockfile is thousands of insertions nobody wrote, and it lands
+// with almost no deletions -- exactly the shape shouldFire reads as sprawl.
+// The benchmark runner's own diff metric already skips these; the ledger has
+// to as well or a routine dependency update ends the session with a question
+// about code the agent never authored.
+// git reports every path with forward slashes, so the name is what is after
+// the last one.
+function isLockfile(file) {
+  const name = file.slice(file.lastIndexOf('/') + 1).toLowerCase();
+  return name.endsWith('.lock') || name.endsWith('-lock.json') || name.endsWith('-lock.yaml');
+}
+
 function diffStats(ledger, cwd) {
   const numstat = git(['diff', '--numstat', ledger.baseSha], cwd);
   if (numstat === null) return null; // base sha gone (rebase) or not a repo
@@ -51,7 +63,7 @@ function diffStats(ledger, cwd) {
   let deletions = 0;
   for (const line of numstat.split('\n')) {
     const [ins, del, file] = line.split('\t');
-    if (!file || baseNames.has(file)) continue;
+    if (!file || baseNames.has(file) || isLockfile(file)) continue;
     insertions += parseInt(ins, 10) || 0;
     deletions += parseInt(del, 10) || 0;
   }

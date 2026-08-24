@@ -86,6 +86,14 @@ describe('unit: classify', () => {
     ['.eslintrc.json', 'config'],
     ['vite.config.ts', 'config'],
     ['Dockerfile', 'config'],
+    // Content and tooling, not modules to maintain: five icons used to spend
+    // the whole production budget and deny the sixth write of the turn.
+    ['public/icons/home.svg', 'asset'],
+    ['assets/logo.png', 'asset'],
+    ['fonts/inter.woff2', 'asset'],
+    ['.gitignore', 'config'],
+    ['.editorconfig', 'config'],
+    ['.env.example', 'config'],
   ];
   for (const [file, kind] of cases) {
     test(`${file} -> ${kind}`, () => {

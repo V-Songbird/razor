@@ -6,6 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { safeWriteFileSync } = require('../hooks/lib/safe-write');
+const { gcStateFiles } = require('../hooks/razor-lib');
 
 const dirs = [];
 after(() => {
@@ -80,6 +81,57 @@ describe('safeWriteFileSync: symlink refusal', () => {
       fs.realpathSync = origRealpath;
       fs.statSync = origStat;
       if (origGetuid) process.getuid = origGetuid;
+    }
+  });
+});
+
+describe('safeWriteFileSync: an ancestor is a link too', () => {
+  // Only the final directory used to be tested for being a link, so a
+  // symlinked ANCESTOR redirected the write with nothing looking at it.
+  test('refuses a dir whose ancestor resolves outside tmpdir/home (win32 branch)', () => {
+    const dir = tmpDir();
+    const target = path.join(dir, 'a.json');
+    const outside = path.join('C:' + path.sep, 'nonexistent-outside-root', 'evil');
+    const origRealpath = fs.realpathSync;
+    const origStat = fs.statSync;
+    const origGetuid = process.getuid;
+    delete process.getuid;
+    // The dir itself is NOT a link here -- an ancestor of it is, which is what
+    // realpath resolves and lstat on the last segment never saw.
+    fs.realpathSync = (p, ...rest) => (p === dir ? outside : origRealpath(p, ...rest));
+    fs.statSync = (p, ...rest) => (p === outside ? { isDirectory: () => true } : origStat(p, ...rest));
+    try {
+      assert.throws(() => safeWriteFileSync(target, 'x'), /outside trusted roots/);
+    } finally {
+      fs.realpathSync = origRealpath;
+      fs.statSync = origStat;
+      if (origGetuid) process.getuid = origGetuid;
+    }
+  });
+});
+
+describe('gcStateFiles: abandoned scratch files', () => {
+  // safe-write's own `.razor-<id>.json.<pid>.<hex>.tmp`, left by a process
+  // killed mid-write, lives in the state directory and matched nothing the
+  // sweep looked for.
+  test('sweeps a stale temp file and leaves a fresh one', () => {
+    const dir = tmpDir();
+    const prev = process.env.CLAUDE_PLUGIN_DATA;
+    process.env.CLAUDE_PLUGIN_DATA = dir;
+    const stale = path.join(dir, '.razor-abc.json.1234.deadbeef.tmp');
+    const fresh = path.join(dir, '.razor-def.json.1234.feedface.tmp');
+    const keep = path.join(dir, 'razor-abc.json');
+    for (const f of [stale, fresh, keep]) fs.writeFileSync(f, '{}');
+    const old = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    fs.utimesSync(stale, old / 1000, old / 1000);
+    try {
+      gcStateFiles();
+      assert.strictEqual(fs.existsSync(stale), false, 'a month-old scratch file is abandoned');
+      assert.strictEqual(fs.existsSync(fresh), true, 'a fresh one may be a live write');
+      assert.strictEqual(fs.existsSync(keep), true);
+    } finally {
+      if (prev === undefined) delete process.env.CLAUDE_PLUGIN_DATA;
+      else process.env.CLAUDE_PLUGIN_DATA = prev;
     }
   });
 });

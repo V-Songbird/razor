@@ -57,7 +57,10 @@ function gcStateFiles() {
   }
   const cutoff = Date.now() - GC_AGE_MS;
   for (const name of names) {
-    if (!/^razor-.*\.json$/.test(name)) continue;
+    // safe-write's abandoned scratch files (`.razor-<id>.json.<pid>.<hex>.tmp`,
+    // left only by a process killed mid-write) live in this same directory and
+    // matched nothing here, so they were the one class the sweep never took.
+    if (!/^razor-.*\.json$/.test(name) && !/^\.razor-.*\.tmp$/.test(name)) continue;
     const file = path.join(dir, name);
     try {
       if (fs.statSync(file).mtimeMs < cutoff) fs.unlinkSync(file);

@@ -11,6 +11,20 @@ const {
 } = require('../hooks/import-guard');
 
 describe('unit: jsImportRoots', () => {
+  // `@/x` and `~/x` are the path-alias forms nearly every modern TS/JS setup
+  // points at its own source. Read as packages they became `@/components` and
+  // `~`, and razor denied ordinary internal imports as new dependencies.
+  test('path aliases are local, never packages', () => {
+    const src = [
+      "import Button from '@/components/Button';",
+      "import { db } from '~/server/db';",
+      "const cfg = require('~');",
+      "import z from '@scope/pkg';",
+      "import lodash from 'lodash';",
+    ].join('\n');
+    assert.deepStrictEqual([...jsImportRoots(src)].sort(), ['@scope/pkg', 'lodash']);
+  });
+
   test('finds require/import/export-from/dynamic-import roots', () => {
     const src = [
       "const axios = require('axios');",

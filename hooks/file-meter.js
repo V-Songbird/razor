@@ -39,6 +39,7 @@ const UNCOUNTED = {
   generated: 'generated files',
   docs: 'docs',
   config: 'config',
+  asset: 'assets',
 };
 
 function norm(p) {
@@ -75,6 +76,13 @@ function classify(filePath) {
   if (/\.(json|ya?ml|toml|ini|cfg|conf|env|properties|lock)$/.test(name)) return 'config';
   if (/^\.[^/]+rc(\.[a-z]+)?$/.test(name) || /^(dockerfile|makefile)$/.test(name)) return 'config';
   if (/\.config\.[a-z]+$/.test(name)) return 'config';
+  // A dotfile is tooling: .gitignore, .editorconfig, .env.example, .npmrc.
+  // None of them is a module someone has to maintain.
+  if (name.startsWith('.')) return 'config';
+
+  // Icons, images, fonts and media are content, not code. Five icons used to
+  // spend the whole production budget and deny the sixth write of the turn.
+  if (/\.(svg|png|jpe?g|gif|ico|webp|avif|bmp|woff2?|ttf|otf|eot|mp4|webm|mp3|wav|pdf)$/.test(name)) return 'asset';
 
   return 'production';
 }

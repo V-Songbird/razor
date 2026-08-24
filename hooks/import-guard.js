@@ -100,6 +100,14 @@ function isTestFile(filePath) {
 // (relative, absolute, subpath-imports, or a runtime builtin).
 function specRoot(spec) {
   if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('#')) return null;
+  // `@/x` and `~/x` are the path-alias forms nearly every modern TS/JS setup
+  // configures for its OWN source (tsconfig paths, Vite, Next, Remix, Nuxt).
+  // Neither can name a package: an npm scope needs a name after the `@`, and
+  // `~` is not a legal package name. Read as roots they became `@/components`
+  // and `~`, and every internal import in such a project was denied as an
+  // undeclared dependency. A missed nudge costs nothing; a false deny costs a
+  // turn, and this one fired on ordinary local code.
+  if (spec === '~' || spec.startsWith('~/') || spec.startsWith('@/')) return null;
   // A node:/bun: prefix can only resolve a runtime builtin, never a package.
   if (/^(node|bun):/.test(spec)) return null;
   const root = spec.startsWith('@') ? spec.split('/').slice(0, 2).join('/') : spec.split('/')[0];

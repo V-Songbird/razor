@@ -289,6 +289,28 @@ describe('integration: build ledger', () => {
     assert.strictEqual(hookOutput(runHook('build-ledger.js', input)), null); // fired already
   });
 
+  // A regenerated lockfile is thousands of insertions nobody wrote, landing
+  // with no deletions -- the exact shape the sprawl rule reads as sprawl.
+  test('a regenerated lockfile is not sprawl', () => {
+    const { dir, sha } = gitRepo();
+    const session = freshSession();
+    writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
+
+    fs.writeFileSync(
+      path.join(dir, 'package-lock.json'),
+      Array.from({ length: 2000 }, (_, i) => `  "dep${i}": "1.0.0",`).join('\n')
+    );
+
+    // Committed, so it lands in the tracked numstat the ledger reads. Left
+    // untracked it would only be one new file and prove nothing.
+    const g = (...args) => spawnSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: dir, encoding: 'utf-8' });
+    g('add', 'package-lock.json');
+    g('commit', '-qm', 'lock');
+
+    const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir, hook_event_name: 'Stop' }));
+    assert.strictEqual(out, null, 'a lockfile is not code the agent wrote');
+  });
+
   test('silent on a well-behaved session', () => {
     const { dir, sha } = gitRepo();
     const session = freshSession();

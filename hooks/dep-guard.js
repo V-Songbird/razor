@@ -45,6 +45,7 @@ const VALUE_FLAGS = new Set([
   '-t', '--target', '-i', '--index-url', '--extra-index-url', '-f', '--find-links',
   '-c', '--constraint', '--python', '--prefix', '--registry', '--tag',
   '-w', '--workspace', '--features', '--manifest-path',
+  '--group', '--filter', '--branch', '--rev',
 ]);
 
 // A local path or a URL is a location, not a name from a registry. Denying
@@ -142,12 +143,18 @@ function parseSegment(segment) {
 // plugins don't chain — each one gets the same original tool_input, never a
 // sibling's rewrite (verified live 2026-07-14). No unwrap step needed here.
 // Scan a whole command line (split on shell chaining) for a dependency add.
-function parseInstallCommand(command) {
+function parseInstallCommands(command) {
+  const hits = [];
   for (const segment of String(command || '').split(/&&|\|\||;|\|/)) {
     const hit = parseSegment(segment);
-    if (hit) return hit;
+    if (hit) hits.push(hit);
   }
-  return null;
+  return hits;
+}
+
+// The first install in the line. Kept for callers that want one answer.
+function parseInstallCommand(command) {
+  return parseInstallCommands(command)[0] || null;
 }
 
 // One decision per package however the spec is written: `axios`,
@@ -467,9 +474,19 @@ function check(data, state) {
   if (settingOff('DEP_GUARD')) return null;
   if (data.tool_name !== 'Bash' && data.tool_name !== 'PowerShell') return null;
 
-  const hit = parseInstallCommand(data.tool_input && data.tool_input.command);
-  if (!hit) return null;
+  // Every install on the line, not just the first. A chained command that
+  // installs two packages used to be checkpointed for the first one alone,
+  // and the retry that cleared it carried the second in unexamined -- one
+  // nudge, two dependencies. Each install now gets its own one-time
+  // checkpoint, and the first one still owing a nudge is the one that answers.
+  for (const hit of parseInstallCommands(data.tool_input && data.tool_input.command)) {
+    const reason = checkHit(hit, data, state);
+    if (reason) return reason;
+  }
+  return null;
+}
 
+function checkHit(hit, data, state) {
   const names = hit.packages.map(packageName);
   const deps = installedDeps(hit.manager, data.cwd);
   // Installing what the manifest already declares is a restore, not an
@@ -494,7 +511,7 @@ function check(data, state) {
 }
 
 module.exports = {
-  check, parseInstallCommand, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
+  check, parseInstallCommand, parseInstallCommands, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
   // The two readers scripts/unused-deps.js consumes — it reuses them so the
   // audit and the gates can never silently disagree. The other ecosystems'
   // readers stay internal; nothing outside this file has ever called them.
