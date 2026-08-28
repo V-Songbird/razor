@@ -4,6 +4,20 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.4.0 — 2026-08-28
+
+Six things razor got wrong are fixed, and the benchmark can now show you the jobs where adding code is the right answer.
+
+An import like `@/components/Button` or `~/server/db` is no longer denied as an undeclared package. If your project uses those path aliases, every internal import used to be blocked. Both now read as local, the same as `./`.
+
+Installing two packages on one command line now checks both. The second one used to ride in unexamined on the retry that cleared the first. A deny message also names the package again rather than a flag value, so `--group`, `--filter`, `--branch` and `--rev` no longer look like package names.
+
+A regenerated lockfile no longer reads as sprawl. Icons, images, fonts and dotfiles no longer count against the production file budget, so a handful of SVGs can't block the next real write.
+
+A write into a directory whose parent is a symlink is now checked against where it actually lands. razor also cleans up its own leftover scratch files, which the old sweep missed.
+
+The benchmark harness gains `--counter`: four jobs where the right move is to add code, so you can see razor's cost as well as its benefit. One batch can also race more than one extra build.
+
 ## 1.3.1 — 2026-08-21
 
 The numbers and charts in the README are freshly measured. razor now writes the least code of the three setups on both models, and it is the cheapest of the three to run.
