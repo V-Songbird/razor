@@ -4,6 +4,14 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## Unreleased
+
+razor now tells you when a session has wandered off the job it started on.
+
+Ask for something unrelated to what you opened the session with and Claude does the work, then adds one line saying the session has moved off its original task and a fresh session would keep this one focused. It says it at most once a session, never stops to ask, and never refuses. Correcting or extending what you already asked for is the same job, and gets no line.
+
+Turn it off with `RAZOR_DRIFT_NOTE=off`, or the "Scope-drift note" setting.
+
 ## 1.4.0 — 2026-08-28
 
 Six things razor got wrong are fixed, and the benchmark can now show you the jobs where adding code is the right answer.

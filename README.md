@@ -48,13 +48,14 @@ Here's the actual checklist, in order. Claude stops at the first line that fits:
 | Fits in one line? | Write one line |
 | None of the above | Write the smallest version that works |
 
-Three checks make sure the list isn't just a suggestion Claude quietly drops later:
+Four checks make sure the list isn't just a suggestion Claude quietly drops later:
 
 | Moment | What happens |
 | --- | --- |
 | Adding a new package — an install command, an `import` line, or a hand-edit to your package list | Asked once, with the packages your project already has right there in the message |
 | Creating a lot of new files in one go | A "does this all need to exist?" nudge, naming what the change looks like. Tests, migrations, config and generated files never count |
 | A session's new code piles up | One look back, once per session, at whether all of it was needed |
+| A request wanders off the job the session started on | One line saying so, at most once a session, so you know when a fresh session would help |
 
 If Claude still thinks it's right after the nudge, it goes ahead. razor asks once — it doesn't argue.
 
@@ -176,13 +177,14 @@ Every check above happens while Claude works, not just as a reminder at the star
 
 ## Scope
 
-razor asks one question — do we need this? — at the moment new code gets added. That is the whole job.
+razor asks one question — do we need this? — at the moment new code gets added. It also tells you when a session has drifted off the job it started on. That is the whole job.
 
 > [!NOTE]
 > **What razor will never do.** It never edits your code, your package list, or your
 > lockfile. Every check is a message, and the retry always goes through. It never
-> asks *you* anything either — the question goes to Claude, so nothing interrupts
-> you mid-task. It never installs a package or runs another tool in your project.
+> asks *you* anything either — every question goes to Claude, and the one line it
+> does write for you is a note, never a prompt, so nothing interrupts you
+> mid-task. It never installs a package or runs another tool in your project.
 > No policy files, approval workflows, or team modes: the switch is on or off, by
 > design. No linting, formatting, or code review — other tools do that better.
 > And nothing leaves your machine. razor makes no network calls and keeps its own
@@ -200,6 +202,7 @@ Most people never touch these. razor asks about most of them when you enable it 
 | `RAZOR_MANIFEST_GUARD=off` | Stops the new-package nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
 | `RAZOR_FILE_BUDGET=4` | New code files allowed at once before it speaks up. Set it yourself and every new file counts, tests included |
 | `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
+| `RAZOR_DRIFT_NOTE=off` | Turns off the scope-drift line |
 | `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
 
 ## License

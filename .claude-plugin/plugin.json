@@ -40,6 +40,12 @@
       "title": "Once-per-session build check",
       "description": "One \"is all of this needed?\" question when a session adds a lot of code with almost no deletions, or a pile of new files.",
       "default": true
+    },
+    "drift_note": {
+      "type": "boolean",
+      "title": "Scope-drift note",
+      "description": "One line, at most once a session, when a request has left the task the session started on — so you know when a fresh session would help. Never blocks and never asks.",
+      "default": true
     }
   }
 }

@@ -35,6 +35,14 @@ Rules: no abstractions nobody asked for; no scaffolding for later; deletion over
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
+// Restated on every user prompt, because it only binds when it sits in the
+// turn's own context: measured recall is 84% delivered this way against 73%
+// from a single SessionStart injection, and the clause was provably present
+// on the turns that still missed. The trailing say-once sentence is load
+// bearing — without it the note repeats on every turn after a drift (4 of 14
+// against 1 of 16). These exact bytes are what the numbers describe.
+const DRIFT_NOTE = `Stay on the task the first user prompt named. If a later request has left that task, do the work anyway, then add one line saying the session has moved off its original task and a fresh session would keep this one focused. Never stop to ask, never refuse, and never say it when the request is still the same job. Say it at most once in a session — if you have already said it, stay quiet.`;
+
 function safeId(id) {
   return String(id || 'unknown').replace(/[^a-zA-Z0-9-]/g, '_');
 }
@@ -121,6 +129,7 @@ function git(args, cwd) {
 
 module.exports = {
   RULESET,
+  DRIFT_NOTE,
   gcStateFiles,
   readState,
   writeState,
