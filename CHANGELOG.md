@@ -4,7 +4,7 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
-## Unreleased
+## 1.5.0 — 2026-08-28
 
 razor now tells you when a session has wandered off the job it started on.
 
