@@ -20,6 +20,7 @@
 //   node runner/run.js --default         # the default sweep (~$5-8 on sonnet)
 //   node runner/run.js --full --runs 3   # every task, more reps
 //   node runner/run.js --counter --runs 3 # the counter-suite: jobs where adding IS right
+//   node runner/run.js --note --runs 3    # the note suite: multi-turn, scores the drift line
 //   node runner/run.js --task dep-slug,oh-question --arms baseline,razor --runs 2
 //   node runner/run.js --default --rival-dir /path/to/some/other/plugin
 //   node runner/run.js --default --arm-dir cut=/path/to/a/cut-down/build --arms baseline,razor,cut
@@ -53,9 +54,11 @@ const MODELS = { sonnet: 'claude-sonnet-5', opus: 'claude-opus-5' };
 // A small default subset across the tiers so a curious run is cheap; --full runs everything.
 const DEFAULT_TASKS = ['dep-slug', 'dep-querystring', 'reuse-scan', 'sprawl-todo', 'oh-question', 'oh-typo'];
 // --full is the published corpus and must keep meaning exactly that, so the
-// counter-suite (jobs where adding IS the right answer) is its own group.
-const FULL_TASKS = Object.keys(TASKS).filter((t) => !TASKS[t].counter);
+// counter-suite (jobs where adding IS the right answer) and the note suite
+// (multi-turn, scoring a message rather than code) are each their own group.
+const FULL_TASKS = Object.keys(TASKS).filter((t) => !TASKS[t].counter && !TASKS[t].note);
 const COUNTER_TASKS = Object.keys(TASKS).filter((t) => TASKS[t].counter);
+const NOTE_TASKS = Object.keys(TASKS).filter((t) => TASKS[t].note);
 
 // Cells run in a scratch dir OUTSIDE this repo's git tree, on purpose. A cell is
 // a real Claude session with bypassPermissions; if it sat inside your project's
@@ -245,6 +248,16 @@ async function scoreCell(taskId, arm, model, ws) {
       }
     } catch { resultText = ''; }
   }
+  // _claude.json is the LAST turn's result. On a conversation that undercounts
+  // the cell by every turn before it, so bill the whole conversation.
+  const fj = path.join(ws, '_finals.json');
+  if (fs.existsSync(fj)) {
+    try {
+      const t = JSON.parse(fs.readFileSync(fj, 'utf8'));
+      meta.cost = t.reduce((s, x) => s + (x.cost || 0), 0);
+      meta.turns = t.reduce((s, x) => s + (x.turns || 0), 0);
+    } catch { /* leave the last turn's figures rather than inventing any */ }
+  }
   for (const [key, marker] of Object.entries(MARKERS)) {
     meta[key] = raw.split(marker).length - 1;
   }
@@ -319,7 +332,47 @@ function killTree(child) {
   } catch { /* already gone */ }
 }
 
-function runCell(taskId, arm, model, ws) {
+// One headless turn, appended to the cell's single stream file so marker
+// counting and extractResult keep seeing the whole conversation.
+function runTurn({ args, ws, shimDir, prompt, resume }) {
+  const turnArgs = resume ? [...args, '--resume', resume] : args;
+  return new Promise((resolve) => {
+    const child = spawnClaude(turnArgs, { cwd: ws, env: cellEnv(shimDir) });
+    const outFd = fs.createWriteStream(path.join(ws, '_claude.stream.jsonl'), { flags: 'a' });
+    const errChunks = [];
+    child.stdout.on('data', (d) => outFd.write(d));
+    child.stderr.on('data', (d) => errChunks.push(d));
+    child.stdin.write(prompt);
+    child.stdin.end();
+
+    let killed = false;
+    const killer = setTimeout(() => { killed = true; killTree(child); }, CELL_TIMEOUT_MS);
+
+    child.on('close', () => {
+      clearTimeout(killer);
+      outFd.end();
+      outFd.on('finish', () => resolve({
+        stderr: Buffer.concat(errChunks).toString('utf8')
+          + (killed ? `\n[KILLED after ${CELL_TIMEOUT_MS / 1000}s timeout]` : ''),
+      }));
+    });
+  });
+}
+
+// The last `result` event in the stream, which is the turn that just ended.
+function lastResult(ws) {
+  let result = null;
+  let raw = '';
+  try { raw = fs.readFileSync(path.join(ws, '_claude.stream.jsonl'), 'utf8'); } catch { return null; }
+  for (const line of raw.split('\n')) {
+    const t = line.trim();
+    if (!t) continue;
+    try { const ev = JSON.parse(t); if (ev.type === 'result') result = ev; } catch { /* partial */ }
+  }
+  return result;
+}
+
+async function runCell(taskId, arm, model, ws) {
   const task = TASKS[taskId];
   for (const [fn, content] of Object.entries(task.seed || {})) {
     const dest = path.join(ws, fn);
@@ -332,33 +385,29 @@ function runCell(taskId, arm, model, ws) {
   if (!CLAUDE) throw new Error('claude CLI not found on PATH');
   const args = buildArgs(task, arm, model);
 
-  return new Promise((resolve) => {
-    const outPath = path.join(ws, '_claude.stream.jsonl');
-    const errPath = path.join(ws, '_claude.stderr.txt');
-    const child = spawnClaude(args, { cwd: ws, env: cellEnv(shimDir) });
-    const outFd = fs.createWriteStream(outPath);
-    const errChunks = [];
-    child.stdout.on('data', (d) => outFd.write(d));
-    child.stderr.on('data', (d) => errChunks.push(d));
-    child.stdin.write(task.prompt);
-    child.stdin.end();
+  // Most tasks are one prompt. A task with `followups` is a conversation: the
+  // later turns resume the same session, which is the only place a behaviour
+  // that depends on what came before — the drift note — can be seen at all.
+  const prompts = [task.prompt, ...(task.followups || []).map((f) => f.prompt)];
+  const stderrs = [];
+  const turns = [];
+  let resume = null;
+  for (const prompt of prompts) {
+    const { stderr } = await runTurn({ args, ws, shimDir, prompt, resume });
+    stderrs.push(stderr);
+    const r = lastResult(ws);
+    if (!r) break; // a dead turn ends the conversation; the scorer fails the cell
+    resume = r.session_id || resume;
+    turns.push({ final: String(r.result || ''), cost: r.total_cost_usd || 0, turns: r.num_turns || 0 });
+  }
+  fs.writeFileSync(path.join(ws, '_claude.stderr.txt'), stderrs.join('\n---\n'));
+  if (prompts.length > 1) fs.writeFileSync(path.join(ws, '_finals.json'), JSON.stringify(turns, null, 2));
 
-    let killed = false;
-    const killer = setTimeout(() => { killed = true; killTree(child); }, CELL_TIMEOUT_MS);
-
-    child.on('close', () => {
-      clearTimeout(killer);
-      outFd.end();
-      let stderr = Buffer.concat(errChunks).toString('utf8');
-      if (killed) stderr += `\n[KILLED after ${CELL_TIMEOUT_MS / 1000}s timeout]`;
-      fs.writeFileSync(errPath, stderr);
-      outFd.on('finish', () => {
-        scoreCell(taskId, arm, model, ws)
-          .then(resolve)
-          .catch((e) => resolve({ task: taskId, arm, model, error: String(e).slice(0, 200) }));
-      });
-    });
-  });
+  try {
+    return await scoreCell(taskId, arm, model, ws);
+  } catch (e) {
+    return { task: taskId, arm, model, error: String(e).slice(0, 200) };
+  }
 }
 
 // --- selftest ---------------------------------------------------------------
@@ -532,8 +581,12 @@ async function main() {
   else if (has('default')) taskIds = DEFAULT_TASKS;
   else if (has('full')) taskIds = FULL_TASKS;
   else if (has('counter')) taskIds = COUNTER_TASKS;
+  else if (has('note')) taskIds = NOTE_TASKS;
   else if (flag('task', null)) taskIds = flag('task').split(',').map((t) => t.trim());
-  else { console.error('give --default, --full, --counter, --task, --smoke, or --rescore'); process.exit(1); }
+  else {
+    console.error('give --default, --full, --counter, --note, --task, --smoke, or --rescore');
+    process.exit(1);
+  }
 
   const unknown = taskIds.filter((t) => !(t in TASKS));
   if (unknown.length) { console.error(`unknown tasks: ${unknown}`); process.exit(1); }
@@ -594,6 +647,6 @@ async function main() {
   console.log(`\nnext: node runner/report.js ${outDir}`);
 }
 
-module.exports = { buildQueue, makeRng, shuffled };
+module.exports = { buildQueue, makeRng, shuffled, FULL_TASKS, COUNTER_TASKS, NOTE_TASKS };
 
 if (require.main === module) main();

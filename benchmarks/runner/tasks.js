@@ -501,6 +501,67 @@ async function scoreOhTypo(workdir) {
 // ================================================================================
 
 // ================================================================================
+// N-tier: the note suite — multi-turn, and it scores a message, not code
+// ================================================================================
+// Every other tier is one prompt, so none of them can see a behaviour that
+// depends on what came earlier. The drift note is exactly that: one line saying
+// the session has left the task its first prompt named. These two tasks share a
+// seed and a first turn and differ only in the second, so the pair measures both
+// halves at once — does it speak when it should, and stay quiet when it should
+// not. Excluded from --full (the published corpus must not move under them);
+// run them with --note.
+//
+// Both are scored from _finals.json, the per-turn final texts the runner writes
+// for any task with followups. That keeps score(workdir) unchanged and lets the
+// selftest prove the instrument from a fixture, before any spend.
+
+const NOTE_FORMATTERS_SEED = 'function money(cents) { return "$" + (cents / 100).toFixed(2); }\n'
+  + 'function percent(n) { return (n * 100).toFixed(1) + "%"; }\n'
+  + 'module.exports = { money, percent };\n';
+
+const NOTE_TURN1 = 'In formatters.js, add and export bytes(n): 1536 -> "1.5 KB", 1048576 -> "1.0 MB",'
+  + ' anything under 1024 -> "512 B". Keep the existing exports.';
+
+// Broad on purpose. A narrow pattern would score the note's exact wording rather
+// than whether the session raised drift at all, and the wording is not the claim.
+const DRIFT_RE = new RegExp([
+  'new session', 'separate session', 'fresh session', 'another session',
+  'off (the )?(original|initial)', 'left (the )?(original|initial)',
+  'outside (the |this )?(original |initial |current )?(task|scope|request)',
+  'scope of (the |this )?(original|initial|first)', 'drift(ed|ing)?',
+  'moved (on|off|away) from', 'unrelated to (the |what )',
+].join('|'), 'i');
+
+// A note that stopped to ask, or refused, is not the shipped behaviour — it is
+// the failure the "never blocks" promise rules out, so it fails `safe`.
+const BALKED_RE = /\b(should I|shall I|do you want me to|would you like me to|before I proceed|let me know if)\b/i;
+
+function readFinals(workdir) {
+  try { return JSON.parse(fs.readFileSync(path.join(workdir, '_finals.json'), 'utf8')); }
+  catch { return null; }
+}
+
+function scoreNote(workdir, expectNote) {
+  const turns = readFinals(workdir);
+  if (!Array.isArray(turns) || turns.length < 2) return fail('no _finals.json conversation');
+  const last = String(turns[turns.length - 1].final || '');
+  const noted = DRIFT_RE.test(last);
+  const earlyNote = turns.slice(0, -1).some((t) => DRIFT_RE.test(String(t.final || '')));
+  const safe = !BALKED_RE.test(last) && !earlyNote;
+  return ok(noted === expectNote, safe,
+    `noted=${noted} expected=${expectNote}${earlyNote ? ' EARLY' : ''}`);
+}
+
+const NOTE_DRIFT_GOOD = JSON.stringify([
+  { final: 'Added bytes(n) to formatters.js and exported it.' },
+  { final: 'Created csv.js with parseCsv(text).\n\nThis session has moved off its original task; a fresh session would keep this one focused.' },
+], null, 2);
+const NOTE_DRIFT_BAD = JSON.stringify([
+  { final: 'Added bytes(n) to formatters.js and exported it.' },
+  { final: 'Created csv.js with parseCsv(text), exported as requested.' },
+], null, 2);
+
+// ================================================================================
 // C-tier: counter-suite — jobs where ADDING is the right answer
 // ================================================================================
 // Every tier above is a trap in one direction: the correct result adds nothing,
@@ -900,6 +961,30 @@ const RAZOR_TASKS = {
     file: 'signup.js', axis: 'safe', score: scoreNeedValidation, counter: true,
     seed: { 'signup.js': SIGNUP_SEED },
     good: SIGNUP_GOOD, bad: SIGNUP_BAD,
+  },
+  // --- N-tier: the note suite (multi-turn; not part of --full) ---
+  'note-drift': {
+    prompt: NOTE_TURN1,
+    followups: [{
+      prompt: 'Now something else entirely: in csv.js, implement and export parseCsv(text) —'
+        + ' the first line is the header row, every later line is a record, and it returns an'
+        + ' array of objects keyed by the header names. Comma separated, no quoting to handle.',
+    }],
+    file: '_finals.json', axis: 'correct', score: (ws) => scoreNote(ws, true), note: true, meta: true,
+    seed: { 'formatters.js': NOTE_FORMATTERS_SEED, 'package.json': PKG_JSON_SEED },
+    good: NOTE_DRIFT_GOOD, bad: NOTE_DRIFT_BAD,
+  },
+  // The false-alarm instrument: turn 2 corrects turn 1's own spec. It looks like
+  // a change of direction and is the same job, so a note here is noise.
+  'note-steady': {
+    prompt: NOTE_TURN1,
+    followups: [{
+      prompt: 'I gave you the wrong spec for bytes — it should divide by 1000, not 1024, and the'
+        + ' units are kB and MB, lower-case k. Fix it, and add TB while you are in there.',
+    }],
+    file: '_finals.json', axis: 'correct', score: (ws) => scoreNote(ws, false), note: true, meta: true,
+    seed: { 'formatters.js': NOTE_FORMATTERS_SEED, 'package.json': PKG_JSON_SEED },
+    good: NOTE_DRIFT_BAD, bad: NOTE_DRIFT_GOOD,
   },
 };
 

@@ -59,7 +59,7 @@ node runner/run.js --full --runs 3      # every task, 3 reps each
 node runner/run.js --default --models opus
 ```
 
-Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--counter` (the other suite, below) · `--runs N` · `--models sonnet|opus` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
+Flags: `--task a,b` (pick tasks) · `--arms baseline,razor` · `--full` (whole suite) · `--counter` (the other suite, below) · `--note` (the note suite, below) · `--runs N` · `--models sonnet|opus` · `--workers N` · `--seed N` (replay an earlier run's arm order) · `--rescore <run-dir>` (recompute metrics offline, no API) · `RAZOR_DIR` (override the razor plugin location).
 
 The setups take turns in a shuffled order rather than one finishing before the next starts, so neither pays more of the cold-start cost than the other. The run prints its seed and saves it — pass `--seed` to repeat the exact same order.
 
@@ -84,6 +84,31 @@ node runner/run.js --counter --arms baseline,razor --runs 3
 
 These four are kept out of `--full` on purpose, so the published tables stay
 the published tables.
+
+## The note suite: when the session has wandered off
+
+Every job above is a single request. That can never show a behaviour which
+depends on what you asked for earlier, and razor has one: the line it adds when
+a request has left the task the session started on.
+
+`--note` runs two conversations. Both open the same way, and differ only in
+what you ask for second:
+
+| Job | The second request | What should happen |
+| --- | --- | --- |
+| `note-drift` | Something unrelated, in a new file | The work gets done, and a line says the session has moved off its original task |
+| `note-steady` | The first request's own spec was wrong, fix it | The work gets done and nothing is said — it is the same job |
+
+`note-steady` is the one that matters. A warning there is a false alarm, and a
+setup that cries wolf on ordinary corrections is worse than one that says
+nothing at all.
+
+```bash
+node runner/run.js --note --arms baseline,razor --runs 3
+```
+
+These two are kept out of `--full` as well. They score a message rather than
+code, so every code column reads zero for them by design.
 
 ## Bring your own rival
 

@@ -12,6 +12,10 @@ Ask for something unrelated to what you opened the session with and Claude does 
 
 Turn it off with `RAZOR_DRIFT_NOTE=off`, or the "Scope-drift note" setting.
 
+The benchmark harness can measure that line for you. `--note` runs two
+conversations: one where the second request really has left the job, and one
+where it only looks like it has. Both check that the work still gets done.
+
 ## 1.4.0 — 2026-08-28
 
 Six things razor got wrong are fixed, and the benchmark can now show you the jobs where adding code is the right answer.

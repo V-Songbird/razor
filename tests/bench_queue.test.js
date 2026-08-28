@@ -7,7 +7,10 @@
 
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
-const { buildQueue, makeRng, shuffled } = require('../benchmarks/runner/run.js');
+const {
+  buildQueue, makeRng, shuffled, FULL_TASKS, COUNTER_TASKS, NOTE_TASKS,
+} = require('../benchmarks/runner/run.js');
+const { RAZOR_TASKS } = require('../benchmarks/runner/tasks.js');
 
 const ARMS = ['baseline', 'razor'];
 const TASKS = ['dep-slug', 'oh-question'];
@@ -62,5 +65,36 @@ describe('benchmark run order', () => {
     const draws = Array.from({ length: 8 }, () => rng());
     assert.ok(draws.every((d) => d >= 0 && d < 1), JSON.stringify(draws));
     assert.ok(new Set(draws).size > 1, 'rng returned the same value every time');
+  });
+});
+
+// The note suite is multi-turn and scores a message rather than code. It must
+// stay out of --full for the same reason the counter-suite does: the published
+// corpus has to keep meaning exactly what it meant when the numbers were taken.
+describe('the note suite is its own group', () => {
+  test('--full excludes both the counter-suite and the note suite', () => {
+    for (const id of [...COUNTER_TASKS, ...NOTE_TASKS]) {
+      assert.ok(!FULL_TASKS.includes(id), `${id} leaked into --full`);
+    }
+    assert.ok(FULL_TASKS.length > 0);
+  });
+
+  test('the two groups do not overlap, and the note suite is not empty', () => {
+    assert.ok(NOTE_TASKS.length >= 2, 'a drift task and a false-alarm task');
+    for (const id of NOTE_TASKS) assert.ok(!COUNTER_TASKS.includes(id), id);
+  });
+
+  test('every note task is a conversation — a single prompt cannot show drift', () => {
+    for (const id of NOTE_TASKS) {
+      assert.ok(Array.isArray(RAZOR_TASKS[id].followups), `${id} has no followups`);
+      assert.ok(RAZOR_TASKS[id].followups.length >= 1, id);
+    }
+  });
+
+  test('no task outside the note suite carries followups', () => {
+    for (const [id, task] of Object.entries(RAZOR_TASKS)) {
+      if (NOTE_TASKS.includes(id)) continue;
+      assert.strictEqual(task.followups, undefined, `${id} would silently run extra turns`);
+    }
   });
 });
