@@ -1,4 +1,10 @@
+# docs/ is local working notes by default. The pages the README links to are
+# published, so each one is named here explicitly — a new file under docs/ is
+# private until someone adds it to this list on purpose.
 /docs/*
+!/docs/HOW-IT-WORKS.md
+!/docs/SETTINGS.md
+!/docs/BENCHMARKS.md
 
 # Crash residue from tests/dispatcher.test.js, which needs a workspace
 # inside the plugin root. Cleaned up on success; ignored so a failed run

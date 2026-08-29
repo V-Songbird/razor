@@ -20,52 +20,87 @@
 <p align="center">
     <a href="#install"><strong>Install</strong></a> &nbsp;·&nbsp;
     <a href="#what-is-this">What is this?</a> &nbsp;·&nbsp;
-    <a href="#what-you-can-do">What you can do</a> &nbsp;·&nbsp;
-    <a href="#benchmarks">Benchmarks</a> &nbsp;·&nbsp;
-    <a href="#settings">Settings</a>
+    <a href="#why-youd-want-it">Why you'd want it</a> &nbsp;·&nbsp;
+    <a href="#the-numbers">The numbers</a> &nbsp;·&nbsp;
+    <a href="#going-deeper">Going deeper</a>
 </p>
 
-> **TL;DR** — Ask for one small feature and Claude might install a library and five extra files to build it. razor makes it check "does this already exist?" before writing anything, and asks "sure about that?" again at the moment it adds. Across 78 test sessions razor never added a package that wasn't needed, got every job right on both models, and wrote the fewest lines of the three setups.
+> **TL;DR** — Ask for one small feature and Claude might install a library and five extra files to build it. razor makes it check "do we already have this?" before writing anything. Across 258 test sessions it never once added a package that wasn't needed, and it got every job right.
 
 ---
 
 ## What is this?
 
-AI assistants love to add things. Ask for one small feature and you might get a new library, five helper files, and extra structure for a future that never arrives. All of it is now yours to read, keep working, and eventually delete.
+AI assistants love to add things.
 
-razor hands Claude a short checklist to run before it writes anything. Do we need this at all? Is it already in the codebase? Does the language do it for free? Most of the time, one line on that list says yes — so nothing new gets written.
+You ask for one small feature. You get a new library, five helper files, and
+some extra structure for a future that never arrives. It all works. It is also
+now yours — yours to read, yours to keep running, yours to eventually delete.
+
+Nobody decided that. It just accumulated, one reasonable-looking step at a time.
+
+razor hands Claude a short checklist to run before it writes anything. Do we
+need this at all? Is it already in the codebase? Does the language do it for
+free? Most of the time one line on that list says yes, so nothing new gets
+written.
+
+That's it. That's the whole plugin.
 
 ## Why you'd want it
 
-- **Leaner projects.** Fewer packages and files means less to learn, less to keep working, less to break.
-- **It acts, not just advises.** The "do we need this?" question comes back at the moment Claude adds something, not just as a note at the start it can forget.
-- **It never blocks you.** Every nudge fires once, and the retry always goes through. You stay in control.
-- **One switch.** `/razor off` for the session, `/razor on` to bring it back.
+Here's a real one. The instruction was *"just use axios"* — the kind of thing
+you say without thinking. The project does not have axios installed.
+
+**Without razor** — it took the throwaway line literally:
+
+```diff
++const axios = require('axios');
++
+ async function fetchJson(url) {
+-  // GET the url and return the parsed JSON body
+-  throw new Error('not implemented');
++  const response = await axios.get(url);
++  return response.data;
+ }
+```
+
+**With razor** — it used `fetch`, which has been built into Node since v18:
+
+```diff
+ async function fetchJson(url) {
+-  // GET the url and return the parsed JSON body
+-  throw new Error('not implemented');
++  const res = await fetch(url);
++  return res.json();
+ }
+```
+
+On that job with Claude Sonnet, plain Claude Code got it wrong **six times out
+of six** — the code it wrote wouldn't even load. razor got it right six times
+out of six.
+
+**One throwaway phrase is enough to put a package in your project.** That's
+what razor is for.
+
+<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 258 sessions razor opened zero doors into that pool" width="700"></p>
+
+Every package you add is a door you now maintain. Package registries have
+already blocked over 1.2 million harmful ones. Across 258 test sessions, razor
+opened that door exactly zero times.
 
 ## How it works
 
-Here's the actual checklist, in order. Claude stops at the first line that fits:
+At the start of every session, Claude gets a short list to run before it writes
+anything — need it at all, already have it, does the language cover it. It
+stops at the first line that applies.
 
-| Ask | Then |
-| --- | --- |
-| Does this need to exist at all? | Skip it |
-| Already in this codebase? | Reuse it |
-| Does the standard library do it? | Use it |
-| Does the platform do it? | Use it |
-| Already installed? | Use it |
-| Fits in one line? | Write one line |
-| None of the above | Write the smallest version that works |
+A few checks sit behind the list, in case Claude gets partway into adding
+something anyway. Each one speaks **once**, and the retry always goes through.
+razor asks; it doesn't argue.
 
-Four checks make sure the list isn't just a suggestion Claude quietly drops later:
-
-| Moment | What happens |
-| --- | --- |
-| Adding a new package — an install command, an `import` line, or a hand-edit to your package list | Asked once, with the packages your project already has right there in the message |
-| Creating a lot of new files in one go | A "does this all need to exist?" nudge, naming what the change looks like. Tests, migrations, config and generated files never count |
-| A session's new code piles up | One look back, once per session, at whether all of it was needed |
-| A request wanders off the job the session started on | One line saying so, at most once a session, so you know when a fresh session would help |
-
-If Claude still thinks it's right after the nudge, it goes ahead. razor asks once — it doesn't argue.
+Three things it never trims: input checks on untrusted data, error handling
+that would lose your work, and security. Ask for the full version and you get
+it, no debate.
 
 ## Install
 
@@ -89,129 +124,95 @@ razor runs itself. These are the only controls:
 | Turn razor off or back on for the session | `/razor off` · `/razor on` |
 | Find packages in your project that no file uses | `/razor:unused` |
 
-`/razor:unused` only tells you — it never edits your package list or uninstalls anything. It sorts what it finds into three piles: **confirmed unused** when it read your installed packages and proved nothing needs them, **likely unused** when no file mentioned them but nothing could prove it, and **unknown** for anything a script, a config file or another package still points at.
+Everything else has a sensible default. If you want to change one, see
+[Settings](docs/SETTINGS.md).
 
-## Benchmarks
+## Finding packages nobody uses
 
-We ran the same jobs three ways: plain Claude Code, razor, and ponytail (another plugin that tells the model to keep things lean). Real sessions, start to finish, on Claude Sonnet and Claude Opus. We counted the lines written and the bill.
+`/razor:unused` is the other half of the job. The checks above stop **new**
+packages getting in; this one finds the ones already sitting in your project
+that no file actually imports.
 
-Every run got the same starter file, the same instruction, and the same test at the end. Here's the job where we said "just use axios" out loud:
+It sorts what it finds into three piles, and it is careful about the
+difference:
 
-**no plugin** — added `axios` to the project
+- **confirmed unused** — it checked properly and found nothing needs this.
+- **likely unused** — nothing mentions it, but nothing could prove it either.
+  A lead, not a verdict.
+- **unknown** — something still points at it. Usually build tooling.
 
-```diff
-+const axios = require('axios');
-+
- async function fetchJson(url) {
--  // GET the url and return the parsed JSON body
--  throw new Error('not implemented');
-+  const response = await axios.get(url);
-+  return response.data;
- }
- module.exports = { fetchJson };
-```
+It only tells you. It never edits your package list and never uninstalls
+anything. What to remove stays your call.
 
-**razor** — added nothing
+## The numbers
 
-```diff
- async function fetchJson(url) {
--  // GET the url and return the parsed JSON body
--  throw new Error('not implemented');
-+  const res = await fetch(url);
-+  if (!res.ok) throw new Error(`Request to ${url} failed with status ${res.status}`);
-+  return res.json();
- }
- module.exports = { fetchJson };
-```
+Real Claude Code sessions, start to finish, on Claude Sonnet and Claude Opus.
+Same job, same starter files, same test at the end. The code gets **run** — a
+short answer that breaks the task counts as a failure, not a win.
 
-**That throwaway "just use axios" is enough to put a real package in your project.** One setup installed it. razor used `fetch`, which Node has had built in since v18. Across all 78 razor sessions, on both models, razor added a package exactly zero times.
+**Does it still work?** A session counts as clean only if the code is correct
+*and* no package was added.
 
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 78 sessions razor opened zero doors into that pool" width="700"></p>
-
-**That "never" matters more than it sounds.** Package registries have already blocked over 1.2 million harmful packages. Across 78 test sessions, razor opened that door exactly zero times.
-
-### The full picture
-
-Every coding job, every setup — the wins and the ties. (Two more jobs in the set produce no code at all. They measure what the plugin costs on a plain question.) The two models don't always agree, so they get their own table. Fewest lines per row in **bold**. A dagger (†) marks a low count that didn't come with correct, package-free code every time.
-
-**On Claude Sonnet**
-
-| Coding job | no plugin | ponytail | razor |
-| --- | --- | --- | --- |
-| Slugify a title | **4** | **4** | **4** |
-| Parse a query string | 17 | 2 | **1** |
-| Generate a unique id | **3** | **3** | **3** |
-| Add a scorer to an existing module | 48 | **46** | **46** |
-| Add due dates to a todo CLI | 15 | **9** | **9** |
-| A one-line HTTP GET | 20 | 3 | **2** |
-| Retry a flaky call | 12 | **8** | **8** |
-| Read a `.env` file | 14 | 14 | **11** |
-| "Just use axios" and fetch | 5† | 4 | **3** |
-| "p-retry's the move" and retry | 12 | 10 | **8** |
-| "dotenv does this" and read a `.env` file | 27 | **12** | **12** |
-| Average across the set | 15.6 | 10.2 | **10.1** |
-
-**On Claude Opus**
-
-| Coding job | no plugin | ponytail | razor |
-| --- | --- | --- | --- |
-| Slugify a title | 4 | 5 | **1** |
-| Parse a query string | 8 | 3 | **1** |
-| Generate a unique id | **3** | 4 | **3** |
-| Add a scorer to an existing module | 55 | 48 | **45** |
-| Add due dates to a todo CLI | 29 | 16 | **13** |
-| A one-line HTTP GET | 8 | **3** | **3** |
-| Retry a flaky call | 12 | 9 | **8** |
-| Read a `.env` file | 14 | **11** | **11** |
-| "Just use axios" and fetch | 5† | 4 | **3** |
-| "p-retry's the move" and retry | 11† | 9 | **8** |
-| "dotenv does this" and read a `.env` file | 22 | 13 | **4** |
-| Average across the set | 16.8 | 11.9 | **9.2** |
-
-Each row is the middle run of three. The average rows count every single session instead, so they won't add up exactly against the rows above.
-
-**Never careless.** razor got every job right on both models, and never added a package. ponytail came out clean too. Plain Claude Code pulled in `axios` on three Sonnet runs and one Opus run, and it tried to install a retry package twice.
-
-**The least code, on both models.** razor writes the fewest lines on every job, or ties for it. On Opus it writes a bit over half what plain Claude Code writes. On Sonnet it and ponytail come out level. It costs the least to run, too — about 9% less than plain Claude Code on Sonnet, and about 26% less on Opus.
-
-> [!NOTE]
-> You'll see lean-code tools headline much bigger cuts — 50%, even 90%. Those come from jobs with a lot to trim. These jobs are already tight, so an honest cut is smaller. Point razor at a real over-build and it saves a lot. Point it at lean code and it holds the line.
-
-*How we tested: the same jobs, three setups, three runs each on both models, in fresh throwaway folders. Full sessions from start to finish, costs read from the API. Numbers move between runs, sometimes by a lot. Run it yourself — see [benchmarks/](benchmarks/); `--rival-dir` adds any third plugin you point it at.*
-
-## Under the hood
-
-Every check above happens while Claude works, not just as a reminder at the start — read the plugin's files if you want the exact triggers. Pairs naturally with [hush](https://github.com/V-Songbird/hush): razor keeps the code lean, hush keeps the noise down.
-
-## Scope
-
-razor asks one question — do we need this? — at the moment new code gets added. It also tells you when a session has drifted off the job it started on. That is the whole job.
-
-> [!NOTE]
-> **What razor will never do.** It never edits your code, your package list, or your
-> lockfile. Every check is a message, and the retry always goes through. It never
-> asks *you* anything either — every question goes to Claude, and the one line it
-> does write for you is a note, never a prompt, so nothing interrupts you
-> mid-task. It never installs a package or runs another tool in your project.
-> No policy files, approval workflows, or team modes: the switch is on or off, by
-> design. No linting, formatting, or code review — other tools do that better.
-> And nothing leaves your machine. razor makes no network calls and keeps its own
-> small state file in a temp folder.
-
-## Settings
-
-Most people never touch these. razor asks about most of them when you enable it — the environment variables below do the same thing, and take precedence when set:
-
-| Variable | What it does |
+| setup | clean sessions |
 | --- | --- |
-| `RAZOR_DISABLE=1` | Turns everything off |
-| `RAZOR_DEP_GUARD=off` | Stops the new-package nudge for install commands |
-| `RAZOR_IMPORT_GUARD=off` | Stops the new-package nudge for `import`/`require` lines |
-| `RAZOR_MANIFEST_GUARD=off` | Stops the new-package nudge for direct edits to `package.json`/`requirements.txt`/`pyproject.toml` |
-| `RAZOR_FILE_BUDGET=4` | New code files allowed at once before it speaks up. Set it yourself and every new file counts, tests included |
-| `RAZOR_LEDGER=off` | Turns off the once-per-session "is all this needed?" check |
-| `RAZOR_DRIFT_NOTE=off` | Turns off the scope-drift line |
-| `RAZOR_LEDGER_LOC=500` · `RAZOR_LEDGER_FILES=8` | How much net growth that check tolerates first |
+| no plugin | 146 / 156 |
+| **razor** | **156 / 156** |
+
+**How much code?** Lines written for the same job, on Claude Opus:
+
+| setup | lines |
+| --- | --- |
+| no plugin | 18.7 |
+| **razor** | **11.6** |
+
+**And over a whole session?** This is the one that surprised us. Five requests
+in a row on the same project — build a feature, build another, fix a bug in the
+second one, build two more. Total lines in the project after each turn, on
+Claude Opus:
+
+| after turn | no plugin | razor |
+| --- | --- | --- |
+| 1 | 57 | **29** |
+| 3 | 100 | **43** |
+| 5 | **136** | **58** |
+
+The gap **grows** as the session goes on. And nothing broke: every feature
+passed in both setups, every time.
+
+> [!IMPORTANT]
+> **Where razor doesn't win.** It does not make code easier to *read* — we
+> tested that with blind side-by-side comparisons and razor lost. The savings
+> are also clearly smaller on Sonnet than on Opus, and the cost saving on
+> Sonnet doesn't reproduce reliably between runs. The full picture, wins and
+> losses, is in [the numbers](docs/BENCHMARKS.md).
+
+*Numbers move between runs, sometimes by a lot. Run it yourself — see [benchmarks/](benchmarks/).*
+
+## Going deeper
+
+Everything technical lives here, so this page can stay short:
+
+| | |
+| --- | --- |
+| [How razor works](docs/HOW-IT-WORKS.md) | The checklist, the checks behind it, what runs and when |
+| [Settings](docs/SETTINGS.md) | Every switch and number, and what each one does |
+| [The numbers](docs/BENCHMARKS.md) | Full results, including where razor loses |
+| [Run the benchmarks](benchmarks/) | The harness, so you can check any of it yourself |
+
+## Good to know
+
+> [!NOTE]
+> **What razor will never do.** It never edits your code, your package list, or
+> your lockfile — every check is a message to Claude, and the retry always goes
+> through. It never asks *you* anything either; every question goes to Claude,
+> and the one line it writes for you is a note, not a prompt. It never installs
+> anything. No policy files, approval workflows, or team modes: the switch is on
+> or off, by design. No linting, formatting, or code review — other tools do
+> that better. And nothing leaves your machine: razor makes no network calls. It
+> reads your git history a few times a session to notice when a session has
+> grown a lot, and it never writes to it.
+
+razor is built for Claude Code, and only Claude Code.
 
 ## License
 
