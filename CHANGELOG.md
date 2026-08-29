@@ -4,6 +4,19 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.1 — 2026-08-29
+
+Packages listed under `optionalDependencies` or `peerDependencies` now count as
+part of your project. Importing one used to be stopped as though it were a brand
+new dependency, and the message listing what you had already declared left that
+package out. `/razor:unused` skipped both sections too, so it could report a
+verdict on a manifest it had only half read.
+
+The front page is rewritten to answer what razor is and why you'd want it,
+nothing else. Hooks, settings and the full benchmark numbers moved to
+[How it works](docs/HOW-IT-WORKS.md), [Settings](docs/SETTINGS.md) and
+[The numbers](docs/BENCHMARKS.md).
+
 ## 1.5.0 — 2026-08-28
 
 razor now tells you when a session has wandered off the job it started on.
