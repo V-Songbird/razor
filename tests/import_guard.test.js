@@ -227,6 +227,30 @@ describe('integration: import gate', () => {
     assert.match(deny.hookSpecificOutput.permissionDecisionReason, /adds a new python dependency/);
   });
 
+  // Regression: a package declared only in optionalDependencies was denied as
+  // a new dependency, and the deny's own evidence list left it out.
+  test('an optional-only dependency imports freely and shows up as evidence', () => {
+    const ws = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-igopt-'));
+    fs.writeFileSync(path.join(ws, 'package.json'), JSON.stringify({
+      name: 'ws', version: '1.0.0',
+      dependencies: { express: '^4.19.2' },
+      optionalDependencies: { sharp: '^0.33.4' },
+    }));
+    const optional = input(freshSession(), 'Write', {
+      file_path: path.join(ws, 'thumb.js'),
+      content: "const sharp = require('sharp');\nmodule.exports = sharp;\n",
+    });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', optional)), null);
+
+    const undeclared = input(freshSession(), 'Write', {
+      file_path: path.join(ws, 'thumb.js'),
+      content: "const axios = require('axios');\nmodule.exports = axios;\n",
+    });
+    const deny = hookOutput(runHook('pre-tool-use.js', undeclared));
+    assert.strictEqual(deny.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(deny.hookSpecificOutput.permissionDecisionReason, /Already declared \(2\): express, sharp/);
+  });
+
   test("python: the project's own package is local, not a dependency", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-igloc-'));
     fs.writeFileSync(path.join(dir, 'requirements.txt'), 'requests==2.31\n');

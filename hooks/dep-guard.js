@@ -206,12 +206,23 @@ function specName(spec) {
   return spec.split(/[<>=!~;\[\s@(]/)[0].trim();
 }
 
+// Every section that names a package declares it. Optional and peer entries
+// are in the manifest exactly as much as a plain dependency is, so leaving
+// them out denied ordinary imports as new dependencies and printed an
+// "Already declared" list that omitted the very package being imported. The
+// python reader has always counted [project.optional-dependencies]; this is
+// the same rule.
 function readNodeDeps(dir) {
   const text = readText(path.join(dir, 'package.json'));
   if (text === null) return null;
   try {
     const pkg = JSON.parse(text);
-    return Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+    return Object.keys({
+      ...pkg.dependencies,
+      ...pkg.devDependencies,
+      ...pkg.optionalDependencies,
+      ...pkg.peerDependencies,
+    });
   } catch {
     return null;
   }

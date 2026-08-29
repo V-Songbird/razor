@@ -37,6 +37,15 @@ describe('unit: dependency-name extraction', () => {
     assert.deepStrictEqual([...names].sort(), ['express', 'jest']);
   });
 
+  test('package.json: optional and peer sections count, lowercased', () => {
+    const names = jsonDepNames(JSON.stringify({
+      dependencies: { express: '^4' },
+      optionalDependencies: { Sharp: '^0.33' },
+      peerDependencies: { react: '^18' },
+    }));
+    assert.deepStrictEqual([...names].sort(), ['express', 'react', 'sharp']);
+  });
+
   test('unparseable JSON yields null, not an empty set', () => {
     assert.strictEqual(jsonDepNames('{ not json'), null);
   });

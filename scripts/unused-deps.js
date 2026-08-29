@@ -107,12 +107,25 @@ function packageJsonScripts(projectDir) {
   return pkg ? Object.values(pkg.scripts || {}).join('\n') : '';
 }
 
-// devDependencies alone (readNodeDeps merges deps+devDeps, losing the
-// distinction this classification needs). Audit-specific read, kept local —
-// dep-guard's manifest reader stays untouched.
+// devDependencies alone (readNodeDeps merges every dependency section, losing
+// the distinction this classification needs). Audit-specific read, kept local
+// — dep-guard's manifest reader stays untouched.
 function packageJsonDevDeps(projectDir) {
   const pkg = readJson(path.join(projectDir, 'package.json'));
   return new Set(Object.keys((pkg && pkg.devDependencies) || {}));
+}
+
+// Packages declared ONLY as peers. A peer requirement is a contract with
+// whoever installs this package, not weight this project carries: the normal
+// case is that no local file imports it, so auditing one for deadness would
+// manufacture false positives. Declared in another section too? Then it is a
+// real dependency here and gets audited like any other.
+function packageJsonPeerOnlyDeps(projectDir) {
+  const pkg = readJson(path.join(projectDir, 'package.json')) || {};
+  const carried = new Set(
+    Object.keys({ ...pkg.dependencies, ...pkg.devDependencies, ...pkg.optionalDependencies })
+  );
+  return new Set(Object.keys(pkg.peerDependencies || {}).filter((n) => !carried.has(n)));
 }
 
 // TypeScript toolchain deps are consumed by tsc/build, never imported by
@@ -230,7 +243,10 @@ function mentionedOutsideImports(dep, haystack) {
 function auditDir(projectDir) {
   const ecosystems = [];
   const nodeDeps = readNodeDeps(projectDir);
-  if (nodeDeps !== null) ecosystems.push({ eco: 'node', deps: nodeDeps });
+  if (nodeDeps !== null) {
+    const peerOnly = packageJsonPeerOnlyDeps(projectDir);
+    ecosystems.push({ eco: 'node', deps: nodeDeps.filter((d) => !peerOnly.has(d)) });
+  }
   const pythonDeps = readPythonDeps(projectDir);
   if (pythonDeps !== null) ecosystems.push({ eco: 'python', deps: pythonDeps });
   if (!ecosystems.length) return { ecosystems: [], usedCount: 0 };

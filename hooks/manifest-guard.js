@@ -13,7 +13,7 @@
 // and import guards — one nudge per dependency however it enters.
 //
 // Bounded on purpose:
-//   - package.json (dependencies + devDependencies), requirements.txt, and
+//   - package.json (every dependency section), requirements.txt, and
 //     pyproject.toml (PEP 621 plus poetry tables) only; other manifests are
 //     covered when their install is attempted,
 //   - fires only when the manifest already exists on disk (creating a fresh
@@ -29,11 +29,19 @@ const { settingOff } = require('./razor-lib');
 const { installedDeps, evidenceReason, ledgerName, pyprojectDepNames } = require('./dep-guard');
 
 // null = unparseable (caller stays silent), Set otherwise.
+// The same four sections readNodeDeps counts, and for the same reason: if the
+// two disagreed, moving a package from optionalDependencies to dependencies
+// would read as a brand-new name and deny an edit that adds nothing.
 function jsonDepNames(text) {
   try {
     const pkg = JSON.parse(text);
     return new Set(
-      Object.keys({ ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) }).map((n) => n.toLowerCase())
+      Object.keys({
+        ...(pkg.dependencies || {}),
+        ...(pkg.devDependencies || {}),
+        ...(pkg.optionalDependencies || {}),
+        ...(pkg.peerDependencies || {}),
+      }).map((n) => n.toLowerCase())
     );
   } catch {
     return null;

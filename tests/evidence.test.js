@@ -31,6 +31,21 @@ describe('unit: installedDeps manifest readers', () => {
     assert.deepStrictEqual(installedDeps('pnpm', dir).sort(), ['axios', 'jest', 'lodash']);
   });
 
+  // Regression: optionalDependencies and peerDependencies were absent from
+  // the reader, so a package declared only there read as undeclared — a false
+  // deny on every import of one, with an evidence list that omitted it.
+  test('package.json: optional and peer sections are declared too', () => {
+    const dir = fixtureDir({
+      'package.json': JSON.stringify({
+        dependencies: { lodash: '^4' },
+        devDependencies: { jest: '^29' },
+        optionalDependencies: { sharp: '^0.33' },
+        peerDependencies: { react: '^18' },
+      }),
+    });
+    assert.deepStrictEqual(installedDeps('npm', dir).sort(), ['jest', 'lodash', 'react', 'sharp']);
+  });
+
   test('walks up from a nested subdirectory', () => {
     const dir = fixtureDir({ 'package.json': JSON.stringify({ dependencies: { zod: '^3' } }) });
     const nested = path.join(dir, 'src', 'deep');

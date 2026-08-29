@@ -329,3 +329,41 @@ describe('scoped names are visible outside imports', () => {
     assert.strictEqual(mentionedOutsideImports('eslint', 'eslintrc-ish'), false);
   });
 });
+
+describe('unused-deps: optional and peer sections', () => {
+  // The audit reads the same manifest sections the gates do. Optional deps are
+  // real weight this project carries, so they are audited; a peer-only entry is
+  // a contract with whoever installs this package, and the normal case is that
+  // no local file imports it, so calling it unused would be a false positive.
+  test('an optional dependency is audited, a peer-only one is left alone', () => {
+    const dir = tmp('razor-unused-opt-');
+    write(dir, 'package.json', {
+      name: 'ws',
+      version: '1.0.0',
+      dependencies: { express: '^4.19.2' },
+      optionalDependencies: { sharp: '^0.33.4', 'sqlite-vec': '^0.1.0' },
+      peerDependencies: { react: '^18.3.1' },
+    });
+    write(dir, 'src/app.js', "const express = require('express');\nconst sharp = require('sharp');\n");
+    const result = auditProject(dir);
+    const eco = node(result);
+    assert.strictEqual(eco.declaredCount, 3);
+    assert.strictEqual(result.usedCount, 2);
+    assert.deepStrictEqual(names(eco.likely), ['sqlite-vec']);
+    const every = names(eco.likely).concat(names(eco.confirmed), names(eco.unknown));
+    assert.ok(!every.includes('react'), 'a peer-only dependency is never bucketed');
+  });
+
+  test('a package declared as both a peer and a dependency is still audited', () => {
+    const dir = tmp('razor-unused-peerdep-');
+    write(dir, 'package.json', {
+      name: 'ws',
+      version: '1.0.0',
+      dependencies: { react: '^18.3.1' },
+      peerDependencies: { react: '^18.3.1' },
+    });
+    write(dir, 'src/app.js', 'module.exports = 1;\n');
+    const eco = node(auditProject(dir));
+    assert.deepStrictEqual(names(eco.likely), ['react']);
+  });
+});
