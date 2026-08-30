@@ -4,6 +4,13 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.2 — 2026-08-29
+
+[How it works](docs/HOW-IT-WORKS.md) now explains the build check rather than
+just listing it: what it looks at when a turn ends, that its question goes to
+Claude and costs one short extra reply, and that it needs a git repository to
+compare against.
+
 ## 1.5.1 — 2026-08-29
 
 Packages listed under `optionalDependencies` or `peerDependencies` now count as

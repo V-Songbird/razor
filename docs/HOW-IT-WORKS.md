@@ -58,6 +58,14 @@ number yourself and it becomes a plain ceiling on every new file instead.
 
 Anything under your system temp directory is treated as scratch and skipped.
 
+The build check is the only one that speaks after the work instead of before
+it. At the end of a turn it compares the tree against where the session
+started, and if the session grew a lot with almost nothing deleted it asks once
+whether all of it is needed. It blocks nothing and never stops to wait for you —
+the question goes to Claude, which answers it in one short extra reply, and
+then it stays quiet for the rest of the session. It needs a git repository to
+compare against, so in a folder that is not one it never runs.
+
 ## Where it hooks in
 
 razor is five hook events and eleven small Node scripts.
