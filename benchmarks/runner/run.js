@@ -98,6 +98,19 @@ function flag(name, dflt) {
   return i >= 0 && i + 1 < argv.length ? argv[i + 1] : dflt;
 }
 
+// Every flag this runner reads. `has`/`flag` ignore anything else, and a
+// silently-ignored typo starts a real billed run instead of erroring out.
+const KNOWN_FLAGS = ['selftest', 'smoke', 'default', 'full', 'counter', 'note', 'task', 'arms',
+  'runs', 'models', 'effort', 'workers', 'seed', 'rescore', 'arm-dir', 'rival-dir', 'rival-name'];
+function unknownFlags(args) {
+  return args.filter((a) => a.startsWith('--') && !KNOWN_FLAGS.includes(a.slice(2)));
+}
+
+// Reasoning effort for every cell in the run; omitted entirely when unset so a
+// run without it keeps whatever the CLI defaults to. Recorded in results.json,
+// because a run at a different effort is not comparable to one without it.
+const EFFORT = flag('effort', null);
+
 // --- run order --------------------------------------------------------------
 //
 // Arms are interleaved inside each task+model+rep block and shuffled there, so
@@ -305,6 +318,7 @@ function buildArgs(task, arm, model) {
     // Bash-allowed tiers still can't touch git or subagents.
     args.push('--disallowedTools', ['Bash(git*)', 'PowerShell(git*)', ...GUARD_TOOLS].join(','));
   }
+  if (EFFORT) args.push('--effort', EFFORT);
   if (arm !== 'baseline') args.push('--plugin-dir', ARM_DIRS[arm]);
   // NO_RUN (identical for every arm) only on the Bash-disallowed code tiers.
   if (!task.meta && !task.bash) args.push('--append-system-prompt', NO_RUN);
@@ -554,6 +568,12 @@ function stampNow() {
 }
 
 async function main() {
+  const bad = unknownFlags(argv);
+  if (bad.length) {
+    console.error(`unknown flag ${bad.join(' ')} -- this runner reads: ${KNOWN_FLAGS.map((f) => `--${f}`).join(' ')}`);
+    process.exit(1);
+  }
+
   const rivalDir = flag('rival-dir', null);
   if (rivalDir) ARM_DIRS[flag('rival-name', 'rival')] = path.resolve(rivalDir);
 
@@ -614,6 +634,7 @@ async function main() {
     seed,
     order: cells.map(([tid, arm, model, r]) => `${tid}__${arm}__${model}__${r}`),
     models: Object.fromEntries(models.map((m) => [m, MODELS[m] || m])),
+    effort: EFFORT,
     claude: claudeVersion(),
     arms: Object.fromEntries(arms.map((a) => [a, ARM_DIRS[a] || 'none'])),
     results,
@@ -647,6 +668,6 @@ async function main() {
   console.log(`\nnext: node runner/report.js ${outDir}`);
 }
 
-module.exports = { buildQueue, makeRng, shuffled, FULL_TASKS, COUNTER_TASKS, NOTE_TASKS };
+module.exports = { buildQueue, makeRng, shuffled, unknownFlags, KNOWN_FLAGS, FULL_TASKS, COUNTER_TASKS, NOTE_TASKS };
 
 if (require.main === module) main();
