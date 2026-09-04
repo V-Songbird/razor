@@ -4,7 +4,7 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
-## Unreleased
+## 1.5.3 — 2026-09-04
 
 Four fixes to the "do we need this?" question, all of them cases where razor
 asked about something that was never a new dependency. Python code that uses
