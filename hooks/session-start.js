@@ -13,7 +13,6 @@ const { tally, isUncounted } = require('./build-ledger');
 
 function main() {
   const data = readInput();
-  gcStateFiles();
   const state = readState(data.session_id);
   if (!isActive(state)) return;
 
@@ -21,6 +20,10 @@ function main() {
   // enough to burn the hook's timeout must cost at most the ledger baseline —
   // never the injection, which is the whole product.
   emitContext('SessionStart', RULESET);
+
+  // Swept after the ladder for the same reason: a state dir with thousands of
+  // entries is a readdir the injection must never wait behind.
+  gcStateFiles();
 
   if (!state.ledger && !settingOff('LEDGER')) {
     const baseSha = git(['rev-parse', 'HEAD'], data.cwd);

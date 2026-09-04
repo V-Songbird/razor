@@ -6,6 +6,28 @@ listing — that's why `plugin.json` here carries none.
 
 ## Unreleased
 
+Four fixes to the "do we need this?" question, all of them cases where razor
+asked about something that was never a new dependency. Python code that uses
+the standard library's own GUI, path and platform modules — `tkinter`,
+`turtle`, `ntpath` and their neighbours — is no longer questioned; none of
+them can be installed, so there was nothing to answer. Packages whose install
+name differs from their import name are recognised: `psycopg2-binary`,
+`pymupdf`, `grpcio`, `protobuf`, `dnspython` and `attrs` all count as
+declared when your manifest lists them. `cargo add -p mycrate serde` asks
+about `serde` and no longer about `mycrate`, which was only ever the
+workspace member being edited.
+
+Session state now writes where the harness says to. When Claude Code pointed
+razor's state at a directory outside the usual temporary and home folders, or
+at one reached through a Windows junction, every write was refused — and
+because those writes fail quietly, razor went on running with no memory of
+anything it had already asked. It kept re-asking, or stopped asking at all.
+
+The ladder now reaches Claude before razor tidies up after itself. The
+sweep of old session files used to run first, and on a machine whose
+temporary folder holds tens of thousands of entries, reading it delayed the
+one thing the plugin exists to send.
+
 The build check no longer counts documentation. Markdown files and anything
 under a `docs/` folder are left out of the comparison it makes at the end of a
 turn, the same way the new-file budget already ignored them. A session whose
