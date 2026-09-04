@@ -102,6 +102,13 @@ describe('unit: pyImportRoots', () => {
     const src = 'import os\nimport json, sys\nfrom pathlib import Path\nfrom . import sibling\nfrom __future__ import annotations';
     assert.strictEqual(pyImportRoots(src).size, 0);
   });
+
+  // These ship with CPython and none of them is installable from PyPI, so a
+  // nudge here can only ever be answered with a command that fails.
+  test('the GUI, path and platform stdlib modules never count', () => {
+    const src = 'import tkinter\nimport turtle\nfrom turtledemo import clock\nimport ntpath\nimport msvcrt\nimport idlelib\nimport ensurepip';
+    assert.strictEqual(pyImportRoots(src).size, 0);
+  });
 });
 
 describe('unit: classification helpers', () => {
@@ -112,8 +119,19 @@ describe('unit: classification helpers', () => {
     assert.strictEqual(isDeclared('bs4', ['beautifulsoup4']), true);
     assert.strictEqual(isDeclared('cv2', ['opencv-python']), true);
     assert.strictEqual(isDeclared('sklearn', ['scikit-learn']), true);
+    assert.strictEqual(isDeclared('fitz', ['pymupdf']), true);
+    assert.strictEqual(isDeclared('grpc', ['grpcio']), true);
+    assert.strictEqual(isDeclared('google', ['protobuf']), true);
+    assert.strictEqual(isDeclared('dns', ['dnspython']), true);
+    assert.strictEqual(isDeclared('attr', ['attrs']), true);
     assert.strictEqual(isDeclared('axios', ['express', 'lodash']), false);
     assert.strictEqual(isDeclared('lodash', ['express', 'lodash']), true);
+  });
+
+  // A wheel flavour is packaging, not a name: only the flavour ever reaches
+  // the manifest, and the import is always the plain one.
+  test('isDeclared sees through a -binary wheel flavour', () => {
+    assert.strictEqual(isDeclared('psycopg2', ['psycopg2-binary']), true);
   });
 
   test('newImports counts only roots absent from both manifest and existing content', () => {

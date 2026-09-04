@@ -110,6 +110,74 @@ describe('safeWriteFileSync: an ancestor is a link too', () => {
   });
 });
 
+describe('safeWriteFileSync: the harness state dir is a trusted root', () => {
+  // razor writes state wherever CLAUDE_PLUGIN_DATA points (harness.stateDir).
+  // While only tmpdir and homedir were trusted, a state dir outside both --
+  // a junction, another drive -- made every write throw. The callers swallow
+  // that, so the whole plugin went quiet with nothing to see.
+  function withWin32Roots(pluginData, run) {
+    const os = require('os');
+    const origTmp = os.tmpdir;
+    const origHome = os.homedir;
+    const origGetuid = process.getuid;
+    const prev = process.env.CLAUDE_PLUGIN_DATA;
+    // Force the no-uid (win32) branch, and move the two default roots away so
+    // only CLAUDE_PLUGIN_DATA can vouch for the target.
+    delete process.getuid;
+    os.tmpdir = () => 'Q:' + path.sep + 'no-tmp';
+    os.homedir = () => 'Q:' + path.sep + 'no-home';
+    if (pluginData === null) delete process.env.CLAUDE_PLUGIN_DATA;
+    else process.env.CLAUDE_PLUGIN_DATA = pluginData;
+    try {
+      return run();
+    } finally {
+      os.tmpdir = origTmp;
+      os.homedir = origHome;
+      if (origGetuid) process.getuid = origGetuid;
+      if (prev === undefined) delete process.env.CLAUDE_PLUGIN_DATA;
+      else process.env.CLAUDE_PLUGIN_DATA = prev;
+    }
+  }
+
+  // The dir resolves somewhere else, which is the only branch that consults
+  // the roots at all. Both paths are real, so the write itself is real too.
+  function linkTo(dir, linked) {
+    const orig = fs.realpathSync;
+    fs.realpathSync = (p, ...rest) => (p === dir ? linked : orig(p, ...rest));
+    return () => {
+      fs.realpathSync = orig;
+    };
+  }
+
+  test('refuses a resolved dir that no root vouches for', () => {
+    const dir = tmpDir();
+    const linked = tmpDir();
+    const restore = linkTo(dir, linked);
+    try {
+      withWin32Roots(null, () => {
+        assert.throws(() => safeWriteFileSync(path.join(dir, 'a.json'), 'x'), /outside trusted roots/);
+      });
+    } finally {
+      restore();
+    }
+  });
+
+  test('accepts it once CLAUDE_PLUGIN_DATA covers it, trailing separator and all', () => {
+    const dir = tmpDir();
+    const linked = tmpDir();
+    const restore = linkTo(dir, linked);
+    try {
+      withWin32Roots(path.dirname(linked).toUpperCase() + path.sep, () => {
+        safeWriteFileSync(path.join(dir, 'a.json'), '{"off":true}');
+      });
+      assert.strictEqual(fs.readFileSync(path.join(linked, 'a.json'), 'utf-8'), '{"off":true}');
+      assert.deepStrictEqual(tmpLeftovers(linked), []);
+    } finally {
+      restore();
+    }
+  });
+});
+
 describe('gcStateFiles: abandoned scratch files', () => {
   // safe-write's own `.razor-<id>.json.<pid>.<hex>.tmp`, left by a process
   // killed mid-write, lives in the state directory and matched nothing the

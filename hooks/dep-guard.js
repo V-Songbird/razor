@@ -46,6 +46,10 @@ const VALUE_FLAGS = new Set([
   '-c', '--constraint', '--python', '--prefix', '--registry', '--tag',
   '-w', '--workspace', '--features', '--manifest-path',
   '--group', '--filter', '--branch', '--rev',
+  // `cargo add -p <member> <dep>` and `uv pip install -p 3.12 <dep>` both put a
+  // value here that is not a package. Reading it as one denies a name nobody
+  // installed, which is the expensive direction.
+  '-p', '--package',
 ]);
 
 // A local path or a URL is a location, not a name from a registry. Denying

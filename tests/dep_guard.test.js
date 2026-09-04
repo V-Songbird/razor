@@ -244,6 +244,12 @@ describe('locations, flag values, and self-upgrades are not dependencies', () =>
     const hit = parseInstallCommand('pip install -t ./vendor requests');
     assert.deepStrictEqual(hit && hit.packages, ['requests']);
   });
+
+  // -p names the workspace member being edited, not something being added.
+  test('a workspace selector is never reported as the package', () => {
+    assert.deepStrictEqual(parseInstallCommand('cargo add -p mycrate serde').packages, ['serde']);
+    assert.deepStrictEqual(parseInstallCommand('cargo add --package mycrate serde').packages, ['serde']);
+  });
 });
 
 describe('PowerShell is gated exactly like Bash', () => {

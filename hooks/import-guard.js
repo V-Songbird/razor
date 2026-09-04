@@ -50,13 +50,14 @@ const PY_STDLIB = new Set([
   'concurrent', 'configparser', 'contextlib', 'contextvars', 'copy',
   'copyreg', 'cProfile', 'csv', 'ctypes', 'curses', 'dataclasses',
   'datetime', 'dbm', 'decimal', 'difflib', 'dis', 'doctest', 'email',
-  'encodings', 'enum', 'errno', 'faulthandler', 'fcntl', 'filecmp',
+  'encodings', 'ensurepip', 'enum', 'errno', 'faulthandler', 'fcntl', 'filecmp',
   'fileinput', 'fnmatch', 'fractions', 'ftplib', 'functools', 'gc',
   'getopt', 'getpass', 'gettext', 'glob', 'graphlib', 'grp', 'gzip',
-  'hashlib', 'heapq', 'hmac', 'html', 'http', 'imaplib', 'importlib',
+  'hashlib', 'heapq', 'hmac', 'html', 'http', 'idlelib', 'imaplib', 'importlib',
   'inspect', 'io', 'ipaddress', 'itertools', 'json', 'keyword', 'linecache',
   'locale', 'logging', 'lzma', 'mailbox', 'marshal', 'math', 'mimetypes',
-  'mmap', 'multiprocessing', 'netrc', 'numbers', 'operator', 'os',
+  'mmap', 'msvcrt', 'multiprocessing', 'netrc', 'ntpath', 'numbers',
+  'operator', 'os',
   'pathlib', 'pdb', 'pickle', 'pickletools', 'pkgutil', 'platform',
   'plistlib', 'poplib', 'posixpath', 'pprint', 'profile', 'pstats', 'pty',
   'pwd', 'py_compile', 'pyclbr', 'pydoc', 'queue', 'quopri', 'random',
@@ -66,7 +67,8 @@ const PY_STDLIB = new Set([
   'statistics', 'string', 'stringprep', 'struct', 'subprocess', 'symtable',
   'sys', 'sysconfig', 'syslog', 'tarfile', 'tempfile', 'termios', 'test',
   'textwrap', 'threading', 'time', 'timeit', 'token', 'tokenize', 'tomllib',
-  'trace', 'traceback', 'tracemalloc', 'tty', 'types', 'typing',
+  'tkinter', 'trace', 'traceback', 'tracemalloc', 'tty', 'turtle',
+  'turtledemo', 'types', 'typing',
   'unicodedata', 'unittest', 'urllib', 'uuid', 'venv', 'warnings', 'wave',
   'weakref', 'webbrowser', 'winreg', 'winsound', 'wsgiref', 'xml',
   'xmlrpc', 'zipapp', 'zipfile', 'zipimport', 'zlib', 'zoneinfo',
@@ -194,11 +196,20 @@ const KNOWN_IMPORT_NAMES = {
   beautifulsoup4: 'bs4',
   'opencv-python': 'cv2',
   'scikit-learn': 'sklearn',
+  pymupdf: 'fitz',
+  grpcio: 'grpc',
+  protobuf: 'google',
+  dnspython: 'dns',
+  attrs: 'attr',
 };
 
 function declaredNameForms(name) {
   const n = String(name).toLowerCase();
-  const forms = new Set([n, n.replace(/-/g, '_'), n.replace(/^python-/, ''), n.replace(/^py/, '')]);
+  // A wheel-flavour suffix is packaging, not a name: psycopg2-binary and
+  // psycopg2 import identically, and only the flavour reaches the manifest.
+  const forms = new Set([
+    n, n.replace(/-/g, '_'), n.replace(/^python-/, ''), n.replace(/^py/, ''), n.replace(/-binary$/, ''),
+  ]);
   if (KNOWN_IMPORT_NAMES[n]) forms.add(KNOWN_IMPORT_NAMES[n]);
   return forms;
 }
