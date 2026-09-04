@@ -61,7 +61,10 @@ Anything under your system temp directory is treated as scratch and skipped.
 The build check is the only one that speaks after the work instead of before
 it. At the end of a turn it compares the tree against where the session
 started, and if the session grew a lot with almost nothing deleted it asks once
-whether all of it is needed. It blocks nothing and never stops to wait for you —
+whether all of it is needed. Prose does not count towards that: Markdown and
+anything under a `docs/` folder is left out of the comparison, along with
+lockfiles, so a session that writes the design notes your project asks for is
+not read as sprawl. It blocks nothing and never stops to wait for you —
 the question goes to Claude, which answers it in one short extra reply, and
 then it stays quiet for the rest of the session. It needs a git repository to
 compare against, so in a folder that is not one it never runs.

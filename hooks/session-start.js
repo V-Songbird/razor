@@ -9,7 +9,7 @@
 // The emitter owns the wire shape; this file only decides what to say.
 
 const { RULESET, readInput, emitContext, readState, writeState, isActive, settingOff, gcStateFiles, git } = require('./razor-lib');
-const { parseShortstat } = require('./build-ledger');
+const { tally, isUncounted } = require('./build-ledger');
 
 function main() {
   const data = readInput();
@@ -26,12 +26,17 @@ function main() {
     const baseSha = git(['rev-parse', 'HEAD'], data.cwd);
     if (baseSha) {
       const list = (s) => (s || '').split('\n').filter(Boolean);
-      const dirty = parseShortstat(git(['diff', '--shortstat', 'HEAD'], data.cwd) || '');
+      // --numstat, not --shortstat: the baseline has to be measured with the
+      // same path exemptions the ledger charges by, or pre-existing docs dirt
+      // gets subtracted from a tally that never counted it.
+      const dirty = tally(git(['diff', '--numstat', 'HEAD'], data.cwd));
       state.ledger = {
         baseSha,
         baseInsertions: dirty.insertions,
         baseDeletions: dirty.deletions,
-        baseAdded: list(git(['diff', '--diff-filter=A', '--name-only', 'HEAD'], data.cwd)).length,
+        baseAdded: list(git(['diff', '--diff-filter=A', '--name-only', 'HEAD'], data.cwd)).filter(
+          (f) => !isUncounted(f)
+        ).length,
         // Names, not a count: a pre-existing untracked file the session
         // merely stages or commits must stay off the session's bill.
         baseUntrackedFiles: list(git(['ls-files', '--others', '--exclude-standard'], data.cwd)),

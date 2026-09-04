@@ -11,6 +11,7 @@
 // so a legitimately large requested task never trips it.
 
 const { readInput, emitContext, readState, writeState, isActive, settingOff, settingNumber, git } = require('./razor-lib');
+const { classify } = require('./file-meter');
 
 const LOC_BUDGET = (() => {
   const n = settingNumber('LEDGER_LOC', 500);
@@ -30,11 +31,21 @@ function shouldFire(stats, locBudget, filesBudget) {
   return sprawlLoc || stats.newFiles > filesBudget;
 }
 
-function parseShortstat(shortstat) {
-  return {
-    insertions: parseInt((/(\d+) insertion/.exec(shortstat) || [])[1] || '0', 10),
-    deletions: parseInt((/(\d+) deletion/.exec(shortstat) || [])[1] || '0', 10),
-  };
+// Sum a --numstat block, skipping the paths the ledger never charges. Both
+// the session-start baseline and the turn-end tally go through here, so a
+// path exempt from one is exempt from the other — an asymmetry would have the
+// baseline subtract lines the tally never counted, and the meter would go
+// quiet for the rest of the session.
+function tally(numstat, skip = () => false) {
+  let insertions = 0;
+  let deletions = 0;
+  for (const line of (numstat || '').split('\n')) {
+    const [ins, del, file] = line.split('\t');
+    if (!file || skip(file) || isUncounted(file)) continue;
+    insertions += parseInt(ins, 10) || 0;
+    deletions += parseInt(del, 10) || 0;
+  }
+  return { insertions, deletions };
 }
 
 // The session's own delta: the working tree vs the base commit, minus the
@@ -55,25 +66,29 @@ function isLockfile(file) {
   return name.endsWith('.lock') || name.endsWith('-lock.json') || name.endsWith('-lock.yaml');
 }
 
+// Prose is not sprawl. file-meter already classifies a new docs file and
+// refuses to charge it against the file budget; the ledger has to agree, or a
+// repo that mandates ADR amendments and doc comments ends every session with
+// a question about lines nobody would want cut. classify() owns the path
+// shapes so the two meters cannot drift apart.
+function isUncounted(file) {
+  return isLockfile(file) || classify(file) === 'docs';
+}
+
 function diffStats(ledger, cwd) {
   const numstat = git(['diff', '--numstat', ledger.baseSha], cwd);
   if (numstat === null) return null; // base sha gone (rebase) or not a repo
   const baseNames = new Set(ledger.baseUntrackedFiles || []);
-  let insertions = 0;
-  let deletions = 0;
-  for (const line of numstat.split('\n')) {
-    const [ins, del, file] = line.split('\t');
-    if (!file || baseNames.has(file) || isLockfile(file)) continue;
-    insertions += parseInt(ins, 10) || 0;
-    deletions += parseInt(del, 10) || 0;
-  }
+  let { insertions, deletions } = tally(numstat, (file) => baseNames.has(file));
   insertions = Math.max(0, insertions - (ledger.baseInsertions || 0));
   deletions = Math.max(0, deletions - (ledger.baseDeletions || 0));
 
   const list = (s) => (s || '').split('\n').filter(Boolean);
   const added = list(git(['diff', '--diff-filter=A', '--name-only', ledger.baseSha], cwd));
   const untracked = list(git(['ls-files', '--others', '--exclude-standard'], cwd));
-  const fresh = [...new Set([...added, ...untracked])].filter((f) => !baseNames.has(f));
+  const fresh = [...new Set([...added, ...untracked])].filter(
+    (f) => !baseNames.has(f) && !isUncounted(f)
+  );
   const newFiles = Math.max(0, fresh.length - (ledger.baseAdded || 0));
 
   return { insertions, deletions, newFiles };
@@ -105,4 +120,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { shouldFire, diffStats, parseShortstat };
+module.exports = { shouldFire, diffStats, tally, isUncounted };

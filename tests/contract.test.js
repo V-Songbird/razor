@@ -80,7 +80,7 @@ function git(dir, ...args) {
 function gitWorld(tag) {
   const cwd = tmpDir(tag);
   git(cwd, 'init', '-q');
-  writeFile(cwd, 'a.txt', 'one\n');
+  writeFile(cwd, 'a.js', 'one\n');
   git(cwd, 'add', '.');
   git(cwd, 'commit', '-qm', 'base');
   const sha = git(cwd, 'rev-parse', 'HEAD').stdout.trim();
@@ -93,7 +93,7 @@ function gitWorld(tag) {
 // text is deterministic.
 function sprawlWorld() {
   const world = gitWorld('sprawl');
-  fs.appendFileSync(path.join(world.cwd, 'a.txt'), 'x\n'.repeat(600));
+  fs.appendFileSync(path.join(world.cwd, 'a.js'), 'x\n'.repeat(600));
   for (let i = 0; i < 9; i++) writeFile(world.cwd, `new${i}.js`, '// new\n');
   world.state = { ledger: { baseSha: world.sha, baseUntrackedFiles: [], fired: false } };
   return world;
@@ -101,7 +101,7 @@ function sprawlWorld() {
 
 function quietWorld() {
   const world = gitWorld('quiet');
-  fs.appendFileSync(path.join(world.cwd, 'a.txt'), 'two\nthree\n');
+  fs.appendFileSync(path.join(world.cwd, 'a.js'), 'two\nthree\n');
   world.state = { ledger: { baseSha: world.sha, baseUntrackedFiles: [], fired: false } };
   return world;
 }

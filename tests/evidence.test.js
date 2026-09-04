@@ -257,7 +257,7 @@ function gitRepo() {
       encoding: 'utf-8',
     });
   g('init', '-q');
-  fs.writeFileSync(path.join(dir, 'a.txt'), 'one\n');
+  fs.writeFileSync(path.join(dir, 'a.js'), 'one\n');
   g('add', '.');
   g('commit', '-qm', 'base');
   const sha = g('rev-parse', 'HEAD').stdout.trim();
@@ -294,7 +294,7 @@ describe('integration: build ledger', () => {
     writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
 
     // sprawl: 600 added lines in a tracked file + several new untracked files
-    fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 600 }, (_, i) => `line ${i}`).join('\n'));
+    fs.appendFileSync(path.join(dir, 'a.js'), Array.from({ length: 600 }, (_, i) => `line ${i}`).join('\n'));
     for (let i = 0; i < 9; i++) fs.writeFileSync(path.join(dir, `new${i}.js`), '// x\n');
 
     const input = { session_id: session, cwd: dir, hook_event_name: 'Stop' };
@@ -326,11 +326,35 @@ describe('integration: build ledger', () => {
     assert.strictEqual(out, null, 'a lockfile is not code the agent wrote');
   });
 
+  // Prose the repo mandates -- ADR amendments, docs, a design note -- lands as
+  // a big insertion-heavy diff with no deletions, and used to end the session
+  // on a question about lines nobody would want cut.
+  test('docs prose is not sprawl, but code alongside it still is', () => {
+    const { dir, sha } = gitRepo();
+    const session = freshSession();
+    writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
+
+    const prose = Array.from({ length: 900 }, (_, i) => `paragraph ${i}`).join('\n');
+    fs.mkdirSync(path.join(dir, 'docs', 'adr'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'docs', 'adr', '0004-records.md'), prose);
+    fs.writeFileSync(path.join(dir, 'DESIGN.md'), prose);
+    assert.strictEqual(
+      hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir, hook_event_name: 'Stop' })),
+      null,
+      'mandated prose is not sprawl'
+    );
+
+    // The same session's actual code is still measured, on its own.
+    fs.appendFileSync(path.join(dir, 'a.js'), Array.from({ length: 600 }, (_, i) => `line ${i}\n`).join(''));
+    const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir, hook_event_name: 'Stop' }));
+    assert.match(out.hookSpecificOutput.additionalContext, /\+600 \/ -0 LOC, 0 new files/);
+  });
+
   test('silent on a well-behaved session', () => {
     const { dir, sha } = gitRepo();
     const session = freshSession();
     writeState(session, { ledger: { baseSha: sha, baseUntrackedFiles: [], fired: false } });
-    fs.appendFileSync(path.join(dir, 'a.txt'), 'two\nthree\n');
+    fs.appendFileSync(path.join(dir, 'a.js'), 'two\nthree\n');
     const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir }));
     assert.strictEqual(out, null);
   });
@@ -352,7 +376,7 @@ describe('integration: build ledger', () => {
   test('pre-existing dirty work is never charged to the session', () => {
     const { dir } = gitRepo();
     // 600 dirty insertions before the session ever starts
-    fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 600 }, (_, i) => `old ${i}\n`).join(''));
+    fs.appendFileSync(path.join(dir, 'a.js'), Array.from({ length: 600 }, (_, i) => `old ${i}\n`).join(''));
     const session = freshSession();
     runHook('session-start.js', { session_id: session, cwd: dir, hook_event_name: 'SessionStart' });
 
@@ -360,7 +384,7 @@ describe('integration: build ledger', () => {
     assert.strictEqual(hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir })), null);
 
     // the session then adds its own 700 → fires with the session's delta only
-    fs.appendFileSync(path.join(dir, 'a.txt'), Array.from({ length: 700 }, (_, i) => `new ${i}\n`).join(''));
+    fs.appendFileSync(path.join(dir, 'a.js'), Array.from({ length: 700 }, (_, i) => `new ${i}\n`).join(''));
     const out = hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir }));
     assert.match(out.hookSpecificOutput.additionalContext, /\+700 \/ -0 LOC/);
   });

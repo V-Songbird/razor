@@ -4,6 +4,14 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## Unreleased
+
+The build check no longer counts documentation. Markdown files and anything
+under a `docs/` folder are left out of the comparison it makes at the end of a
+turn, the same way the new-file budget already ignored them. A session whose
+project asks for design notes or decision records used to end on a question
+about prose it was told to write.
+
 ## 1.5.2 — 2026-08-29
 
 [How it works](docs/HOW-IT-WORKS.md) now explains the build check rather than
