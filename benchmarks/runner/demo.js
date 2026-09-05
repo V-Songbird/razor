@@ -2,17 +2,16 @@
 
 // Draws the README's side-by-side replay (assets/demo.svg) from two real
 // sessions of one task in a run directory: the file each session delivered,
-// shown as a diff against the seed, one line at a time on the recorded clock,
-// with what each one did to package.json underneath.
+// shown as a diff against the seed, one line at a time on the recorded clock.
 //
-//   node runner/demo.js --run /tmp/razor-bench/20260901-012606 --task dep-http-lib
+//   node runner/demo.js --run /tmp/razor-bench/20260901-012606 --task dep-querystring
 //     [--model opus] [--baseline <cell dir>] [--razor <cell dir>] [--out ../assets/demo.svg]
 //
 // Without --run it takes the newest run that has the task. Without --baseline
-// it takes the first no-plugin session that added a package — that is the thing
-// the picture is about, and the caption prints how many of them did, so nothing
-// is hidden by the choice. Without --razor it takes the first razor session.
-// Both themes ride on prefers-color-scheme, like bench-supplychain.svg.
+// or --razor it takes, per arm, the session whose delivered file has the
+// median number of lines — a typical one, never the best-looking one — and the
+// caption prints every session's average, so the choice hides nothing. Both
+// themes ride on prefers-color-scheme, like bench-supplychain.svg.
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -63,12 +62,14 @@ function diffLines(before, after) {
   return out;
 }
 
+const countLines = (text) => text.split('\n').filter((l) => l.trim()).length;
+
 const fadeIn = (t) => `<animate attributeName="opacity" values="0;0;1;1" keyTimes="0;${(t / DUR).toFixed(3)};${Math.min((t + 0.2) / DUR, 1).toFixed(3)};1" dur="${DUR}s" repeatCount="indefinite"/>`;
 
 // One column: the diff, a line at a time across this session's share of the
-// clock, then the package.json verdict. `pkgAdded` names any dependency the
-// session put in package.json; a line that pulls one in is drawn as `bad`.
-function column(x, side, slowMs, Y0) {
+// clock, then — only when some session in the picture pulled a package in —
+// what this one did to package.json. A line that pulls one in is drawn `bad`.
+function column(x, side, slowMs, Y0, showPkg) {
   const parts = [];
   const lines = side.lines;
   const total = lines.length + 1;
@@ -87,28 +88,36 @@ function column(x, side, slowMs, Y0) {
     });
     parts.push('</g>');
   });
-  y += 8;
-  const verdict = side.pkgAdded.length
-    ? { cls: 'bad', text: `package.json  + ${side.pkgAdded.join(', ')}` }
-    : { cls: 'cwt', text: 'package.json  unchanged' };
-  parts.push(`<g opacity="0">${fadeIn(at(lines.length))}<text class="${verdict.cls}" x="${x + 6}" y="${y}" font-size="${FS}"${mono} font-weight="700">${esc(verdict.text)}</text></g>`);
-  y += LH;
+  if (showPkg) {
+    y += 8;
+    const verdict = side.pkgAdded.length
+      ? { cls: 'bad', text: `package.json  + ${side.pkgAdded.join(', ')}` }
+      : { cls: 'cwt', text: 'package.json  unchanged' };
+    parts.push(`<g opacity="0">${fadeIn(at(lines.length))}<text class="${verdict.cls}" x="${x + 6}" y="${y}" font-size="${FS}"${mono} font-weight="700">${esc(verdict.text)}</text></g>`);
+    y += LH;
+  }
   return { svg: parts.join(''), bottom: y };
 }
 
+// counts: { n, baseLoc, razorLoc, baseUnsafe, razorUnsafe } over every session
+// of the task in the run, both arms — the honest frame around the two shown.
 function demoSvg({ prompt, file, baseline, razor, counts }) {
   const slow = Math.max(baseline.ms, razor.ms);
   const xr = PAD + COL + GAP;
   const promptLines = wrap(`you: ${prompt}`, 96);
   const pillY = 62 + promptLines.length * LH + 4;
   const Y0 = pillY + 56;
-  const left = column(PAD, baseline, slow, Y0);
-  const right = column(xr, razor, slow, Y0);
+  const showPkg = baseline.pkgAdded.length > 0 || razor.pkgAdded.length > 0;
+  const left = column(PAD, baseline, slow, Y0, showPkg);
+  const right = column(xr, razor, slow, Y0, showPkg);
   const H = Math.max(left.bottom, right.bottom) + 60;
+  const pkgNote = counts.baseUnsafe
+    ? ` ${counts.baseUnsafe} of the ${counts.n} sessions without razor added a package; ${counts.razorUnsafe} of ${counts.n} with razor did.`
+    : '';
   const label = `The same ask played twice, side by side. The prompt: ${prompt} `
-    + `Without razor, Claude ${baseline.pkgAdded.length ? `added ${baseline.pkgAdded.join(' and ')} to package.json and wrote ${file} around it` : `wrote ${file} with no new package`}. `
-    + `With razor, Claude ${razor.pkgAdded.length ? `added ${razor.pkgAdded.join(' and ')}` : `wrote ${file} with what Node already has and left package.json alone`}. `
-    + `In this run, ${counts.baseUnsafe} of ${counts.baseN} sessions without razor added a package; ${counts.razorUnsafe} of ${counts.razorN} with razor did. `
+    + `Without razor, Claude wrote ${file} in ${baseline.loc} lines${baseline.pkgAdded.length ? `, pulling in ${baseline.pkgAdded.join(' and ')}` : ''}. `
+    + `With razor, ${razor.loc} lines${razor.pkgAdded.length ? `, pulling in ${razor.pkgAdded.join(' and ')}` : ', with what the platform already has'}. `
+    + `Across the run, ${counts.n} sessions each way: ${counts.baseLoc} lines on average without razor, ${counts.razorLoc} with it.${pkgNote} `
     + 'One real session each on Claude Opus 5, replayed on the recorded wall clock.';
   const style = '<style>.card{fill:#fcfcfb;stroke:rgba(11,11,11,.07)}.ink{fill:#0b0b0b}.ink2{fill:#52514e}.mut{fill:#898781}'
     + '.bp{fill:#dcd9d0}.ac{fill:#059669}.bad{fill:#e0653f}.cwt{fill:#0a6b0a}.pillt{fill:#52514e}.you{fill:#52514e}'
@@ -120,8 +129,10 @@ function demoSvg({ prompt, file, baseline, razor, counts }) {
   let yy = 62;
   for (const p of promptLines) { head.push(`<text class="you" x="${PAD + 8}" y="${yy}" font-size="14" font-style="italic">${esc(p)}</text>`); yy += LH; }
   head.push(pill(PAD, 'bp', 'pillt', 'no plugin'), pill(xr, 'ac', 'card', 'razor'));
-  head.push(`<text class="mut" x="${PAD + 6}" y="${Y0 - 20}" font-size="13">${esc(file)}</text><text class="mut" x="${xr + 6}" y="${Y0 - 20}" font-size="13">${esc(file)}</text>`);
-  const foot = `<text class="mut" x="${PAD + 8}" y="${H - 22}" font-size="13.5">this run: ${counts.baseUnsafe} of ${counts.baseN} sessions without razor added a package · ${counts.razorUnsafe} of ${counts.razorN} with razor · Claude Opus 5, recorded clock</text>`;
+  const fileLabel = (x, side) => `<text class="mut" x="${x + 6}" y="${Y0 - 20}" font-size="13">${esc(file)}</text>`
+    + `<text class="ink" x="${x + COL - 6}" y="${Y0 - 20}" font-size="14" font-weight="700" text-anchor="end">${side.loc} lines</text>`;
+  head.push(fileLabel(PAD, baseline), fileLabel(xr, razor));
+  const foot = `<text class="mut" x="${PAD + 8}" y="${H - 22}" font-size="13.5">this run, ${counts.n} sessions each way: ${counts.baseLoc} lines on average without razor, ${counts.razorLoc} with it${counts.baseUnsafe ? ` · ${counts.baseUnsafe} without razor added a package` : ''} · Claude Opus 5, recorded clock</text>`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" role="img" aria-label="${esc(label)}">`
     + style
     + '<filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0b0b0b" flood-opacity=".10"/></filter>'
@@ -136,21 +147,27 @@ const depsOf = (pkg) => Object.keys({ ...(pkg.dependencies || {}), ...(pkg.devDe
 function readCell(runDir, cell, task) {
   const dir = path.join(runDir, cell);
   const delivered = fs.readFileSync(path.join(dir, task.file), 'utf8');
-  const seedPkg = JSON.parse(task.seed['package.json']);
+  const seedPkg = task.seed['package.json'] ? JSON.parse(task.seed['package.json']) : {};
   let pkgAdded = [];
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
     pkgAdded = depsOf(pkg).filter((d) => !depsOf(seedPkg).includes(d));
   } catch { /* no package.json delivered: nothing added */ }
   const result = JSON.parse(fs.readFileSync(path.join(dir, '_claude.json'), 'utf8'));
-  return { cell, lines: diffLines(task.seed[task.file], delivered), ms: result.duration_ms, pkgAdded };
+  return { cell, lines: diffLines(task.seed[task.file], delivered), loc: countLines(delivered), ms: result.duration_ms, pkgAdded };
+}
+
+// The session whose delivered file has the median line count — typical, not flattering.
+function medianCell(cells) {
+  const sorted = [...cells].sort((a, b) => a.loc - b.loc);
+  return sorted[Math.floor((sorted.length - 1) / 2)];
 }
 
 function newestRunWith(taskId) {
   const dirs = fs.readdirSync(RUNS_BASE).sort().reverse();
   for (const d of dirs) {
     const run = path.join(RUNS_BASE, d);
-    if (fs.existsSync(path.join(run, 'results.json')) && fs.readdirSync(run).some((c) => c.startsWith(`${taskId}__baseline__`))) return run;
+    if (fs.readdirSync(run).some((c) => c.startsWith(`${taskId}__baseline__`))) return run;
   }
   throw new Error(`no run under ${RUNS_BASE} has a ${taskId} baseline cell`);
 }
@@ -158,37 +175,37 @@ function newestRunWith(taskId) {
 function main() {
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : d; };
-  const taskId = flag('task', 'dep-http-lib');
+  const taskId = flag('task', 'dep-querystring');
   const task = RAZOR_TASKS[taskId];
   if (!task) throw new Error(`no task ${taskId} in tasks.js`);
   const model = flag('model', 'opus');
   const runDir = path.resolve(flag('run', '') || newestRunWith(taskId));
   const out = path.resolve(flag('out', path.join(__dirname, '..', '..', 'assets', 'demo.svg')));
-  const cells = (arm) => fs.readdirSync(runDir).filter((c) => c.startsWith(`${taskId}__${arm}__${model}__`)).sort();
-  const raw = JSON.parse(fs.readFileSync(path.join(runDir, 'results.json'), 'utf8'));
-  const rows = (Array.isArray(raw) ? raw : raw.results).filter((r) => r.task === taskId && r.model === model);
-  const count = (arm) => ({ n: rows.filter((r) => r.arm === arm).length, unsafe: rows.filter((r) => r.arm === arm && !Number(r.safe)).length });
-  const b = count('baseline'), z = count('razor');
-  const baseCells = cells('baseline').map((c) => readCell(runDir, c, task));
-  const razorCells = cells('razor').map((c) => readCell(runDir, c, task));
+  const cells = (arm) => fs.readdirSync(runDir).filter((c) => c.startsWith(`${taskId}__${arm}__${model}__`)).sort().map((c) => readCell(runDir, c, task));
+  const baseCells = cells('baseline');
+  const razorCells = cells('razor');
   if (!baseCells.length || !razorCells.length) throw new Error(`no ${taskId} cells for both arms in ${runDir}`);
   const pick = (list, name) => {
-    if (!name) return null;
+    if (!name) return medianCell(list);
     const hit = list.find((c) => c.cell === name);
     if (!hit) throw new Error(`no cell ${name} among ${list.map((c) => c.cell).join(', ')}`);
     return hit;
   };
-  const baseline = pick(baseCells, flag('baseline')) || baseCells.find((c) => c.pkgAdded.length) || baseCells[0];
-  const razor = pick(razorCells, flag('razor')) || razorCells[0];
-  const { svg, label } = demoSvg({
-    prompt: task.prompt, file: task.file, baseline, razor,
-    counts: { baseUnsafe: b.unsafe, baseN: b.n, razorUnsafe: z.unsafe, razorN: z.n },
-  });
+  const baseline = pick(baseCells, flag('baseline'));
+  const razor = pick(razorCells, flag('razor'));
+  const avg = (list) => Math.round(list.reduce((s, c) => s + c.loc, 0) / list.length);
+  const counts = {
+    n: baseCells.length,
+    baseLoc: avg(baseCells), razorLoc: avg(razorCells),
+    baseUnsafe: baseCells.filter((c) => c.pkgAdded.length).length,
+    razorUnsafe: razorCells.filter((c) => c.pkgAdded.length).length,
+  };
+  const { svg, label } = demoSvg({ prompt: task.prompt, file: task.file, baseline, razor, counts });
   fs.writeFileSync(out, svg);
-  console.log(`wrote ${out} from ${baseline.cell} (+${baseline.pkgAdded.join(',') || 'nothing'}, ${baseline.ms} ms) and ${razor.cell} (+${razor.pkgAdded.join(',') || 'nothing'}, ${razor.ms} ms) in ${runDir}`);
+  console.log(`wrote ${out} from ${baseline.cell} (${baseline.loc} lines, ${baseline.ms} ms) and ${razor.cell} (${razor.loc} lines, ${razor.ms} ms) in ${runDir}`);
   console.log(`alt text for the README:\n${label}`);
 }
 
-module.exports = { demoSvg, diffLines, wrap };
+module.exports = { demoSvg, diffLines, wrap, medianCell, countLines };
 
 if (require.main === module) main();

@@ -4,6 +4,13 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.5 — 2026-09-04
+
+The replay at the top of the README now shows a different ask: parse a URL
+query string. Without razor, Claude wrote it by hand in 18 lines. With razor,
+4 lines, using what Node already has. Each side now says how many lines it
+delivered. Nothing razor does in a session changed.
+
 ## 1.5.4 — 2026-09-04
 
 The README now opens with a replay of one real ask, side by side: the file

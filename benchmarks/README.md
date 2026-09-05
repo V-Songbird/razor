@@ -161,10 +161,10 @@ This **can** show whether razor changes what the agent builds and what it costs,
 The side-by-side replay at the top of the front page comes from a run directory too:
 
 ```bash
-node runner/demo.js --run <the-run-dir-it-printed> --task dep-http-lib
+node runner/demo.js --run <the-run-dir-it-printed> --task dep-querystring
 ```
 
-It shows the file one no-plugin session and one razor session each delivered, as a diff against the seed, a line at a time on the recorded clock, and writes `assets/demo.svg`. With no `--baseline` named it takes the first no-plugin session that added a package, and the caption prints how many of them did, so the choice hides nothing.
+It shows the file one no-plugin session and one razor session each delivered, as a diff against the seed, a line at a time on the recorded clock, and writes `assets/demo.svg`. With no `--baseline` or `--razor` named it takes, per arm, the session whose file has the median number of lines — a typical one, not a flattering one — and the caption prints every session's average, so the choice hides nothing.
 
 razor's once-per-session ladder is part of the product, so its token cost is included in the measurement, not subtracted. Each arm runs in a fresh throwaway workspace outside any git repo, with only that one plugin loaded (`--setting-sources project,local`, no MCP servers, a scoped tool allowlist) — so a difference between arms is the plugin, nothing else.
 
