@@ -4,6 +4,13 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.4 — 2026-09-04
+
+The README now opens with a replay of one real ask, side by side: the file
+Claude wrote without razor, reaching for a package, beside the one it wrote
+with razor, using what Node already has. Nothing razor does in a session
+changed.
+
 ## 1.5.3 — 2026-09-04
 
 Four fixes to the "do we need this?" question, all of them cases where razor

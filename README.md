@@ -29,6 +29,8 @@
 
 ---
 
+<p align="center"><img src="assets/demo.svg" alt="The same ask played twice, side by side. The prompt: ok so in my node app i gotta hit an api and get the json back — lets just use axios for it lol. can you gimme an async fetchJson(url) in http_client.js that returns the parsed json? keep the module.exports = { fetchJson } bit. Without razor, Claude added axios to package.json and wrote http_client.js around it. With razor, Claude wrote http_client.js with what Node already has and left package.json alone. In this run, 3 of 3 sessions without razor added a package; 0 of 3 with razor did. One real session each on Claude Opus 5, replayed on the recorded wall clock." width="700"></p>
+
 ## What is this?
 
 AI assistants love to add things.
