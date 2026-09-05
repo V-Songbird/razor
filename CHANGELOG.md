@@ -4,6 +4,11 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.8 — 2026-09-05
+
+In Ember's cartoon the new package now leaves with a red cross, and what
+stays gets a YAGNI tag. Nothing razor does in a session changed.
+
 ## 1.5.7 — 2026-09-05
 
 Meet Ember. The README now opens with a short cartoon of the Foundry mascot
