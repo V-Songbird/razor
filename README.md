@@ -50,39 +50,50 @@ That's it. That's the whole plugin.
 
 ## Why you'd want it
 
-Here's a real one. The instruction was *"just use axios"* — the kind of thing
-you say without thinking. The project does not have axios installed.
+Here's a real one. The ask: write `parseQuery(qs)`, which turns a query string
+like `host=localhost&port=8080` into a plain object. Handle a leading `?`,
+decode the values. That's it.
 
-**Without razor** — it took the throwaway line literally:
+**Without razor** — it built a parser by hand. Eighteen lines, all of them
+now yours to maintain:
 
 ```diff
-+const axios = require('axios');
+ function parseQuery(qs) {
+   // Parse a URL query string into an object of key -> value.
+-  throw new Error('not implemented');
++  const out = {};
++  if (typeof qs !== 'string' || qs === '') return out;
 +
- async function fetchJson(url) {
--  // GET the url and return the parsed JSON body
--  throw new Error('not implemented');
-+  const response = await axios.get(url);
-+  return response.data;
++  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
++  for (const [key, value] of params) {
++    // defineProperty so keys like '__proto__' become own properties
++    // instead of mutating the prototype.
++    Object.defineProperty(out, key, {
++      value,
++      writable: true,
++      enumerable: true,
++      configurable: true,
++    });
++  }
++  return out;
  }
 ```
 
-**With razor** — it used `fetch`, which has been built into Node since v18:
+**With razor** — it asked what Node already has, and used it. Four lines:
 
 ```diff
- async function fetchJson(url) {
--  // GET the url and return the parsed JSON body
+ function parseQuery(qs) {
+-  // Parse a URL query string into an object of key -> value.
 -  throw new Error('not implemented');
-+  const res = await fetch(url);
-+  return res.json();
++  return Object.fromEntries(new URLSearchParams(qs.replace(/^\?/, '')));
  }
 ```
 
-On that job with Claude Sonnet, plain Claude Code got it wrong **six times out
-of six** — the code it wrote wouldn't even load. razor got it right six times
-out of six.
+Same ask, same tests, both green. Across that run, three sessions each way on
+Claude Opus 5: 18 lines on average without razor, 4 with it.
 
-**One throwaway phrase is enough to put a package in your project.** That's
-what razor is for.
+**The reflex is to build. razor's first question is whether you have to.**
+Here you didn't, and the answer was already in the language.
 
 <p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 258 sessions razor opened zero doors into that pool" width="700"></p>
 
