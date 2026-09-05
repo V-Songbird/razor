@@ -29,6 +29,8 @@
 
 ---
 
+<p align="center"><img src="assets/mascot.svg" alt="A cartoon. Ember, a round orange blob with a little flame on its head, types at a keyboard while a tower of boxes piles up beside it: the feature, then helper.js, utils, a library, another, config, wrapper, its flame flickering wildly. A green razor badge drops in. One green swipe, and every box above the first flies off; only the feature stays. Ember glances over, its flame settles to a small steady glow, and it types slowly with eyes half closed. At the end one bubble appears: Done. Nothing extra." width="700"></p>
+
 <p align="center"><img src="assets/demo.svg" alt="The same ask played twice, side by side. The prompt: In query.js, implement and export parseQuery(qs): parse a URL query string (like &#x27;host=localhost&amp;port=8080&#x27;) into a plain object of key -&gt; value. Handle a leading &#x27;?&#x27;, and percent-decode values. Keep the existing module.exports = { parseQuery } shape. Without razor, Claude wrote query.js in 18 lines. With razor, 4 lines, with what the platform already has. Across the run, 3 sessions each way: 18 lines on average without razor, 4 with it. One real session each on Claude Opus 5, replayed on the recorded wall clock." width="700"></p>
 
 ## What is this?

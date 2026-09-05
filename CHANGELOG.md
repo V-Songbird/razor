@@ -4,6 +4,12 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.7 — 2026-09-05
+
+Meet Ember. The README now opens with a short cartoon of the Foundry mascot
+at a keyboard, piling up boxes nobody asked for until razor sweeps the extras
+away. Nothing razor does in a session changed.
+
 ## 1.5.6 — 2026-09-05
 
 The worked example on the README now matches the replay above it: the
