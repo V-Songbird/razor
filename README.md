@@ -124,8 +124,14 @@ it, no debate.
 
 ## Install
 
-razor works with Codex and Node.js 22 or newer. Follow the
-[setup guide](docs/CODEX-HANDOFF.md) to install it and check that it is active.
+razor works with Codex and Node.js 22 or newer. Install it from Foundry:
+
+```text
+codex plugin marketplace add V-Songbird/foundry
+codex plugin add razor@foundry
+```
+
+See the [setup guide](docs/CODEX-HANDOFF.md) to check that it is active.
 Codex will ask you to review its hooks before they run. Git enables the
 session build check.
 
