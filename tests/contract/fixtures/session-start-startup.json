@@ -1,6 +1,0 @@
-{
-  "session_id": "{{SESSION}}",
-  "cwd": "{{CWD}}",
-  "hook_event_name": "SessionStart",
-  "source": "startup"
-}
