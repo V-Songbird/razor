@@ -25,3 +25,25 @@ describe('benchmark CLI flags', () => {
     }
   });
 });
+
+test('the Claude live runner refuses native Codex hooks before starting a model session', () => {
+  const fs = require('fs');
+  const os = require('os');
+  const path = require('path');
+  const { spawnSync } = require('child_process');
+  const root = path.resolve(__dirname, '..');
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-bench-host-'));
+  const results = path.join(fixture, 'must-not-be-created');
+  try {
+    const run = spawnSync(process.execPath, [path.join(root, 'benchmarks/runner/run.js'), '--smoke'], {
+      encoding: 'utf8', timeout: 30000,
+      env: { ...process.env, RAZOR_DIR: root, RAZOR_BENCH_RUNS: results },
+    });
+    assert.ifError(run.error);
+    assert.equal(run.status, 1);
+    assert.match(run.stderr, /Claude benchmark runner; Codex hook arms cannot run here/);
+    assert.equal(fs.existsSync(results), false);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});

@@ -17,6 +17,7 @@ const { RULESET, readInput, emitContext, readState, isActive } = require('./razo
 // Read-only / non-coding built-ins. Extend with RAZOR_AGENT_SKIP.
 const DEFAULT_SKIP = [
   'explore',
+  ...(process.env.RAZOR_HOST === 'codex' ? ['explorer'] : []),
   'plan',
   'claude-code-guide',
   'statusline-setup',
@@ -53,4 +54,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { shouldInject, DEFAULT_SKIP };
+module.exports = { main, shouldInject, DEFAULT_SKIP };

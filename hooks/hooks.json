@@ -2,12 +2,12 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact|fork",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/session-start.js"],
+            "command": "node \"${PLUGIN_ROOT}/hooks/codex-hook.js\" SessionStart",
+            "commandWindows": "powershell.exe -NoLogo -NoProfile -NonInteractive -Command \"if (Get-Command fnm -ErrorAction SilentlyContinue) { fnm env --use-on-cd | Out-String | Invoke-Expression }; & node (Join-Path $env:PLUGIN_ROOT 'hooks/codex-hook.js') SessionStart; exit $LASTEXITCODE\"",
             "timeout": 10
           }
         ]
@@ -18,21 +18,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.js"],
-            "timeout": 5
+            "command": "node \"${PLUGIN_ROOT}/hooks/codex-hook.js\" SubagentStart",
+            "commandWindows": "powershell.exe -NoLogo -NoProfile -NonInteractive -Command \"if (Get-Command fnm -ErrorAction SilentlyContinue) { fnm env --use-on-cd | Out-String | Invoke-Expression }; & node (Join-Path $env:PLUGIN_ROOT 'hooks/codex-hook.js') SubagentStart; exit $LASTEXITCODE\"",
+            "timeout": 10
           }
         ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": "^(Bash|PowerShell|Edit|Write)$",
+        "matcher": "^(Bash|PowerShell|apply_patch|Edit|Write)$",
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.js"],
+            "command": "node \"${PLUGIN_ROOT}/hooks/codex-hook.js\" PreToolUse",
+            "commandWindows": "powershell.exe -NoLogo -NoProfile -NonInteractive -Command \"if (Get-Command fnm -ErrorAction SilentlyContinue) { fnm env --use-on-cd | Out-String | Invoke-Expression }; & node (Join-Path $env:PLUGIN_ROOT 'hooks/codex-hook.js') PreToolUse; exit $LASTEXITCODE\"",
             "timeout": 10
           }
         ]
@@ -43,8 +43,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/build-ledger.js"],
+            "command": "node \"${PLUGIN_ROOT}/hooks/codex-hook.js\" Stop",
+            "commandWindows": "powershell.exe -NoLogo -NoProfile -NonInteractive -Command \"if (Get-Command fnm -ErrorAction SilentlyContinue) { fnm env --use-on-cd | Out-String | Invoke-Expression }; & node (Join-Path $env:PLUGIN_ROOT 'hooks/codex-hook.js') Stop; exit $LASTEXITCODE\"",
             "timeout": 10
           }
         ]
@@ -55,9 +55,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js"],
-            "timeout": 5
+            "command": "node \"${PLUGIN_ROOT}/hooks/codex-hook.js\" UserPromptSubmit",
+            "commandWindows": "powershell.exe -NoLogo -NoProfile -NonInteractive -Command \"if (Get-Command fnm -ErrorAction SilentlyContinue) { fnm env --use-on-cd | Out-String | Invoke-Expression }; & node (Join-Path $env:PLUGIN_ROOT 'hooks/codex-hook.js') UserPromptSubmit; exit $LASTEXITCODE\"",
+            "timeout": 10
           }
         ]
       }

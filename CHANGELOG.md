@@ -1,8 +1,15 @@
 # Changelog
 
-All notable changes to razor are documented here. Looking for a version
-number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
-listing — that's why `plugin.json` here carries none.
+All notable changes to razor are documented here. The Codex package version
+lives in `.codex-plugin/plugin.json`. The earlier Claude Code releases use the
+[foundry marketplace](https://github.com/V-Songbird/foundry) listing.
+
+## 1.5.8-codex.1 — 2026-09-08
+
+razor brings its reuse-first checklist and one-time dependency, file and
+build checks to Codex. Send `razor off` or `razor on` to control it for the
+session; use `$unused` to find dependencies nobody imports. The checklist
+keeps the same protections for security, accessibility and work you asked for.
 
 ## 1.5.8 — 2026-09-05
 

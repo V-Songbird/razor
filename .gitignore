@@ -5,6 +5,7 @@
 !/docs/HOW-IT-WORKS.md
 !/docs/SETTINGS.md
 !/docs/BENCHMARKS.md
+!/docs/CODEX-HANDOFF.md
 
 # Crash residue from tests/dispatcher.test.js, which needs a workspace
 # inside the plugin root. Cleaned up on success; ignored so a failed run

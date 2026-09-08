@@ -5,7 +5,8 @@
 // CONTRIBUTING.md's "no shared runtime between plugins" rule means neither
 // plugin can require() this file directly -- each is installed from its own
 // independent repo, with no guarantee this monorepo is present on disk.
-// Each plugin ships its own byte-identical copy instead. Fix here first,
+// The Codex branch additionally trusts its native PLUGIN_DATA directory.
+// The original plugins ship byte-identical copies. Fix shared logic first,
 // then copy the change into both plugin copies in the same commit.
 //
 // Throws on refusal or I/O failure; every current call site (hush's
@@ -45,9 +46,9 @@ function safeWriteFileSync(target, content) {
       // left unresolved fails to match its own contents the moment it holds a
       // short 8.3 segment or a junction, and the write dies with it — state
       // that never lands is the plugin silently doing nothing.
-      // CLAUDE_PLUGIN_DATA is a trusted root because the harness hands it to
-      // us as the place to write; omitting it refused the caller's own dir.
-      const roots = [os.tmpdir(), os.homedir(), process.env.CLAUDE_PLUGIN_DATA]
+      // PLUGIN_DATA (Codex) and CLAUDE_PLUGIN_DATA (legacy fixtures) are
+      // trusted roots supplied by their respective hook harnesses.
+      const roots = [os.tmpdir(), os.homedir(), process.env.PLUGIN_DATA, process.env.CLAUDE_PLUGIN_DATA]
         .filter(Boolean)
         .map((r) => {
           let p = path.win32.resolve(r);

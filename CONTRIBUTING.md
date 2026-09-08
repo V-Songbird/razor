@@ -14,21 +14,23 @@ This plugin is part of the [Foundry Collection](https://github.com/V-Songbird/fo
 ## Structure
 
 ```
+.codex-plugin/
+└── plugin.json        # Codex metadata and package version
 .claude-plugin/
-└── plugin.json        # name, description, author, keywords — NO version
-                        # field (the version is owned by foundry's
-                        # .claude-plugin/marketplace.json)
-CHANGELOG.md            # Keep a Changelog format
+└── plugin.json        # retained for the historical Claude benchmark lane
+CHANGELOG.md            # dated entries, newest first
 LICENSE                 # MIT
 README.md               # plain-language intro first, technical depth after
 skills/                 # if the plugin has skills
 ├── skill-name/
-│   ├── SKILL.md        # Claude Code skill definition
+│   ├── SKILL.md        # Codex skill definition
 │   └── references/     # Reference files loaded by the skill
 hooks/
-└── hooks.json          # Hook event wiring (PreToolUse, PostToolUse, etc.)
-scripts/                # if the plugin has helper CLIs
-└── tests/              # required when the plugin has scripted behavior
+├── hooks.json          # native Codex event wiring
+├── codex-hook.js       # Codex event entrypoint
+└── lib/                # shared runtime and host adapters
+scripts/                # helper CLIs
+tests/                  # Node tests and hook contract fixtures
 ```
 
 Every README shares one skeleton, tone, and style, defined in foundry's [`.github/PLUGIN_README_TEMPLATE.md`](https://github.com/V-Songbird/foundry/blob/main/.github/PLUGIN_README_TEMPLATE.md).
@@ -37,9 +39,9 @@ Every README shares one skeleton, tone, and style, defined in foundry's [`.githu
 
 ## What to keep in mind
 
-**Skills are Claude-facing instruction files.** Changes to `SKILL.md` affect how Claude interprets a skill — be precise, and test manually by invoking the affected skill in a real session before submitting.
+**Skills are Codex-facing instruction files.** Changes to `SKILL.md` affect how Codex interprets a skill — be precise, and verify the affected skill in a real session before release. Resolve bundled scripts relative to the skill file; hook environment variables are not a skill's shell environment.
 
-**Hooks are scripts that run on every tool call or session event.** Keep them fast (no network, no blocking I/O) and test on both Unix and Windows.
+**Hooks run on matching tool calls and session events.** Keep them fast, keep network calls out, and test on Windows, Linux, and macOS. Shared checks belong outside the Codex event adapter.
 
 ---
 
@@ -51,7 +53,21 @@ If this plugin has scripted behavior, run its tests before submitting:
 node --test tests/*.test.js
 ```
 
-PRs that change script behavior without updating tests will not be merged.
+CI runs the suite on Windows, Linux, and macOS with Node 22. The suite needs
+no dependency installation. On Windows with fnm, initialize Node first:
+
+```powershell
+fnm env --use-on-cd | Out-String | Invoke-Expression
+node --test tests/*.test.js
+```
+
+Include regression coverage for changed script behavior. Hook contract tests
+check messages, counters, and file effects in isolated fixtures. They do not
+establish that a particular Codex installation has enabled or trusted the
+hooks. Follow [the setup handoff](docs/CODEX-HANDOFF.md) for that live check.
+
+The recorded benchmark data and artwork describe Claude Code. Preserve those
+results as recorded; Codex performance comparisons need separate runs.
 
 ---
 
@@ -72,7 +88,15 @@ This enables two hooks:
 
 ## Changelog
 
-Add an entry to `CHANGELOG.md` under `[Unreleased]` for every user-visible change. Follow the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Version bumps and marketplace listing changes happen in [foundry](https://github.com/V-Songbird/foundry), not here.
+Add a dated entry at the top of `CHANGELOG.md` for every user-visible change.
+The Codex package version lives in `.codex-plugin/plugin.json`. Keep its
+prerelease suffix for Codex-specific releases. The retained Claude manifest
+has no version; its historical release numbers belong to the
+[foundry](https://github.com/V-Songbird/foundry) listing.
+
+Installation, marketplace changes, and migration are separate from source
+changes. A pull request must not update a contributor's installed plugins or
+personal Codex configuration.
 
 ---
 

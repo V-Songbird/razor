@@ -13,13 +13,18 @@
 // writes never spend the main thread's budgets, and vice versa. The /razor
 // toggle stays session-wide.
 
-const { readInput, emitDeny, readState, writeState, isActive, gateStateId } = require('./razor-lib');
+const { readInput, emitDeny, readState, writeState, isActive, gateStateId, turnKey } = require('./razor-lib');
+
+const { toToolCalls, nativeReason, pathKey } = require('./lib/codex-tools');
+const MANIFEST_GUARD = require('./manifest-guard');
+const IMPORT_GUARD = require('./import-guard');
+const FILE_METER = require('./file-meter');
 
 const GATES = [
   require('./dep-guard'),
-  require('./manifest-guard'),
-  require('./import-guard'),
-  require('./file-meter'),
+  MANIFEST_GUARD,
+  IMPORT_GUARD,
+  FILE_METER,
 ];
 
 function main() {
@@ -30,14 +35,33 @@ function main() {
   const stateId = gateStateId(data);
   const state = stateId === data.session_id ? sessionState : readState(stateId);
 
+  const nativePatch = data.tool_name === 'apply_patch';
+  const calls = nativePatch ? toToolCalls(data) : [data];
   let reason = null;
   for (const gate of GATES) {
-    const r = gate.check(data, state);
-    if (r && !reason) reason = r;
+    for (const call of calls) {
+      // A denied compound patch has not created its files yet. Its retry
+      // must not spend the file budget again for those same paths.
+      if (nativePatch && gate === FILE_METER && call.tool_name === 'Write') {
+        const key = turnKey(data);
+        if (!state.codexPatchFiles || state.codexPatchFiles.turnKey !== key) {
+          state.codexPatchFiles = { turnKey: key, paths: [] };
+        }
+        const file = pathKey(call.tool_input.file_path);
+        if (state.codexPatchFiles.paths.includes(file)) continue;
+        state.codexPatchFiles.paths.push(file);
+      }
+      const view = gate === MANIFEST_GUARD ? 'manifest' : gate === IMPORT_GUARD ? 'import' : null;
+      const gateInput = nativePatch && view && call.razor_gate_views ? call.razor_gate_views[view] : call;
+      const r = gate.check(gateInput, state);
+      if (r && !reason) reason = r;
+    }
   }
   writeState(stateId, state);
 
-  emitDeny('PreToolUse', reason);
+  emitDeny('PreToolUse', nativePatch ? nativeReason(reason) : reason);
 }
 
 if (require.main === module) main();
+
+module.exports = { main };

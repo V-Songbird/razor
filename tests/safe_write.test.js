@@ -162,6 +162,24 @@ describe('safeWriteFileSync: the harness state dir is a trusted root', () => {
     }
   });
 
+  test('accepts a native PLUGIN_DATA root without a Claude alias', () => {
+    const dir = tmpDir();
+    const linked = tmpDir();
+    const restore = linkTo(dir, linked);
+    const previous = process.env.PLUGIN_DATA;
+    try {
+      process.env.PLUGIN_DATA = path.dirname(linked).toUpperCase() + path.sep;
+      withWin32Roots(null, () => {
+        safeWriteFileSync(path.join(dir, 'native.json'), '{"off":true}');
+      });
+      assert.strictEqual(fs.readFileSync(path.join(linked, 'native.json'), 'utf8'), '{"off":true}');
+      assert.deepStrictEqual(tmpLeftovers(linked), []);
+    } finally {
+      if (previous === undefined) delete process.env.PLUGIN_DATA;
+      else process.env.PLUGIN_DATA = previous;
+      restore();
+    }
+  });
   test('accepts it once CLAUDE_PLUGIN_DATA covers it, trailing separator and all', () => {
     const dir = tmpDir();
     const linked = tmpDir();

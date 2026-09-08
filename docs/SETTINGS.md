@@ -2,9 +2,27 @@
 
 Most people never touch these. razor works out of the box.
 
-When you enable the plugin, Claude Code asks you about most of these in its own
-settings panel. The environment variables below do the same thing, and they win
-when both are set.
+Set these environment variables before starting the Codex host that runs
+razor. The hooks inherit that host's environment. This Codex package reads
+`RAZOR_*` variables directly; it does not add a plugin settings panel.
+
+For example, in PowerShell:
+
+```powershell
+$env:RAZOR_FILE_BUDGET = '6'
+codex
+```
+
+For Bash or another POSIX shell:
+
+```sh
+RAZOR_FILE_BUDGET=6 codex
+```
+
+A desktop app already running will not inherit changes made in a new shell.
+Restart it with the intended environment. The Windows hook command initializes
+fnm when it is available, then runs Node. On other platforms, initialize your
+version manager before launching Codex so Node is available in its `PATH`.
 
 ## The switch
 
@@ -12,8 +30,8 @@ when both are set.
 | --- | --- |
 | `RAZOR_DISABLE=1` | Turns everything off |
 
-In a session you can also type `/razor off` and `/razor on`. The switch is on or
-off by design. There are no levels.
+In a session you can also send `razor off` and `razor on` as ordinary messages.
+The switch is on or off by design. There are no levels.
 
 ## Turning off one check
 
@@ -42,11 +60,27 @@ off by design. There are no levels.
 
 Set `RAZOR_FILE_BUDGET=0` to switch the new-file check off entirely.
 
+## Subagents
+
+| Variable | What it does |
+| --- | --- |
+| `RAZOR_AGENT_SKIP` | Comma-separated agent types that should skip the checklist |
+| `RAZOR_AGENT_INJECT` | Comma-separated agent types that should receive it, overriding the skip list |
+
+Read-only exploration and planning agents skip the checklist by default.
+Writing agents and unknown custom types receive it. Names match without
+regard to case, with or without a plugin namespace.
+
 ## Where razor keeps its state
 
-A small file in the plugin data directory your host provides. If there isn't
-one, it falls back to your system temp directory. Old files clean themselves
-up. Nothing leaves your machine.
+A small file in the `PLUGIN_DATA` directory Codex provides. If there isn't
+one, it uses `razor-codex` under your system temp directory. Old files clean
+themselves up. State stays outside the plugin cache. Nothing leaves your
+machine.
+
+Codex provides `PLUGIN_ROOT` and `PLUGIN_DATA` to its hooks. You do not need
+to set them yourself. Existing Claude Code settings and state are separate;
+see the [setup handoff](CODEX-HANDOFF.md) for migration.
 
 ## More
 

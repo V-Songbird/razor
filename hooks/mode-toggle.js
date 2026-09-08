@@ -44,4 +44,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseToggle };
+module.exports = { main, parseToggle };

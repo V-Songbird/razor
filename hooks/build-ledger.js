@@ -120,4 +120,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { shouldFire, diffStats, tally, isUncounted };
+module.exports = { main, shouldFire, diffStats, tally, isUncounted };

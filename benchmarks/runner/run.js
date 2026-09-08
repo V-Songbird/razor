@@ -617,6 +617,23 @@ async function main() {
   const badArms = arms.filter((a) => a !== 'baseline' && !(a in ARM_DIRS));
   if (badArms.length) { console.error(`unknown arms ${badArms} (rival needs --rival-dir)`); process.exit(1); }
 
+  // This runner drives Claude. Native Codex hooks cannot be measured by
+  // loading this branch through Claude's --plugin-dir.
+  const nativeArms = arms.filter((arm) => {
+    if (!ARM_DIRS[arm]) return false;
+    try {
+      return fs.readFileSync(path.join(ARM_DIRS[arm], 'hooks', 'hooks.json'), 'utf8').includes('codex-hook.js');
+    } catch {
+      return false; // Existing instrument checks handle absent plugin files.
+    }
+  });
+  if (nativeArms.length) {
+    console.error('This is the Claude benchmark runner; Codex hook arms cannot run here: ' +
+      nativeArms.join(', ') + '. Set RAZOR_DIR (or --arm-dir) to a Claude checkout. ' +
+      'Offline --selftest and --rescore remain available.');
+    process.exit(1);
+  }
+
   const models = flag('models', 'sonnet').split(',').map((m) => m.trim());
   const workers = Number(flag('workers', 4));
   const stamp = stampNow();
