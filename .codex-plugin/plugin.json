@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI checkpoints at the harness level for real engineering work — nudges toward the simplest solution and asks one evidence-backed \"do we need this?\" before new dependencies, file sprawl, and unchecked build growth.",
+  "description": "YAGNI checkpoints at the harness level for real engineering work \u2014 nudges toward the simplest solution and asks one evidence-backed \"do we need this?\" before new dependencies, file sprawl, and unchecked build growth.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",
@@ -18,7 +18,7 @@
     "dependency-guard",
     "lazy"
   ],
-  "version": "1.5.8-codex.1",
+  "version": "1.5.8-codex.1+codex.20260908221048",
   "skills": "./skills/",
   "interface": {
     "displayName": "razor",
@@ -31,6 +31,7 @@
       "Interactive"
     ],
     "websiteURL": "https://github.com/V-Songbird/razor",
+    "composerIcon": "./assets/icon.svg",
     "logo": "./assets/logo.svg",
     "logoDark": "./assets/logo-dark.svg",
     "defaultPrompt": [
