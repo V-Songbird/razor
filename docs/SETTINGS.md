@@ -71,6 +71,11 @@ Read-only exploration and planning agents skip the checklist by default.
 Writing agents and unknown custom types receive it. Names match without
 regard to case, with or without a plugin namespace.
 
+The skip list matches the role Codex actually reports. Children reported as
+`default` receive the checklist even when their prompt only asks them to read.
+Named roles must be available in Codex's own agent configuration; razor does
+not change that configuration.
+
 ## Where razor keeps its state
 
 A small file in the `PLUGIN_DATA` directory Codex provides. If there isn't

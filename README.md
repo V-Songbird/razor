@@ -165,7 +165,8 @@ anything. What to remove stays your call.
 ## The numbers
 
 Historical Claude Code sessions, start to finish, on Claude Opus 5. These
-measurements describe that host and model; a Codex comparison needs its own run.
+measurements describe that host and model. The [Codex runner](benchmarks/CODEX-HARNESS.md)
+checks current behavior in Codex.
 
 Same job, same starter files, same test at the end. The code gets **run** — a short answer that breaks the task counts as a failure,
 not a win. 39 sessions per setup, in one run.
@@ -233,7 +234,7 @@ Everything technical lives here, so this page can stay short:
 | [How razor works](docs/HOW-IT-WORKS.md) | The checklist, the checks behind it, what runs and when |
 | [Settings](docs/SETTINGS.md) | Every switch and number, and what each one does |
 | [The numbers](docs/BENCHMARKS.md) | Full results, including where razor loses |
-| [Run the benchmarks](benchmarks/) | The historical Claude Code harness |
+| [Run the benchmarks](benchmarks/) | Codex checks and the original Claude Code harness |
 | [Codex setup handoff](docs/CODEX-HANDOFF.md) | Installation prerequisites and live verification |
 
 ## Good to know

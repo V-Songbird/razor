@@ -90,7 +90,7 @@ node scripts/git-hooks/check-readme-nav.js
 git diff --check
 ~~~
 
-The pre-port suite passed 331 tests. Final Windows validation passed all 370 tests (39 added), with no failures or skips. Added tests cover native lifecycle output,
+The pre-port suite passed 331 tests. Initial source-port Windows validation passed all 370 tests (39 added), with no failures or skips. Added tests cover native lifecycle output,
 state/toggle isolation, turn/agent identity, settings, compound patches,
 dependency retries, file budgets, move scopes, empty manifests, malformed
 input and failed Stop-state persistence.
@@ -102,9 +102,12 @@ Independent code review produced regression cases for moved dependency scope,
 empty requirements updates and failed Stop-state persistence; all are covered.
 
 CI is configured for Node 22 on Windows, Linux and macOS, targeting `main` and
-`Codex`. Only Windows execution is claimed locally. Installed activation, live
-skill invocation, non-Windows execution and comparative Codex model benchmarks
-are not claimed.
+`Codex`. Only Windows execution is claimed locally. Subsequent source-hook
+headless validation completed 76 paired Sol/high sessions and ten native
+functional checks. The local report is `benchmarks/results/CODEX-RESULTS.md`;
+see [the runner guide](../benchmarks/CODEX-HARNESS.md) to reproduce the checks.
+Permanent installed activation, live skill invocation and non-Windows
+execution remain separate checks.
 
 ## Coverage boundaries
 

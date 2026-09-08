@@ -1,5 +1,9 @@
-# Reproduce razor's benchmarks
+# Razor benchmarks
 
+Run Codex checks and create a local report with the [Codex runner](CODEX-HARNESS.md).
+The original Claude Code runner is also available below.
+
+## Original Claude Code benchmark
 This is the original Claude Code benchmark harness. To reproduce its live
 runs from the Codex branch, set `RAZOR_DIR` to a separate Claude checkout
 (for the port baseline, commit `e0cf7ceb4d09efb5ea651555aa8354d03b1c6c2e`).
