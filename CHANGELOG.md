@@ -4,6 +4,10 @@ All notable changes to razor are documented here. The Codex package version
 lives in `.codex-plugin/plugin.json`. The earlier Claude Code releases use the
 [foundry marketplace](https://github.com/V-Songbird/foundry) listing.
 
+## 1.5.10-codex.1 — 2026-09-09
+
+New Tinta y oficio banners adapt to light and dark GitHub themes. Plugin icons and logos now use the same identity in Codex.
+
 ## 1.5.9-codex.1 — 2026-09-09
 
 Product guides and decisions now accompany the Codex edition. Research and
