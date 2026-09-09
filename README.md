@@ -16,6 +16,19 @@
 
 > **TL;DR** — Before adding code, ask whether the project already has what it needs.
 
+<!-- foundry:hero -->
+<p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
+
+Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance. [Evidence and methodology](https://github.com/V-Songbird/foundry/tree/main/docs/razor).
+
+<details>
+<summary>Watch the recorded Claude Code demo</summary>
+
+<p align="center"><img src="assets/demo.svg" alt="Recorded Claude Code demonstration of Razor" width="700"></p>
+
+</details>
+<!-- /foundry:hero -->
+
 <p align="center"><img src="assets/mascot.svg" alt="Ember clears away extra packages and helper boxes, leaving only the requested work." width="700"></p>
 
 ## What is this?

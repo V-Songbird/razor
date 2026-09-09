@@ -4,6 +4,10 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.11 — 2026-09-09
+
+Restore the original product hero and recorded Claude demo with clear provenance. Use white light-theme banners.
+
 ## 1.5.10 — 2026-09-09
 
 New Tinta y oficio banners adapt to light and dark GitHub themes.
