@@ -4,6 +4,12 @@ All notable changes to razor are documented here. The Codex package version
 lives in `.codex-plugin/plugin.json`. The earlier Claude Code releases use the
 [foundry marketplace](https://github.com/V-Songbird/foundry) listing.
 
+## 1.5.9-codex.1 — 2026-09-09
+
+Product guides and decisions now accompany the Codex edition. Research and
+benchmark evidence live in Foundry, with updated links and coordinated edition
+pages. Plugin behavior is unchanged by this maintenance release.
+
 ## Unreleased
 
 The benchmark now compares the same Codex model with razor on and off, and

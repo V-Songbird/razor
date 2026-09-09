@@ -7,7 +7,7 @@ Every session is scored on the code it left behind, and correctness is checked
 by running that code. **A short answer that breaks the task scores as a
 failure, not a win.**
 
-You can run all of it yourself. See [benchmarks/](../benchmarks/).
+You can run all of it yourself. See [benchmarks/](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor).
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -172,7 +172,7 @@ far, and less reliably.
 
 ## Reproducing this
 
-The harness is in [benchmarks/](../benchmarks/). It drives real sessions
+The harness is in [benchmarks/](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor). It drives real sessions
 against the same fixed jobs, so it costs real money — the cheap default run is
 about $3 on Sonnet. Start with `node runner/run.js --selftest`, which is free
 and proves every scorer catches a wrong answer before you spend anything.

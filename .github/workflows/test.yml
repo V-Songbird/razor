@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [main, Codex]
+    branches: [Codex]
   pull_request:
-    branches: [main, Codex]
+    branches: [Codex]
 
 jobs:
   test:
@@ -24,7 +24,17 @@ jobs:
           node-version: 22
 
       - name: manifests parse
-        run: node -e 'for (const f of [".codex-plugin/plugin.json",".claude-plugin/plugin.json","hooks/hooks.json"]) JSON.parse(require("fs").readFileSync(f,"utf-8"))'
+        run: node -e 'for (const f of [".codex-plugin/plugin.json","hooks/hooks.json"]) JSON.parse(require("fs").readFileSync(f,"utf-8"))'
 
       - name: run tests
         run: node --test tests/*.test.js
+  runtime-check:
+    name: Runtime tests
+    needs: [test]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every runtime test job to pass
+        env:
+          RESULT: ${{ needs.test.result }}
+        run: test "$RESULT" = success

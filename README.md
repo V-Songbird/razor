@@ -1,264 +1,95 @@
+<!-- foundry:edition Codex -->
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg" />
     <img src="assets/logo.svg" alt="razor" width="240" />
   </picture>
   <h1>razor</h1>
-  <p><strong>Codex loves to add code. razor makes it stop and ask "do we even need this?" first — and actually makes the question stick.</strong></p>
-
-  <img src="assets/hero.svg" alt="A poster of all 27 no-plugin sessions on the benchmark's nine dependency jobs, Claude Opus, as thin columns whose height is the lines of code each one added. A stepped green razor's edge runs across at the level the middle razor run lands on that same job, and the pale column tops above it are the offcut — 193 lines across 27 sessions. It reads: 193 lines never shipped." width="700" />
-
-  <p><em>This is where the razor falls. Historical Claude Code benchmark artwork.</em></p>
+  <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
 </div>
 
-<p align="center">
-    <a href="https://github.com/V-Songbird/razor/stargazers"><img src="https://img.shields.io/github/stars/V-Songbird/razor?style=social" alt="GitHub stars"/></a>
-    <a href="https://github.com/V-Songbird/razor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/V-Songbird/razor" alt="License"/></a>
-    <a href="https://developers.openai.com/codex/plugins"><img src="https://img.shields.io/badge/Codex-111111" alt="Codex"/></a>
-</p>
+<!-- foundry:platform identity -->
+**Edition: Codex.** Use this edition’s installation and compatibility notes below.
+<!-- /foundry:platform identity -->
 
-<p align="center">
-    <a href="#install"><strong>Install</strong></a> &nbsp;·&nbsp;
-    <a href="#what-is-this">What is this?</a> &nbsp;·&nbsp;
-    <a href="#why-youd-want-it">Why you'd want it</a> &nbsp;·&nbsp;
-    <a href="#the-numbers">The numbers</a> &nbsp;·&nbsp;
-    <a href="#going-deeper">Going deeper</a>
-</p>
+[**Install**](#install) · [What is this?](#what-is-this) · [What you can do](#what-you-can-do) · [The numbers](#the-numbers) · [Going deeper](#going-deeper)
 
-> **TL;DR** — Ask for one small feature and Codex might install a library and five extra files to build it. razor makes it check "do we already have this?" before writing anything. Each check asks once, then gets out of the way.
+> **TL;DR** — Before adding code, ask whether the project already has what it needs.
 
----
-
-<p align="center"><img src="assets/mascot.svg" alt="A cartoon. Ember, a round orange blob with a little flame on its head, types at a keyboard while a tower of boxes piles up beside it: what you asked for, then helper.js, utils, a new package, another, config, wrapper, its flame flickering wildly. A green razor badge drops in. One green swipe, and every box above the first flies off, the new package stamped with a red cross; only what you asked for stays, with a green YAGNI tag beside it. Ember glances over, its flame settles to a small steady glow, and it types slowly with eyes half closed. At the end one bubble appears: Done. Nothing extra." width="700"></p>
-
-<p align="center"><img src="assets/demo.svg" alt="The same ask played twice, side by side. The prompt: In query.js, implement and export parseQuery(qs): parse a URL query string (like &#x27;host=localhost&amp;port=8080&#x27;) into a plain object of key -&gt; value. Handle a leading &#x27;?&#x27;, and percent-decode values. Keep the existing module.exports = { parseQuery } shape. Without razor, Claude wrote query.js in 18 lines. With razor, 4 lines, with what the platform already has. Across the run, 3 sessions each way: 18 lines on average without razor, 4 with it. One real session each on Claude Opus 5, replayed on the recorded wall clock." width="700"></p>
-
-The benchmark artwork and results on this page come from recorded Claude Code
-sessions. Codex validation is tracked separately in the
-[setup handoff](docs/CODEX-HANDOFF.md).
+<p align="center"><img src="assets/mascot.svg" alt="Ember clears away extra packages and helper boxes, leaving only the requested work." width="700"></p>
 
 ## What is this?
 
-AI assistants love to add things.
-
-You ask for one small feature. You get a new library, five helper files, and
-some extra structure for a future that never arrives. It all works. It is also
-now yours — yours to read, yours to keep running, yours to eventually delete.
-
-Nobody decided that. It just accumulated, one reasonable-looking step at a time.
-
-razor hands Codex a short checklist to run before it writes anything. Do we
-need this at all? Is it already in the codebase? Does the language do it for
-free? Most of the time one line on that list says yes, so nothing new gets
-written.
-
-That's it. That's the whole plugin.
+AI assistants love to add things. One small feature can turn into a new library, helper files and abstractions that are now yours to maintain. razor adds a short checklist and targeted checks so existing code and language features get considered first.
 
 ## Why you'd want it
 
-Here's a real one from the Claude Code benchmarks. The ask: write
-`parseQuery(qs)`, which turns a query string
-like `host=localhost&port=8080` into a plain object. Handle a leading `?`,
-decode the values. That's it.
-
-**Without razor** — it built a parser by hand. Eighteen lines, all of them
-now yours to maintain:
-
-```diff
- function parseQuery(qs) {
-   // Parse a URL query string into an object of key -> value.
--  throw new Error('not implemented');
-+  const out = {};
-+  if (typeof qs !== 'string' || qs === '') return out;
-+
-+  const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
-+  for (const [key, value] of params) {
-+    // defineProperty so keys like '__proto__' become own properties
-+    // instead of mutating the prototype.
-+    Object.defineProperty(out, key, {
-+      value,
-+      writable: true,
-+      enumerable: true,
-+      configurable: true,
-+    });
-+  }
-+  return out;
- }
-```
-
-**With razor** — it asked what Node already has, and used it. Four lines:
-
-```diff
- function parseQuery(qs) {
--  // Parse a URL query string into an object of key -> value.
--  throw new Error('not implemented');
-+  return Object.fromEntries(new URLSearchParams(qs.replace(/^\?/, '')));
- }
-```
-
-Same ask, same tests, both green. Across that run, three sessions each way on
-Claude Opus 5: 18 lines on average without razor, 4 with it.
-
-**The reflex is to build. razor's first question is whether you have to.**
-Here you didn't, and the answer was already in the language.
-
-<p align="center"><img src="assets/bench-supplychain.svg" alt="More than 1.2 million malicious open-source packages blocked to date, and climbing; across 258 sessions razor opened zero doors into that pool" width="700"></p>
-
-Every package you add is a door you now maintain. The historical benchmark
-artwork above puts that cost in perspective: across those 258 Claude Code
-test sessions, razor added no packages.
+- Reuse what the project already has.
+- Reconsider unnecessary dependencies before installing them.
+- Notice file growth before a small task becomes a larger project.
+- Find declared dependencies that no source file appears to use.
 
 ## How it works
 
-At the start of every session, Codex gets a short list to run before it writes
-anything — need it at all, already have it, does the language cover it. It
-stops at the first line that applies.
-
-A few checks sit behind the list, in case Codex gets partway into adding
-something anyway. Each one speaks **once**, and the retry always goes through.
-razor asks; it doesn't argue.
-
-It never trims input checks on untrusted data, error handling that would lose
-your work, security, or accessibility. Ask for the full version and you get
-it, no debate.
+A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
 
 ## Install
 
-razor works with Codex and Node.js 22 or newer. Install it from Foundry:
+<!-- foundry:platform install -->
+Requirements: Node.js 22 or later, Git and a Codex host with plugin support.
 
 ```text
 codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-See the [setup guide](docs/CODEX-HANDOFF.md) to check that it is active.
-Codex will ask you to review its hooks before they run. Git enables the
-session build check.
+Review and enable its hooks, then start a new Codex session.
+<!-- /foundry:platform install -->
 
 ## What you can do
 
-razor runs itself. These are the only controls:
-
-| You want to… | Command |
+| You want to | Outcome |
 | --- | --- |
-| Turn razor off or back on for the session | Send `razor off` · `razor on` |
-| Find packages in your project that no file uses | `$unused` |
+| Keep a small task small | Check reuse, dependencies and file growth |
+| Pause or resume the checks | Change the session toggle |
+| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
-Choose the `unused` skill from razor if Codex shows a namespaced skill name.
-Send the on/off controls as ordinary messages; slash commands may be handled
-by Codex before razor receives them.
-
-Everything else has a sensible default. If you want to change one, see
-[Settings](docs/SETTINGS.md).
-
-## Finding packages nobody uses
-
-`$unused` is the other half of the job. The checks above stop **new**
-packages getting in; this one finds the ones already sitting in your project
-that no file actually imports.
-
-It sorts what it finds into three piles, and it is careful about the
-difference:
-
-- **confirmed unused** — it checked properly and found nothing needs this.
-- **likely unused** — nothing mentions it, but nothing could prove it either.
-  A lead, not a verdict.
-- **unknown** — something still points at it. Usually build tooling.
-
-It only tells you. It never edits your package list and never uninstalls
-anything. What to remove stays your call.
+<!-- foundry:platform commands -->
+Use `razor off` / `razor on` for the session toggle and select the installed `unused` skill for a dependency report.
+<!-- /foundry:platform commands -->
 
 ## The numbers
 
-Historical Claude Code sessions, start to finish, on Claude Opus 5. These
-measurements describe that host and model. The [Codex runner](benchmarks/CODEX-HARNESS.md)
-checks current behavior in Codex.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured.
 
-Same job, same starter files, same test at the end. The code gets **run** — a short answer that breaks the task counts as a failure,
-not a win. 39 sessions per setup, in one run.
+<!-- foundry:platform benchmarks -->
+<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/razor/validation/codex-benchmark-source-2026-09-08.md","date":"2026-09-08"} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| GPT-5.6 Sol | No plugin | 19/26 | 19.2 |
+| GPT-5.6 Sol | razor | 26/26 | 9.6 |
 
-Beside razor: [ponytail](https://github.com/DietrichGebert/ponytail), a plugin that also tells
-Claude to write less and say less.
+Controlled Codex run at high reasoning on Windows: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, elapsed time was 1.8% higher and input tokens 0.8% higher; those measures did not improve. This exploratory result does not compare Sol against Claude.
+<!-- /foundry:platform benchmarks -->
 
-**Does it still work?** A session counts as clean only if the code is correct *and* no package was
-added.
-
-| setup | clean sessions |
-| --- | --- |
-| no plugin | 35 / 39 |
-| ponytail | 39 / 39 |
-| **razor** | **39 / 39** |
-
-**How much code?** Lines written for the same job, averaged over the eleven coding jobs:
-
-| setup | lines |
-| --- | --- |
-| no plugin | 18.3 |
-| ponytail | 12.2 |
-| **razor** | **9.6** |
-
-razor wrote fewer lines than ponytail on nine of the eleven jobs and tied on the other two.
-
-**And what does it cost?** Per session, same run:
-
-| setup | cost |
-| --- | --- |
-| no plugin | $0.155 |
-| ponytail | $0.151 |
-| **razor** | **$0.121** |
-
-**And over a whole session?** This is the one that surprised us. Five requests in a row on the same
-project — build a feature, build another, fix a bug in the second one, build two more. Total lines
-in the project after each turn, on Claude Opus. This is a separate multi-turn run, with no third
-setup in it:
-
-| after turn | no plugin | razor |
-| --- | --- | --- |
-| 1 | 57 | **29** |
-| 3 | 100 | **43** |
-| 5 | 136 | **58** |
-
-The gap **grows** as the session goes on. And nothing broke: every feature passed in both setups,
-every time.
-
-> [!IMPORTANT]
-> **Where razor doesn't win.** It does not make code easier to *read* — we tested that with blind
-> side-by-side comparisons and razor lost. ponytail is genuine competition, not a straw man: it
-> also blocked every unnecessary package, and it beat plain Claude on both size and cost. The
-> savings are also clearly smaller on Sonnet than on Opus, and the cost saving on Sonnet doesn't
-> reproduce reliably between runs. The full picture, wins and losses, is in
-> [the numbers](docs/BENCHMARKS.md).
-
-*Numbers move between runs, sometimes by a lot. Run it yourself — see [benchmarks/](benchmarks/).*
+*Results can vary between runs.*
 
 ## Going deeper
 
-Everything technical lives here, so this page can stay short:
+<!-- foundry:platform links -->
+[How it works](docs/HOW-IT-WORKS.md) · [Settings](docs/SETTINGS.md) · [Codex setup](docs/SETUP.md) · [Native benchmark harness](https://github.com/V-Songbird/foundry/blob/main/benchmarks/razor/CODEX-HARNESS.md)
+<!-- /foundry:platform links -->
 
-| | |
-| --- | --- |
-| [How razor works](docs/HOW-IT-WORKS.md) | The checklist, the checks behind it, what runs and when |
-| [Settings](docs/SETTINGS.md) | Every switch and number, and what each one does |
-| [The numbers](docs/BENCHMARKS.md) | Full results, including where razor loses |
-| [Run the benchmarks](benchmarks/) | Codex checks and the original Claude Code harness |
-| [Codex setup handoff](docs/CODEX-HANDOFF.md) | Installation prerequisites and live verification |
+[Foundry](https://github.com/V-Songbird/foundry) holds the research, methodology and detailed evidence for this plugin.
 
 ## Good to know
 
-> [!NOTE]
-> **What razor will never do.** It never edits your code, your package list, or
-> your lockfile — every check is a message to Codex, and the retry always goes
-> through. It never asks *you* anything either; every question goes to Codex,
-> and the one line it writes for you is a note, not a prompt. It never installs
-> anything. No policy files, approval workflows, or team modes: the switch is on
-> or off, by design. No linting, formatting, or code review — other tools do
-> that better. And nothing leaves your machine: razor makes no network calls. It
-> reads your git history a few times a session to notice when a session has
-> grown a lot, and it never writes to it.
+Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-This branch uses Codex plugin hooks. The recorded Claude Code benchmarks
-remain available in their original form.
+<!-- foundry:platform compatibility -->
+Native patch checks cover previewable `apply_patch` changes. Shell writes and unsupported or ambiguous patches can bypass those checks. See [setup and coverage](docs/SETUP.md).
+<!-- /foundry:platform compatibility -->
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT — see [LICENSE](LICENSE).

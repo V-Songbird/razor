@@ -16,8 +16,6 @@ This plugin is part of the [Foundry Collection](https://github.com/V-Songbird/fo
 ```
 .codex-plugin/
 └── plugin.json        # Codex metadata and package version
-.claude-plugin/
-└── plugin.json        # retained for the historical Claude benchmark lane
 CHANGELOG.md            # dated entries, newest first
 LICENSE                 # MIT
 README.md               # plain-language intro first, technical depth after
@@ -64,7 +62,7 @@ node --test tests/*.test.js
 Include regression coverage for changed script behavior. Hook contract tests
 check messages, counters, and file effects in isolated fixtures. They do not
 establish that a particular Codex installation has enabled or trusted the
-hooks. Follow [the setup handoff](docs/CODEX-HANDOFF.md) for that live check.
+hooks. Follow [the setup guide](docs/SETUP.md) for that live check.
 
 The recorded benchmark data and artwork describe Claude Code. Preserve those
 results as recorded; Codex performance comparisons need separate runs.
@@ -79,10 +77,10 @@ Run this once after cloning:
 git config core.hooksPath scripts/git-hooks
 ```
 
-This enables two hooks:
+This enables the following commit checks:
 
 - `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory.
-- `commit-msg` scans the commit message against a private blocklist of reference-project names. The blocklist lives outside this repo, so in a public clone the check finds nothing and passes. If it ever blocks you, rename the project in your message and commit again.
+- Public source names and attribution are allowed in documentation and commit messages. Keep credentials and personal session data out of commits.
 
 ---
 

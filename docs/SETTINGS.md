@@ -85,7 +85,7 @@ machine.
 
 Codex provides `PLUGIN_ROOT` and `PLUGIN_DATA` to its hooks. You do not need
 to set them yourself. Existing Claude Code settings and state are separate;
-see the [setup handoff](CODEX-HANDOFF.md) for migration.
+see the [setup guide](SETUP.md) for migration.
 
 ## More
 
