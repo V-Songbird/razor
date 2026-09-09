@@ -4,6 +4,12 @@ All notable changes to razor are documented here. Looking for a version
 number? It lives in the [foundry marketplace](https://github.com/V-Songbird/foundry)
 listing — that's why `plugin.json` here carries none.
 
+## 1.5.9 — 2026-09-09
+
+Product guides and decisions now accompany the Claude edition. Research and
+benchmark evidence live in Foundry, with updated links and coordinated edition
+pages. Plugin behavior is unchanged by this maintenance release.
+
 ## 1.5.8 — 2026-09-05
 
 In Ember's cartoon the new package now leaves with a red cross, and what
