@@ -14,26 +14,13 @@
 
 [**Install**](#install) · [What is this?](#what-is-this) · [What you can do](#what-you-can-do) · [The numbers](#the-numbers) · [Going deeper](#going-deeper)
 
-> **TL;DR** — Before adding code, ask whether the project already has what it needs.
-
-<!-- foundry:hero -->
-<p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
-
-Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance. [Evidence and methodology](https://github.com/V-Songbird/foundry/tree/main/docs/razor).
-
-<details>
-<summary>Watch the recorded Claude Code demo</summary>
-
-<p align="center"><img src="assets/demo.svg" alt="Recorded Claude Code demonstration of Razor" width="700"></p>
-
-</details>
-<!-- /foundry:hero -->
-
-<p align="center"><img src="assets/mascot.svg" alt="Ember clears away extra packages and helper boxes, leaving only the requested work." width="700"></p>
-
 ## What is this?
 
-AI assistants love to add things. One small feature can turn into a new library, helper files and abstractions that are now yours to maintain. razor adds a short checklist and targeted checks so existing code and language features get considered first.
+You ask for a small query parser. The assistant reaches for a package, adds helper files, and leaves you more code to maintain. Razor asks whether the language or your project already has what the task needs.
+
+It puts a short checklist before new code and uses targeted checks to prompt reconsideration of unnecessary additions. The aim is to finish the requested work with less to maintain. This example illustrates the workflow; the measurements below describe specific recorded runs.
+
+<p align="center"><img src="assets/mascot.svg" alt="Ember considers additions, learns the Razor checklist and gets to work." width="700"></p>
 
 ## Why you'd want it
 
@@ -45,6 +32,18 @@ AI assistants love to add things. One small feature can turn into a new library,
 ## How it works
 
 A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
+
+## What you can do
+
+| You want to | Outcome |
+| --- | --- |
+| Keep a small task small | Check reuse, dependencies and file growth |
+| Pause or resume the checks | Change the session toggle |
+| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
+
+<!-- foundry:platform commands -->
+Use `razor off` / `razor on` for the session toggle and select the installed `unused` skill for a dependency report.
+<!-- /foundry:platform commands -->
 
 ## Install
 
@@ -59,17 +58,13 @@ codex plugin add razor@foundry
 Review and enable its hooks, then start a new Codex session.
 <!-- /foundry:platform install -->
 
-## What you can do
+## Good to know
 
-| You want to | Outcome |
-| --- | --- |
-| Keep a small task small | Check reuse, dependencies and file growth |
-| Pause or resume the checks | Change the session toggle |
-| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
+Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-<!-- foundry:platform commands -->
-Use `razor off` / `razor on` for the session toggle and select the installed `unused` skill for a dependency report.
-<!-- /foundry:platform commands -->
+<!-- foundry:platform compatibility -->
+Native patch checks cover previewable `apply_patch` changes. Shell writes and unsupported or ambiguous patches can bypass those checks. See [setup and coverage](docs/SETUP.md).
+<!-- /foundry:platform compatibility -->
 
 ## The numbers
 
@@ -87,6 +82,19 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 
 *Results can vary between runs.*
 
+<!-- foundry:hero -->
+<p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
+
+Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance. [Evidence and methodology](https://github.com/V-Songbird/foundry/tree/main/docs/razor).
+
+<details>
+<summary>Watch the recorded Claude Code demo</summary>
+
+<p align="center"><img src="assets/demo.svg" alt="Recorded Claude Code demonstration of Razor" width="700"></p>
+
+</details>
+<!-- /foundry:hero -->
+
 ## Going deeper
 
 <!-- foundry:platform links -->
@@ -94,14 +102,6 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 <!-- /foundry:platform links -->
 
 [Foundry](https://github.com/V-Songbird/foundry) holds the research, methodology and detailed evidence for this plugin.
-
-## Good to know
-
-Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
-
-<!-- foundry:platform compatibility -->
-Native patch checks cover previewable `apply_patch` changes. Shell writes and unsupported or ambiguous patches can bypass those checks. See [setup and coverage](docs/SETUP.md).
-<!-- /foundry:platform compatibility -->
 
 ## License
 
