@@ -1,27 +1,69 @@
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg" />
-    <img src="assets/logo.svg" alt="razor" width="160" />
+    <img src="assets/logo.svg" alt="razor" width="240" />
   </picture>
   <h1>razor</h1>
-  <p>Check whether new dependencies and extra code are needed before adding them.</p>
+  <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
 </div>
 
-[Install](#install) · [Going deeper](#going-deeper) · [License](#license)
+**Choose your edition: [Claude Code](https://github.com/V-Songbird/razor/tree/Claude) · [Codex](https://github.com/V-Songbird/razor/tree/Codex)**
 
-## Install
+[**Get started**](#get-started) · [What is this?](#what-is-this) · [How it works](#how-it-works) · [What you can do](#what-you-can-do) · [Evidence](#evidence-and-benchmarks)
 
-Choose your coding assistant. Its edition page contains the source, requirements, installation instructions and usage guide.
+> **TL;DR** — Before adding code, ask whether the project already has what it needs.
 
-| Platform | Edition |
+<p align="center"><img src="assets/mascot.svg" alt="Ember clears away extra packages and helper boxes, leaving only the requested work." width="700"></p>
+
+## What is this?
+
+AI assistants love to add things. One small feature can turn into a new library, helper files and abstractions that are now yours to maintain. razor adds a short checklist and targeted checks so existing code and language features get considered first.
+
+## Why you'd want it
+
+- Reuse what the project already has.
+- Reconsider unnecessary dependencies before installing them.
+- Notice file growth before a small task becomes a larger project.
+- Find declared dependencies that no source file appears to use.
+
+## How it works
+
+A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
+
+## Get started
+
+Choose the assistant you use. Its edition page has the installation steps,
+commands and compatibility notes for your setup.
+
+| Your assistant | Status | Next step |
+| --- | --- | --- |
+| Claude Code | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Claude) |
+| Codex | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Codex) |
+
+## What you can do
+
+| You want to | Outcome |
 | --- | --- |
-| Claude Code | [Open the Claude Code edition](https://github.com/V-Songbird/razor/tree/Claude) |
-| Codex | [Open the Codex edition](https://github.com/V-Songbird/razor/tree/Codex) |
+| Keep a small task small | Check reuse, dependencies and file growth |
+| Pause or resume the checks | Change the session toggle |
+| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
+
+## Good to know
+
+Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
+
+## Evidence and benchmarks
+
+Measurements belong to the model and setup that produced them. Each edition
+keeps its own results, limitations and any measurements still missing:
+
+- [Claude Code results and limitations](https://github.com/V-Songbird/razor/tree/Claude#the-numbers)
+- [Codex evidence and measurement status](https://github.com/V-Songbird/razor/tree/Codex#the-numbers)
 
 ## Going deeper
 
-[Foundry](https://github.com/V-Songbird/foundry) contains the collection overview, research and benchmark tools. This branch is the entry page; the linked editions contain the plugin.
+[Research and validation](https://github.com/V-Songbird/foundry/tree/main/docs/razor) · [Benchmark instruments and retained evidence](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor) · [Foundry](https://github.com/V-Songbird/foundry)
 
 ## License
 
-[MIT](LICENSE).
+MIT — see [LICENSE](LICENSE).
