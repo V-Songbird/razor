@@ -1,8 +1,8 @@
 <!-- foundry:edition Claude -->
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg" />
-    <img src="assets/logo.svg" alt="razor" width="240" />
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png" />
+    <img src="assets/banner-light.png" alt="razor" width="900" />
   </picture>
   <h1>razor</h1>
   <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
