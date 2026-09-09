@@ -1,4 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-  <path d="m14 3 7 7-11 11-7-7Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
-  <path d="m9 15 6-6M8 5l2 2m7 7 2 2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="razor icon" style="--accent:#bf4935;--paper:#fff"><style>:root{--icon-ink:#252820}@media(prefers-color-scheme:dark){:root{--icon-ink:#eee9de}}</style><g stroke="var(--icon-ink)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M25 78L76 24Q80 19 85 24L103 41 97 48 104 55 56 106Q51 110 46 106L28 90 34 83Z" fill="#bf4935"/><path d="M48 75L74 47Q77 44 81 48Q84 51 81 55L55 82Q52 84 49 81Q45 78 48 75Z" fill="#ffffff"/></g></svg>
