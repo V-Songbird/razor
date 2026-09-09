@@ -18,7 +18,7 @@
     "dependency-guard",
     "lazy"
   ],
-  "version": "1.5.9-codex.1+codex.20260909081411",
+  "version": "1.5.10-codex.1",
   "skills": "./skills/",
   "interface": {
     "displayName": "razor",
@@ -31,11 +31,12 @@
       "Interactive"
     ],
     "websiteURL": "https://github.com/V-Songbird/razor",
-    "composerIcon": "./assets/icon.svg",
-    "logo": "./assets/logo.svg",
-    "logoDark": "./assets/logo-dark.svg",
+    "composerIcon": "./assets/icon-on-light.png",
+    "logo": "./assets/logo-on-light.png",
+    "logoDark": "./assets/logo-on-dark.png",
     "defaultPrompt": [
       "Find unused dependencies in this project."
-    ]
+    ],
+    "brandColor": "#BF4935"
   }
 }
