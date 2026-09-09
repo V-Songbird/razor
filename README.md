@@ -11,7 +11,60 @@
 
 [**Get started**](#get-started) · [What is this?](#what-is-this) · [How it works](#how-it-works) · [What you can do](#what-you-can-do) · [Evidence](#evidence-and-benchmarks)
 
-> **TL;DR** — Before adding code, ask whether the project already has what it needs.
+
+
+## What is this?
+
+You ask for a small query parser. The assistant reaches for a package, adds helper files, and leaves you more code to maintain. Razor asks whether the language or your project already has what the task needs.
+
+It puts a short checklist before new code and uses targeted checks to prompt reconsideration of unnecessary additions. The aim is to finish the requested work with less to maintain. This example illustrates the workflow; the measurements below describe specific recorded runs.
+
+<p align="center"><img src="assets/mascot.svg" alt="Ember considers additions, learns the Razor checklist and gets to work." width="700"></p>
+
+
+
+## Why you'd want it
+
+- Reuse what the project already has.
+- Reconsider unnecessary dependencies before installing them.
+- Notice file growth before a small task becomes a larger project.
+- Find declared dependencies that no source file appears to use.
+
+## How it works
+
+A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
+
+## What you can do
+
+| You want to | Outcome |
+| --- | --- |
+| Keep a small task small | Check reuse, dependencies and file growth |
+| Pause or resume the checks | Change the session toggle |
+| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
+
+## What you can do
+
+| You want to | Outcome |
+| --- | --- |
+| Keep a small task small | Check reuse, dependencies and file growth |
+| Pause or resume the checks | Change the session toggle |
+| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
+
+## Get started
+
+Choose the assistant you use. Its edition page has the installation steps,
+commands and compatibility notes for your setup.
+
+| Your assistant | Status | Next step |
+| --- | --- | --- |
+| Claude Code | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Claude) |
+| Codex | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Codex) |
+
+## Good to know
+
+Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
+
+## Evidence and benchmarks
 
 <!-- foundry:hero -->
 <p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
@@ -25,47 +78,6 @@ Original Claude Code benchmark visualization. These measurements describe the re
 
 </details>
 <!-- /foundry:hero -->
-
-<p align="center"><img src="assets/mascot.svg" alt="Ember clears away extra packages and helper boxes, leaving only the requested work." width="700"></p>
-
-## What is this?
-
-AI assistants love to add things. One small feature can turn into a new library, helper files and abstractions that are now yours to maintain. razor adds a short checklist and targeted checks so existing code and language features get considered first.
-
-## Why you'd want it
-
-- Reuse what the project already has.
-- Reconsider unnecessary dependencies before installing them.
-- Notice file growth before a small task becomes a larger project.
-- Find declared dependencies that no source file appears to use.
-
-## How it works
-
-A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
-
-## Get started
-
-Choose the assistant you use. Its edition page has the installation steps,
-commands and compatibility notes for your setup.
-
-| Your assistant | Status | Next step |
-| --- | --- | --- |
-| Claude Code | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Claude) |
-| Codex | Available | [Install and get started](https://github.com/V-Songbird/razor/tree/Codex) |
-
-## What you can do
-
-| You want to | Outcome |
-| --- | --- |
-| Keep a small task small | Check reuse, dependencies and file growth |
-| Pause or resume the checks | Change the session toggle |
-| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
-
-## Good to know
-
-Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
-
-## Evidence and benchmarks
 
 Measurements belong to the model and setup that produced them. Each edition
 keeps its own results, limitations and any measurements still missing:
