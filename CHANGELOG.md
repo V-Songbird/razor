@@ -4,6 +4,10 @@ All notable changes to razor are documented here. The Codex package version
 lives in `.codex-plugin/plugin.json`. The earlier Claude Code releases use the
 [foundry marketplace](https://github.com/V-Songbird/foundry) listing.
 
+## 1.5.11-codex.1 — 2026-09-09
+
+Restore the original product hero and recorded Claude demo with clear provenance. Use white light-theme banners. Codex cards now display the symbol without lettering.
+
 ## 1.5.10-codex.1 — 2026-09-09
 
 New Tinta y oficio banners adapt to light and dark GitHub themes. Plugin icons and logos now use the same identity in Codex.
