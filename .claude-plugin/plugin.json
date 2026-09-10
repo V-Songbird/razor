@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI checkpoints at the harness level for real engineering work — nudges toward the simplest solution and asks one evidence-backed \"do we need this?\" before new dependencies, file sprawl, and unchecked build growth.",
+  "description": "Reuse-first checks for Claude Code: reconsider dependencies, file growth and unnecessary code before adding more.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",
