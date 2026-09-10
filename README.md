@@ -7,9 +7,15 @@
   <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
 </div>
 
-**Choose your edition: [Claude Code](https://github.com/V-Songbird/razor/tree/Claude) · [Codex](https://github.com/V-Songbird/razor/tree/Codex)**
+<p align="center"><strong>Available on</strong></p>
+<p align="center">
+  <a href="https://github.com/V-Songbird/razor/tree/Codex"><img src="assets/edition-codex.svg" alt="Codex" width="80" height="80" /></a>&emsp;&emsp;<a href="https://github.com/V-Songbird/razor/tree/Claude"><img src="assets/edition-claude.svg" alt="Claude" width="80" height="80" /></a><br />
+  <a href="https://github.com/V-Songbird/razor/tree/Codex">Codex</a>&emsp;&emsp;&emsp;&emsp;<a href="https://github.com/V-Songbird/razor/tree/Claude">Claude</a>
+</p>
 
-[**Get started**](#get-started) · [What is this?](#what-is-this) · [How it works](#how-it-works) · [What you can do](#what-you-can-do) · [Evidence](#evidence-and-benchmarks)
+<p align="center"><a href="#get-started"><strong>Get started</strong></a> · <a href="#what-is-this">What is this?</a> · <a href="#how-it-works">How it works</a> · <a href="#what-you-can-do">What you can do</a> · <a href="#evidence-and-benchmarks">Evidence</a></p>
+
+
 
 
 
@@ -21,8 +27,6 @@ It puts a short checklist before new code and uses targeted checks to prompt rec
 
 <p align="center"><img src="assets/mascot.svg" alt="Ember considers additions, learns the Razor checklist and gets to work." width="700"></p>
 
-
-
 ## Why you'd want it
 
 - Reuse what the project already has.
@@ -33,14 +37,6 @@ It puts a short checklist before new code and uses targeted checks to prompt rec
 ## How it works
 
 A checklist asks whether the work is needed, already implemented or covered by the language. Targeted checks can request one reconsideration. A retry follows the host’s normal permissions. The unused-dependency audit reports findings without uninstalling anything.
-
-## What you can do
-
-| You want to | Outcome |
-| --- | --- |
-| Keep a small task small | Check reuse, dependencies and file growth |
-| Pause or resume the checks | Change the session toggle |
-| Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
 ## What you can do
 
