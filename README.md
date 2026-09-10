@@ -8,11 +8,17 @@
   <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
 </div>
 
+<p align="center"><strong>Available on</strong></p>
+<p align="center">
+  <a href="https://github.com/V-Songbird/razor/tree/Codex"><img src="assets/edition-codex.svg" alt="Codex" width="80" height="80" /></a>&emsp;&emsp;<a href="https://github.com/V-Songbird/razor/tree/Claude"><img src="assets/edition-claude.svg" alt="Claude" width="80" height="80" /></a><br />
+  <a href="https://github.com/V-Songbird/razor/tree/Codex">Codex</a>&emsp;&emsp;&emsp;&emsp;<a href="https://github.com/V-Songbird/razor/tree/Claude">Claude</a>
+</p>
+
 <!-- foundry:platform identity -->
-**Edition: Claude Code.** Use this edition’s installation and compatibility notes below.
+<p align="center"><strong>Edition: Claude Code.</strong> Use this edition’s installation and compatibility notes below.</p>
 <!-- /foundry:platform identity -->
 
-[**Install**](#install) · [What is this?](#what-is-this) · [What you can do](#what-you-can-do) · [The numbers](#the-numbers) · [Going deeper](#going-deeper)
+<p align="center"><a href="#install"><strong>Get started</strong></a> · <a href="#what-is-this">What is this?</a> · <a href="#how-it-works">How it works</a> · <a href="#what-you-can-do">What you can do</a> · <a href="#the-numbers">Evidence</a></p>
 
 ## What is this?
 
