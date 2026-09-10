@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "description": "YAGNI checkpoints at the harness level for real engineering work \u2014 nudges toward the simplest solution and asks one evidence-backed \"do we need this?\" before new dependencies, file sprawl, and unchecked build growth.",
+  "description": "Reuse-first checks for Codex: reconsider dependencies, file growth and unnecessary code before adding more.",
   "license": "MIT",
   "author": {
     "name": "Victor Villegas",
@@ -22,8 +22,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "razor",
-    "shortDescription": "Do we even need this? One check before adding more.",
-    "longDescription": "razor puts a short reuse-first checklist in front of Codex, with one-shot checks for new dependencies, file sprawl, and unchecked build growth. Its unused-dependency skill reports existing dead weight without changing your project.",
+    "shortDescription": "Check what you have before adding more",
+    "longDescription": "Check existing code, dependencies and file growth before adding more. Ask for an unused-dependency report when you want to inspect what the project already carries.",
     "developerName": "Victor Villegas",
     "category": "Productivity",
     "capabilities": [
