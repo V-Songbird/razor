@@ -1,0 +1,43 @@
+{
+  "name": "razor",
+  "description": "Reuse-first checks for Codex: reconsider dependencies, file growth and unnecessary code before adding more.",
+  "license": "MIT",
+  "author": {
+    "name": "Victor Villegas",
+    "email": "victor.villegas@tuta.com"
+  },
+  "homepage": "https://github.com/V-Songbird/razor",
+  "repository": "https://github.com/V-Songbird/razor",
+  "keywords": [
+    "yagni",
+    "token-optimization",
+    "minimalism",
+    "over-engineering",
+    "hooks",
+    "subagents",
+    "dependency-guard",
+    "lazy"
+  ],
+  "version": "1.6.0",
+  "skills": "./skills/",
+  "hooks": "./hooks/codex-hooks.json",
+  "interface": {
+    "displayName": "razor",
+    "shortDescription": "Check what you have before adding more",
+    "longDescription": "Check existing code, dependencies and file growth before adding more. Ask for an unused-dependency report when you want to inspect what the project already carries.",
+    "developerName": "Victor Villegas",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/V-Songbird/razor",
+    "composerIcon": "./assets/icon-on-light.png",
+    "logo": "./assets/icon-on-light.png",
+    "logoDark": "./assets/icon-on-dark.png",
+    "defaultPrompt": [
+      "Find unused dependencies in this project."
+    ],
+    "brandColor": "#BF4935"
+  }
+}

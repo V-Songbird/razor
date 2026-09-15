@@ -1,0 +1,11 @@
+{
+  "session_id": "{{SESSION}}",
+  "cwd": "{{CWD}}",
+  "hook_event_name": "PreToolUse",
+  "prompt_id": "fixed-turn",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "{{CWD}}/src/fifth.js",
+    "content": "module.exports = 5;\n"
+  }
+}

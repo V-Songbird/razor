@@ -1,0 +1,12 @@
+{
+  "session_id": "{{SESSION}}",
+  "cwd": "{{CWD}}",
+  "hook_event_name": "PreToolUse",
+  "prompt_id": "fixed-turn",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "{{CWD}}/package.json",
+    "old_string": "\"express\": \"^4.19.2\"",
+    "new_string": "\"express\": \"^4.19.2\",\n    \"left-pad\": \"^1.3.0\""
+  }
+}

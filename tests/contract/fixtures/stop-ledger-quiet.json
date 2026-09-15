@@ -1,0 +1,5 @@
+{
+  "session_id": "{{SESSION}}",
+  "cwd": "{{CWD}}",
+  "hook_event_name": "Stop"
+}

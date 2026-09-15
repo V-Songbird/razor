@@ -1,0 +1,7 @@
+{
+  "session_id": "{{SESSION}}",
+  "cwd": "{{CWD}}",
+  "hook_event_name": "SubagentStart",
+  "agent_type": "explore",
+  "agent_id": "contract-agent"
+}

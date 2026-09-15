@@ -1,0 +1,10 @@
+{
+  "session_id": "{{SESSION}}",
+  "cwd": "{{CWD}}",
+  "hook_event_name": "PreToolUse",
+  "prompt_id": "fixed-turn",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "npm install left-pad"
+  }
+}
