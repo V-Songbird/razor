@@ -156,7 +156,7 @@ test('the shipped hook command launches from a path with spaces using native plu
   const w = world();
   const copy = path.join(w.cwd, 'plugin with spaces');
   fs.cpSync(path.join(ROOT, 'hooks'), path.join(copy, 'hooks'), { recursive: true });
-  const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks/hooks.json'), 'utf8'));
+  const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks/codex-hooks.json'), 'utf8'));
   const hook = config.hooks.SessionStart[0].hooks[0];
   const command = process.platform === 'win32' ? hook.commandWindows : hook.command;
   assert.equal(typeof command, 'string');
@@ -190,4 +190,18 @@ test('Codex never loops a Stop continuation when state writes fail', () => {
   assert.equal(state(w).ledger.fired, false);
   assert.equal(run(w, 'Stop', { turn_id: 'continuation', stop_hook_active: true }, env), '');
   assert.equal(state(w).ledger.fired, false);
+});
+test('each host loads its own hook wiring and both manifests share one version', () => {
+  const read = (file) => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'));
+  const claude = read('.claude-plugin/plugin.json');
+  const codex = read('.codex-plugin/plugin.json');
+  assert.equal(typeof codex.version, 'string');
+  assert.equal(claude.version, codex.version);
+  // Claude Code always loads hooks/hooks.json; a manifest hooks entry makes
+  // Codex load its own file instead of that one.
+  assert.equal(codex.hooks, './hooks/codex-hooks.json');
+  const commands = (file) => Object.values(read(file).hooks).flat().flatMap((group) => group.hooks)
+    .map((hook) => [hook.command, ...(hook.args || [])].join(' '));
+  assert.ok(commands('hooks/hooks.json').every((c) => c.includes('${CLAUDE_PLUGIN_ROOT}') && !c.includes('codex-hook.js')));
+  assert.ok(commands('hooks/codex-hooks.json').every((c) => c.includes('codex-hook.js')));
 });

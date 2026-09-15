@@ -1,28 +1,28 @@
 # Changelog
 
-All notable changes to razor are documented here. The Codex package version
-lives in `.codex-plugin/plugin.json`. The earlier Claude Code releases use the
-[foundry marketplace](https://github.com/V-Songbird/foundry) listing.
+All notable changes to razor are documented here. The version number lives in
+both plugin manifests, `.claude-plugin/plugin.json` and
+`.codex-plugin/plugin.json`.
 
-## 1.5.11-codex.1 — 2026-09-09
+## 1.6.0 — 2026-09-15
+
+razor is now one package for Claude Code and Codex. Both get the same checks
+from the same source, and each keeps its own commands and settings. Codex may
+ask you to review razor's hooks again after this update.
+
+## 1.5.11 and 1.5.11-codex.1 — 2026-09-09
 
 Restore the original product hero and recorded Claude demo with clear provenance. Use white light-theme banners. Codex cards now display the symbol without lettering.
 
-## 1.5.10-codex.1 — 2026-09-09
+## 1.5.10 and 1.5.10-codex.1 — 2026-09-09
 
 New Tinta y oficio banners adapt to light and dark GitHub themes. Plugin icons and logos now use the same identity in Codex.
 
-## 1.5.9-codex.1 — 2026-09-09
+## 1.5.9 and 1.5.9-codex.1 — 2026-09-09
 
-Product guides and decisions now accompany the Codex edition. Research and
+Product guides and decisions now accompany each edition. Research and
 benchmark evidence live in Foundry, with updated links and coordinated edition
 pages. Plugin behavior is unchanged by this maintenance release.
-
-## Unreleased
-
-The benchmark now compares the same Codex model with razor on and off, and
-checks native hook behavior. Runs keep resumable checkpoints and clean up
-their temporary projects and sessions.
 
 ## 1.5.8-codex.1 — 2026-09-08
 

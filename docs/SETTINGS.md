@@ -2,9 +2,15 @@
 
 Most people never touch these. razor works out of the box.
 
-Set these environment variables before starting the Codex host that runs
-razor. The hooks inherit that host's environment. This Codex package reads
-`RAZOR_*` variables directly; it does not add a plugin settings panel.
+## Where to set them
+
+In **Claude Code**, the plugin's settings panel asks about the per-check
+switches and the new-file budget when you enable razor. The environment
+variables below do the same thing, and they win when both are set.
+
+In **Codex**, there is no settings panel. Set the environment variables before
+starting the Codex host that runs razor; its hooks inherit that host's
+environment.
 
 For example, in PowerShell:
 
@@ -30,8 +36,9 @@ version manager before launching Codex so Node is available in its `PATH`.
 | --- | --- |
 | `RAZOR_DISABLE=1` | Turns everything off |
 
-In a session you can also send `razor off` and `razor on` as ordinary messages.
-The switch is on or off by design. There are no levels.
+In a session you can also send `razor off` and `razor on` as ordinary messages;
+`/razor off` and `/razor on` also work in Claude Code. The switch is on or off
+by design. There are no levels.
 
 ## Turning off one check
 
@@ -71,23 +78,23 @@ Read-only exploration and planning agents skip the checklist by default.
 Writing agents and unknown custom types receive it. Names match without
 regard to case, with or without a plugin namespace.
 
-The skip list matches the role Codex actually reports. Children reported as
-`default` receive the checklist even when their prompt only asks them to read.
-Named roles must be available in Codex's own agent configuration; razor does
-not change that configuration.
+In Codex, the skip list matches the role Codex actually reports. Children
+reported as `default` receive the checklist even when their prompt only asks
+them to read. Named roles must be available in Codex's own agent configuration;
+razor does not change that configuration.
 
 ## Where razor keeps its state
 
-A small file in the `PLUGIN_DATA` directory Codex provides. If there isn't
-one, it uses `razor-codex` under your system temp directory. Old files clean
-themselves up. State stays outside the plugin cache. Nothing leaves your
-machine.
+A small file in the plugin data directory the host provides:
+`CLAUDE_PLUGIN_DATA` in Claude Code, `PLUGIN_DATA` in Codex. The host sets it;
+you do not need to. Without one, razor uses your system temp directory, inside
+a `razor-codex` folder in Codex. Old files clean themselves up. State stays
+outside the plugin cache. Nothing leaves your machine.
 
-Codex provides `PLUGIN_ROOT` and `PLUGIN_DATA` to its hooks. You do not need
-to set them yourself. Existing Claude Code settings and state are separate;
-see the [setup guide](SETUP.md) for migration.
+Each host keeps its own settings and state. The [setup guide](SETUP.md) covers
+bringing Claude Code preferences to Codex.
 
 ## More
 
 - [How razor works](HOW-IT-WORKS.md) — what runs, and when
-- [The numbers](BENCHMARKS.md) — what we measured, and where razor loses
+- [The numbers](BENCHMARKS.md) — what we measured in Claude Code, and where razor loses

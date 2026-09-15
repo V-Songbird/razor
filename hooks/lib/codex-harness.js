@@ -1,11 +1,11 @@
 'use strict';
 
-// Native Codex wire adapter. The original adapter remains the reference lane
-// for Razor's Claude contract fixtures and recorded benchmark results.
+// Codex wire adapter. ./harness is the Claude Code adapter; this module
+// replaces only what Codex's hook contract does differently.
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const legacy = require('./harness');
+const claude = require('./harness');
 
 let input;
 function readInput() {
@@ -30,7 +30,7 @@ function emitContext(event, text) {
     process.stdout.write(JSON.stringify({ decision: 'block', reason: text }));
     return;
   }
-  legacy.emitContext(event, text);
+  claude.emitContext(event, text);
 }
 
 // Codex does not run Claude userConfig installation prompts. Keep Razor's
@@ -69,7 +69,7 @@ function turnKey(data) {
 }
 
 module.exports = {
-  ...legacy,
+  ...claude,
   readInput,
   emitContext,
   settingOff,

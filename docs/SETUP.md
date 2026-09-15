@@ -10,8 +10,8 @@ codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-Use the Codex package's `.codex-plugin/plugin.json`. Claude packages live on
-the separate `Claude` branch.
+The same package also works in Claude Code; the [README](../README.md#claude-code)
+has those steps.
 
 Review and trust the exact hooks through your client's supported review flow.
 Installing or enabling the plugin alone does not establish that its hooks run.

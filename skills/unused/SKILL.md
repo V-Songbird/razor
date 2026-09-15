@@ -1,6 +1,9 @@
 ---
 name: unused
-description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes $unused. Report-only; never edits files or uninstalls packages.
+description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes /razor:unused or $unused. Report-only; never edits files or uninstalls packages.
+when_to_use: Trigger when the user wants to find unused dependencies, says "find unused deps", "audit dependencies", "what deps aren't used", "check for dead dependencies", or invokes /razor:unused.
+argument-hint: "[project directory, defaults to cwd]"
+allowed-tools: Bash, PowerShell, Read
 ---
 
 # unused
@@ -9,9 +12,10 @@ Runs a mechanical audit — declared dependencies (`package.json`, `requirements
 
 ## 1. Run the script
 
-Resolve `../../scripts/unused-deps.js` relative to the directory containing
-this `SKILL.md`. Run that absolute script path with the available shell tool,
-quoting the script path and project directory as separate arguments:
+In Claude Code the script is `${CLAUDE_PLUGIN_ROOT}/scripts/unused-deps.js`.
+In Codex, resolve `../../scripts/unused-deps.js` relative to the directory
+containing this `SKILL.md`. Run that absolute script path with the available
+shell tool, quoting the script path and project directory as separate arguments:
 
 ```text
 node "<absolute path to scripts/unused-deps.js>" "<projectDir>"

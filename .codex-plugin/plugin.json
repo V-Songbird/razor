@@ -18,8 +18,9 @@
     "dependency-guard",
     "lazy"
   ],
-  "version": "1.5.11-codex.1",
+  "version": "1.6.0",
   "skills": "./skills/",
+  "hooks": "./hooks/codex-hooks.json",
   "interface": {
     "displayName": "razor",
     "shortDescription": "Check what you have before adding more",
