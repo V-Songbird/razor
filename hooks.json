@@ -1,0 +1,38 @@
+{
+  "razor": {
+    "PreInvocation": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/antigravity-hook.js PreInvocation",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/antigravity-hook.js PreToolUse",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/antigravity-hook.js Stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -9,7 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { safeWriteFileSync } = require('./lib/safe-write');
-const harness = require(process.env.RAZOR_HOST === 'codex' ? './lib/codex-harness' : './lib/harness');
+const HARNESSES = { codex: './lib/codex-harness', antigravity: './lib/antigravity-harness' };
+const harness = require(HARNESSES[process.env.RAZOR_HOST] || './lib/harness');
 
 // Kept compact on purpose (~300 tokens per injection), and the
 // no-deliberation line keeps reasoning models from spending thinking

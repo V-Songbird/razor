@@ -1,0 +1,22 @@
+{
+  "name": "razor",
+  "version": "1.6.0",
+  "description": "Reuse-first checks for Antigravity: reconsider dependencies, file growth and unnecessary code before adding more.",
+  "author": {
+    "name": "Victor Villegas",
+    "email": "victor.villegas@tuta.com"
+  },
+  "homepage": "https://github.com/V-Songbird/razor",
+  "repository": "https://github.com/V-Songbird/razor",
+  "license": "MIT",
+  "keywords": [
+    "yagni",
+    "token-optimization",
+    "minimalism",
+    "over-engineering",
+    "hooks",
+    "dependency-guard",
+    "lazy",
+    "antigravity"
+  ]
+}

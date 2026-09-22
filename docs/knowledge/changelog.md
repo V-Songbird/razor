@@ -1,17 +1,33 @@
 ---
 type: knowledge
-summary: "Records user-facing razor changes by release for both hosts; read when upgrading or checking when a behavior changed."
+summary: "Records user-facing razor changes by release for every host; read when upgrading or checking when a behavior changed."
 related_files:
   - README.md
   - .claude-plugin/plugin.json
   - .codex-plugin/plugin.json
+  - plugin.json
 ---
 
 # Changelog
 
 All notable changes to razor are documented here. The version number lives in
-both plugin manifests, `.claude-plugin/plugin.json` and
-`.codex-plugin/plugin.json`.
+the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
+and `plugin.json`.
+
+## 1.7.0 — Unreleased
+
+razor now runs on Antigravity from the same package, installed from a clone
+with `agy plugin install`. The checklist arrives at the first model call of a
+conversation and the scope-drift note at the first call of each turn. The
+install check reads `run_command`; the import, manifest and new-file checks
+read `write_to_file`, `replace_file_content` and `multi_replace_file_content`;
+the build check speaks once per conversation through the stop hook. `/unused`
+gives the dependency report there.
+
+Antigravity has no prompt or subagent event, so `razor off` and `razor on` and
+the subagent checklist are not available there; `RAZOR_DISABLE=1` before the
+host starts still turns everything off. Its state lives in a `razor-antigravity`
+folder under the system temp directory.
 
 ## 1.6.0 — 2026-09-15
 

@@ -41,6 +41,10 @@ Restart it with the intended environment. The Windows hook command initializes
 fnm when it is available, then runs Node. On other platforms, initialize your
 version manager before launching Codex so Node is available in its `PATH`.
 
+In **Antigravity**, the same environment variables apply, set before the CLI
+or the editor starts; its hook commands run plain `node`, so Node must be on
+that `PATH`.
+
 ## The switch
 
 | Variable | What it does |
@@ -48,7 +52,8 @@ version manager before launching Codex so Node is available in its `PATH`.
 | `RAZOR_DISABLE=1` | Turns everything off |
 
 In a session you can also send `razor off` and `razor on` as ordinary messages;
-`/razor off` and `/razor on` also work in Claude Code. The switch is on or off
+`/razor off` and `/razor on` also work in Claude Code. Antigravity gives hooks
+no prompt, so only the variable works there. The switch is on or off
 by design. There are no levels.
 
 ## Turning off one check
@@ -94,13 +99,17 @@ reported as `default` receive the checklist even when their prompt only asks
 them to read. Named roles must be available in Codex's own agent configuration;
 razor does not change that configuration.
 
+Antigravity has no subagent event, so these two variables do nothing there and
+its subagents receive no checklist.
+
 ## Where razor keeps its state
 
 A small file in the plugin data directory the host provides:
 `CLAUDE_PLUGIN_DATA` in Claude Code, `PLUGIN_DATA` in Codex. The host sets it;
 you do not need to. Without one, razor uses your system temp directory, inside
-a `razor-codex` folder in Codex. Old files clean themselves up. State stays
-outside the plugin cache. Nothing leaves your machine.
+a `razor-codex` folder in Codex and a `razor-antigravity` folder in
+Antigravity. Old files clean themselves up. State stays outside the plugin
+cache. Nothing leaves your machine.
 
 Each host keeps its own settings and state. The [setup guide](codex-setup.md) covers
 bringing Claude Code preferences to Codex.

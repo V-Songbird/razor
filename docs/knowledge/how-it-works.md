@@ -11,7 +11,8 @@ related_files:
 
 The short version lives in the [README](../../README.md). This page is the long
 one, for people who want to know exactly what runs and when. razor behaves the
-same in Claude Code and Codex; where the two hosts differ, this page says so.
+same in Claude Code, Codex and Antigravity; where the hosts differ, this page
+says so.
 
 ## The idea in one line
 
@@ -58,8 +59,9 @@ most once, then gets out of the way — **the retry always goes through.**
 | New-file check | before a new file | how many new production files this one turn has already created |
 | Build check | at the end of a turn | whether the session grew a lot with almost no deletions |
 
-A file change is a `Write` or `Edit` call in Claude Code and an `apply_patch`
-change in Codex.
+A file change is a `Write` or `Edit` call in Claude Code, an `apply_patch`
+change in Codex, and a `write_to_file`, `replace_file_content` or
+`multi_replace_file_content` call in Antigravity.
 
 The first three read your project's own manifests, so a package you already
 declared is never treated as new. That includes `optionalDependencies` and
@@ -73,7 +75,7 @@ number yourself and it becomes a plain ceiling on every new file instead.
 Anything under your system temp directory is treated as scratch and skipped.
 
 Files written inside a shell command do not pass through the file checks in
-either host. Shell commands are checked for dependency installs, and the build
+any host. Shell commands are checked for dependency installs, and the build
 check can still notice the resulting growth. In Codex, the file checks preview
 local `apply_patch` changes without editing your files. If a patch needs fuzzy
 matching, has ambiguous context or colliding paths, or targets remote or
@@ -97,7 +99,7 @@ folder that is not one it never runs.
 
 ## Where it hooks in
 
-razor uses the same five hook events in both hosts. Claude Code reads
+razor uses the same five hook events in Claude Code and Codex. Claude Code reads
 `hooks/hooks.json`, which runs each check's Node script directly. Codex reads
 `hooks/codex-hooks.json`, which starts `hooks/codex-hook.js` to translate
 Codex's event format before the same checks run.
@@ -118,6 +120,22 @@ Read-only exploration and planning agents skip the checklist. Writing agents
 and unknown custom agent types receive it. Each agent gets its own counters
 under the parent session, so one agent's new-file budget is not another's.
 
+Antigravity reads `hooks.json` at the plugin root, which starts
+`hooks/antigravity-hook.js`. That host has three of the events, and no session,
+prompt or subagent event, so the same checks are wired to what exists:
+
+| Event | What razor does |
+| --- | --- |
+| `PreInvocation` | on the first model call of a conversation, writes the checklist and takes the snapshot; on the first call after each stop, writes the scope-drift note |
+| `PreToolUse` | the install check on `run_command`, and the import, manifest and new-file checks on the three file tools |
+| `Stop` | runs the build check, once per conversation, and asks for one more turn when it fires |
+
+A turn there is the stretch between two stops, which is what the new-file
+budget counts. The checklist is sent once per conversation, so a conversation
+that was compacted or resumed does not get it again, and subagents receive no
+checklist. `razor on` and `razor off` do not exist there; `RAZOR_DISABLE=1`
+before the host starts is the switch.
+
 ## The scope-drift note
 
 One line, at most once per session, when a later request has clearly left the
@@ -130,7 +148,7 @@ Turn it off with `RAZOR_DRIFT_NOTE=off`.
 ## Finding dead packages
 
 The `unused` skill is the reverse question: `/razor:unused` in Claude Code,
-`$unused` in Codex. The checks above stop **new** dependencies; this finds ones
+`$unused` in Codex, `/unused` in Antigravity. The checks above stop **new** dependencies; this finds ones
 already in your manifest that no file imports.
 
 It sorts what it finds into three piles:
@@ -162,15 +180,17 @@ high-confidence pile is separate.
 - **It keeps a small state file** in the plugin data directory the host
   provides: `CLAUDE_PLUGIN_DATA` in Claude Code, `PLUGIN_DATA` in Codex.
   Without one it falls back to your system temp directory, inside a
-  `razor-codex` folder in Codex. Old files are cleaned up on their own. The
-  plugin cache stays read-only.
+  `razor-codex` folder in Codex and a `razor-antigravity` folder in
+  Antigravity, which provides no data directory. Old files are cleaned up on
+  their own. The plugin cache stays read-only.
 
 ## Turning it off
 
 Send `razor off` for the session and `razor on` to bring it back. `/razor off`
 and `/razor on` also work in Claude Code; a Codex client may intercept slash
-commands before hooks receive them, so use the plain words there. The switch is
+commands before hooks receive them, so use the plain words there. Antigravity
+gives hooks no prompt, so the toggle does not exist there. The switch is
 on or off by design — there are no levels. `RAZOR_DISABLE=1` turns everything
-off before the session starts.
+off before the session starts, on every host.
 
 Per-check switches are in [Settings](settings.md).

@@ -42,11 +42,11 @@ A checklist asks whether the work is needed, already implemented or covered by t
 | Pause or resume the checks | Change the session toggle |
 | Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
-Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. For a dependency report, use `/razor:unused` in Claude Code or select the installed `unused` skill in Codex.
+Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. For a dependency report, use `/razor:unused` in Claude Code, `/unused` in Antigravity, or select the installed `unused` skill in Codex.
 
 ## Install
 
-razor is one package for both hosts. Install it in the one you use.
+razor is one package for Claude Code, Codex and Antigravity. Install it in the one you use.
 
 ### Codex
 
@@ -70,11 +70,22 @@ Inside Claude Code:
 
 Start a new session to load the plugin.
 
+### Antigravity
+
+Requirements: Node.js 22 or later, Git and the Antigravity CLI. Antigravity has no marketplace for third-party plugins, so install from a clone of this repository. Replace `<path-to-clone>` with that directory:
+
+```shell
+agy plugin install "<path-to-clone>"
+agy plugin list
+```
+
+The list should name `razor`. Start a new conversation to load it. The checklist arrives at the first model call, the drift note at the first call of each turn, and the build check speaks through the stop hook. Antigravity has no subagent event, so subagents there receive no checklist.
+
 ## Good to know
 
 Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. See [setup and coverage](docs/knowledge/codex-setup.md) and [how razor works](docs/knowledge/how-it-works.md).
+File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code, `write_to_file`, `replace_file_content` and `multi_replace_file_content` in Antigravity. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. See [setup and coverage](docs/knowledge/codex-setup.md) and [how razor works](docs/knowledge/how-it-works.md).
 
 ## The numbers
 
