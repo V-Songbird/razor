@@ -133,6 +133,55 @@ test('file tools translate: a new import is caught in a write and in a multi-chu
   assert.deepEqual(run(w, 'PreToolUse', call('view_file', { AbsolutePath: path.join(w.cwd, 'src', 'app.js') })), { decision: 'allow' });
 });
 
+test('a manifest edit in chunks is judged by the whole file it would produce: denied once, allowed on the identical retry', () => {
+  const w = world();
+  nodeProject(w);
+  const edit = (chunks) => run(w, 'PreToolUse', call('multi_replace_file_content', {
+    TargetFile: path.join(w.cwd, 'package.json'), ReplacementChunks: chunks,
+  }));
+  const twoChunks = [
+    { TargetContent: '"version": "1.0.0"', ReplacementContent: '"version": "1.1.0"' },
+    { TargetContent: '"express": "^4.19.2"', ReplacementContent: '"express": "^4.19.2",\n    "lodash": "^4.17.21"' },
+  ];
+  const deny = edit(twoChunks);
+  assert.equal(deny.decision, 'deny');
+  assert.match(deny.reason, /lodash/);
+  assert.deepEqual(edit(twoChunks), { decision: 'allow' });
+  const single = edit([{ TargetContent: '"express": "^4.19.2"', ReplacementContent: '"express": "^4.19.2",\n    "axios": "^1.7.2"' }]);
+  assert.equal(single.decision, 'deny');
+  assert.match(single.reason, /axios/);
+});
+
+test('a code edit keeps its chunks joined, so an import in a chunk that does not match the file is still caught', () => {
+  const w = world();
+  nodeProject(w);
+  const edit = run(w, 'PreToolUse', call('multi_replace_file_content', {
+    TargetFile: path.join(w.cwd, 'src', 'app.js'),
+    ReplacementChunks: [
+      { TargetContent: 'module.exports = express;', ReplacementContent: 'module.exports = express();' },
+      { TargetContent: 'const absent = 1;', ReplacementContent: "const chalk = require('chalk');" },
+    ],
+  }));
+  assert.equal(edit.decision, 'deny');
+  assert.match(edit.reason, /chalk/);
+});
+
+test('a manifest edit that cannot be previewed stays silent and never throws', () => {
+  const w = world();
+  nodeProject(w, { express: '^4.19.2', cors: '^4.19.2' });
+  const edit = (file, chunks) => run(w, 'PreToolUse', call('multi_replace_file_content', { TargetFile: file, ReplacementChunks: chunks }));
+  const add = (name) => ({ TargetContent: '"express": "^4.19.2"', ReplacementContent: `"express": "^4.19.2",\n    "${name}": "^1.0.0"` });
+  const manifest = path.join(w.cwd, 'package.json');
+  // Each call would add a dependency if its whole file were previewed.
+  assert.deepEqual(edit(manifest, [add('lodash'), { TargetContent: '"private": true', ReplacementContent: '"private": false' }]), { decision: 'allow' });
+  assert.deepEqual(edit(manifest, [add('chalk'), { TargetContent: '"^4.19.2"', ReplacementContent: '"^4.21.0"' }]), { decision: 'allow' });
+  fs.mkdirSync(path.join(w.cwd, 'folder', 'package.json'), { recursive: true });
+  assert.deepEqual(edit(path.join(w.cwd, 'folder', 'package.json'), [add('dayjs')]), { decision: 'allow' });
+  assert.deepEqual(edit(path.join(w.cwd, 'absent', 'package.json'), [add('dayjs')]), { decision: 'allow' });
+  assert.deepEqual(edit(undefined, [add('dayjs')]), { decision: 'allow' });
+  assert.deepEqual(state(w).deniedImports || {}, {});
+});
+
 test('the new-file budget counts one turn and starts over after a Stop', () => {
   const w = world();
   nodeProject(w);
