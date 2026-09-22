@@ -51,6 +51,13 @@ function run(w, event, payload = {}, extraEnv = {}, raw) {
 
 const call = (name, args, extra = {}) => ({ toolCall: { name, args }, stepIdx: 1, ...extra });
 
+// A deny's retry sentence names the tool the call used, and no sentence names
+// Claude Code's Write or Edit, which this host does not have.
+function assertToolNamed(reason, tool) {
+  assert.match(reason, new RegExp(`exact same ${tool} —`));
+  assert.doesNotMatch(reason, /\bWrite\b|\bEdit\b/);
+}
+
 function stateFile(w, id = SESSION) {
   return path.join(w.tmp, 'razor-antigravity', 'razor-' + id + '.json');
 }
@@ -109,12 +116,16 @@ test('an undeclared install is denied once and allowed on the exact retry; a dec
 test('file tools translate: a new import is caught in a write and in a multi-chunk edit, and a manifest edit too', () => {
   const w = world();
   nodeProject(w);
-  const write = run(w, 'PreToolUse', call('write_to_file', {
+  const pad = call('write_to_file', {
     TargetFile: path.join(w.cwd, 'src', 'pad.js'), CodeContent: "const pad = require('left-pad');\n",
-  }));
+  });
+  const write = run(w, 'PreToolUse', pad);
   assert.equal(write.decision, 'deny');
   assert.match(write.reason, /left-pad/);
   assert.match(write.reason, /new node dependency/);
+  assert.match(write.reason, /in this write_to_file adds/);
+  assertToolNamed(write.reason, 'write_to_file');
+  assert.deepEqual(run(w, 'PreToolUse', pad), { decision: 'allow' });
   const edit = run(w, 'PreToolUse', call('multi_replace_file_content', {
     TargetFile: path.join(w.cwd, 'src', 'app.js'),
     ReplacementChunks: [
@@ -123,6 +134,8 @@ test('file tools translate: a new import is caught in a write and in a multi-chu
   }));
   assert.equal(edit.decision, 'deny');
   assert.match(edit.reason, /axios/);
+  assert.match(edit.reason, /in this multi_replace_file_content adds/);
+  assertToolNamed(edit.reason, 'multi_replace_file_content');
   const manifest = run(w, 'PreToolUse', call('replace_file_content', {
     TargetFile: path.join(w.cwd, 'package.json'),
     TargetContent: '"express": "^4.19.2"',
@@ -130,6 +143,8 @@ test('file tools translate: a new import is caught in a write and in a multi-chu
   }));
   assert.equal(manifest.decision, 'deny');
   assert.match(manifest.reason, /lodash/);
+  assert.match(manifest.reason, /this replace_file_content to package\.json/);
+  assertToolNamed(manifest.reason, 'replace_file_content');
   assert.deepEqual(run(w, 'PreToolUse', call('view_file', { AbsolutePath: path.join(w.cwd, 'src', 'app.js') })), { decision: 'allow' });
 });
 
@@ -192,6 +207,7 @@ test('the new-file budget counts one turn and starts over after a Stop', () => {
   const over = write(2);
   assert.equal(over.decision, 'deny');
   assert.match(over.reason, /new file #2/);
+  assertToolNamed(over.reason, 'write_to_file');
   assert.deepEqual(write(3), { decision: 'allow' });
   assert.equal(state(w).turn.turnKey, '0');
   assert.deepEqual(run(w, 'Stop', { executionNum: 0, fullyIdle: true }), {});
