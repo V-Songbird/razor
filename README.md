@@ -74,7 +74,7 @@ Start a new session to load the plugin.
 
 Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. See [setup and coverage](docs/SETUP.md) and [how razor works](docs/HOW-IT-WORKS.md).
+File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. See [setup and coverage](docs/knowledge/codex-setup.md) and [how razor works](docs/knowledge/how-it-works.md).
 
 ## The numbers
 
@@ -105,7 +105,7 @@ A clean session completed the job without adding a package. Lines are averaged a
 
 <p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
 
-Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance. [Evidence and methodology](https://github.com/V-Songbird/foundry/tree/main/docs/razor).
+Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance.
 
 <details>
 <summary>Watch the recorded Claude Code demo</summary>
@@ -116,9 +116,9 @@ Original Claude Code benchmark visualization. These measurements describe the re
 
 ## Going deeper
 
-[How it works](docs/HOW-IT-WORKS.md) · [Settings](docs/SETTINGS.md) · [Codex setup](docs/SETUP.md) · [Claude Code benchmark details](docs/BENCHMARKS.md) · [Codex benchmark harness](https://github.com/V-Songbird/foundry/blob/main/benchmarks/razor/CODEX-HARNESS.md)
+[How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Changelog](docs/knowledge/changelog.md)
 
-[Foundry](https://github.com/V-Songbird/foundry) holds the research, methodology and detailed evidence for this plugin.
+[Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The research records and both benchmark harnesses are kept outside this repository and are not distributed with the plugin.
 
 ## License
 

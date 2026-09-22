@@ -1,3 +1,12 @@
+---
+type: knowledge
+summary: "Records user-facing razor changes by release for both hosts; read when upgrading or checking when a behavior changed."
+related_files:
+  - README.md
+  - .claude-plugin/plugin.json
+  - .codex-plugin/plugin.json
+---
+
 # Changelog
 
 All notable changes to razor are documented here. The version number lives in
@@ -94,7 +103,7 @@ about prose it was told to write.
 
 ## 1.5.2 — 2026-08-29
 
-[How it works](docs/HOW-IT-WORKS.md) now explains the build check rather than
+[How it works](how-it-works.md) now explains the build check rather than
 just listing it: what it looks at when a turn ends, that its question goes to
 Claude and costs one short extra reply, and that it needs a git repository to
 compare against.
@@ -109,8 +118,8 @@ verdict on a manifest it had only half read.
 
 The front page is rewritten to answer what razor is and why you'd want it,
 nothing else. Hooks, settings and the full benchmark numbers moved to
-[How it works](docs/HOW-IT-WORKS.md), [Settings](docs/SETTINGS.md) and
-[The numbers](docs/BENCHMARKS.md).
+[How it works](how-it-works.md), [Settings](settings.md) and
+[The numbers](benchmarks.md).
 
 ## 1.5.0 — 2026-08-28
 

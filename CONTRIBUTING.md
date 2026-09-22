@@ -20,9 +20,11 @@ One package serves Claude Code and Codex.
 └── plugin.json        # Claude Code metadata, settings and version
 .codex-plugin/
 └── plugin.json        # Codex metadata and version; points Codex at its hook file
-CHANGELOG.md            # dated entries, newest first
+AGENTS.md               # contributor rules for both hosts; CLAUDE.md imports them
 LICENSE                 # MIT
 README.md               # plain-language intro first, technical depth after
+docs/knowledge/         # how it works, settings, Codex setup, benchmark details
+                        # and the changelog, dated entries newest first
 skills/                 # skills read by both hosts
 ├── skill-name/
 │   ├── SKILL.md        # skill definition
@@ -36,7 +38,7 @@ scripts/                # helper CLIs
 tests/                  # Node tests and hook contract fixtures
 ```
 
-Every README shares one skeleton, tone, and style, defined in foundry's [`.github/PLUGIN_README_TEMPLATE.md`](https://github.com/V-Songbird/foundry/blob/main/.github/PLUGIN_README_TEMPLATE.md).
+The README puts plain-language sections first and technical depth behind links, and names the host beside every host-specific instruction and result; [`AGENTS.md`](AGENTS.md) holds those rules.
 
 ---
 
@@ -70,7 +72,7 @@ skips temp paths, so its tests fail there.
 Include regression coverage for changed script behavior. Hook contract tests
 check messages, counters, and file effects in isolated fixtures. They do not
 establish that a particular Claude Code or Codex installation has enabled or
-trusted the hooks. For Codex, follow [the setup guide](docs/SETUP.md) for that
+trusted the hooks. For Codex, follow [the setup guide](docs/knowledge/codex-setup.md) for that
 live check.
 
 The recorded Claude Code benchmark data and artwork stay as recorded. Codex
@@ -95,7 +97,7 @@ This enables the following commit checks:
 
 ## Changelog
 
-Add a dated entry at the top of `CHANGELOG.md` for every user-visible change.
+Add a dated entry at the top of [`docs/knowledge/changelog.md`](docs/knowledge/changelog.md) for every user-visible change.
 The version lives in both `.claude-plugin/plugin.json` and
 `.codex-plugin/plugin.json`. Change them together; the test suite fails when
 they differ.

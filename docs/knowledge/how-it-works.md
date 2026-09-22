@@ -1,6 +1,15 @@
+---
+type: knowledge
+summary: "The checklist razor hands the assistant, the five checks behind it, the hook events on each host, the scope-drift note, the unused-dependency audit and what razor never touches; read before changing a check."
+related_files:
+  - hooks/
+  - scripts/unused-deps.js
+  - skills/unused/SKILL.md
+---
+
 # How razor works
 
-The short version lives in the [README](../README.md). This page is the long
+The short version lives in the [README](../../README.md). This page is the long
 one, for people who want to know exactly what runs and when. razor behaves the
 same in Claude Code and Codex; where the two hosts differ, this page says so.
 
@@ -164,4 +173,4 @@ commands before hooks receive them, so use the plain words there. The switch is
 on or off by design — there are no levels. `RAZOR_DISABLE=1` turns everything
 off before the session starts.
 
-Per-check switches are in [SETTINGS.md](SETTINGS.md).
+Per-check switches are in [Settings](settings.md).

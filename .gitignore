@@ -1,11 +1,18 @@
-# docs/ is local working notes by default. The pages the README links to are
-# published, so each one is named here explicitly — a new file under docs/ is
-# private until someone adds it to this list on purpose.
-/docs/*
-!/docs/HOW-IT-WORKS.md
-!/docs/SETTINGS.md
-!/docs/BENCHMARKS.md
-!/docs/SETUP.md
+# razor repository visibility and local generated files.
+# Keep the runtime, skills, tests and public documentation visible.
+
+# Private working material and documentation
+.private/
+docs/tasks/
+docs/decisions/
+docs/knowledge/private/
+docs/apis/private/
+
+# Machine-local agent state; shared instructions stay visible
+**/.claude/settings.local.json
+**/.claude/memory/
+CLAUDE.local.md
+AGENTS.override.md
 
 # Crash residue from tests/dispatcher.test.js, which needs a workspace
 # inside the plugin root. Cleaned up on success; ignored so a failed run
@@ -16,7 +23,12 @@
 # the plugin root because the file meter exempts system-temp paths.
 /contract-ws-*/
 
-# Plugin-local session state — written at run time, never published.
+# Plugin-local session state written at run time, never published
 .assay/
 .foreman/
 .scribe/
+
+# Dependency cache and operating-system metadata
+node_modules/
+.DS_Store
+Thumbs.db

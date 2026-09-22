@@ -1,3 +1,14 @@
+---
+type: knowledge
+summary: "Every razor environment variable, where to set it on each host, the per-check switches, the numeric budgets, the subagent lists and where razor keeps its state; read before adding or renaming a setting."
+related_files:
+  - hooks/razor-lib.js
+  - hooks/file-meter.js
+  - hooks/build-ledger.js
+  - hooks/subagent-start.js
+  - .claude-plugin/plugin.json
+---
+
 # Settings
 
 Most people never touch these. razor works out of the box.
@@ -91,10 +102,10 @@ you do not need to. Without one, razor uses your system temp directory, inside
 a `razor-codex` folder in Codex. Old files clean themselves up. State stays
 outside the plugin cache. Nothing leaves your machine.
 
-Each host keeps its own settings and state. The [setup guide](SETUP.md) covers
+Each host keeps its own settings and state. The [setup guide](codex-setup.md) covers
 bringing Claude Code preferences to Codex.
 
 ## More
 
-- [How razor works](HOW-IT-WORKS.md) — what runs, and when
-- [The numbers](BENCHMARKS.md) — what we measured in Claude Code, and where razor loses
+- [How razor works](how-it-works.md) — what runs, and when
+- [The numbers](benchmarks.md) — what we measured in Claude Code, and where razor loses

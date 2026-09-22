@@ -1,3 +1,13 @@
+---
+type: knowledge
+summary: "Installing razor in Codex, trusting its hooks, carrying settings over from Claude Code, checking that it is active and what the patch guards cover; read before touching Codex behavior."
+related_files:
+  - hooks/codex-hooks.json
+  - hooks/codex-hook.js
+  - hooks/lib/codex-tools.js
+  - .codex-plugin/plugin.json
+---
+
 # Set up Razor in Codex
 
 Install Razor from the Foundry marketplace, then review its hooks in the Codex
@@ -10,7 +20,7 @@ codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-The same package also works in Claude Code; the [README](../README.md#claude-code)
+The same package also works in Claude Code; the [README](../../README.md#claude-code)
 has those steps.
 
 Review and trust the exact hooks through your client's supported review flow.
@@ -18,7 +28,7 @@ Installing or enabling the plugin alone does not establish that its hooks run.
 
 ## Bring over your preferences
 
-Transfer the desired `RAZOR_*` preferences using the [settings guide](SETTINGS.md).
+Transfer the desired `RAZOR_*` preferences using the [settings guide](settings.md).
 Map Claude installation options to those environment controls. Keep toggles,
 counters and ledgers local to each host; do not copy transient session state.
 
@@ -48,5 +58,5 @@ abstain. Shell scripts and other editing tools bypass those patch guards;
 `write_stdin` does not receive a new `PreToolUse` check. The Git build ledger
 can still notice aggregate growth. Razor is advisory, not a security boundary.
 
-For settings, see [Settings](SETTINGS.md). For reproducible source checks, see
-[the Codex benchmark harness](https://github.com/V-Songbird/foundry/blob/main/benchmarks/razor/CODEX-HARNESS.md).
+For settings, see [Settings](settings.md). The Codex benchmark harness is kept
+outside this repository and is not distributed with the plugin.

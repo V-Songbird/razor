@@ -1,3 +1,10 @@
+---
+type: knowledge
+summary: "The Claude Code benchmark results behind the README: correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win; read before changing a published number."
+related_files:
+  - README.md
+---
+
 # The numbers
 
 Everything here comes from real Claude Code sessions — full conversations, not
@@ -7,7 +14,8 @@ Every session is scored on the code it left behind, and correctness is checked
 by running that code. **A short answer that breaks the task scores as a
 failure, not a win.**
 
-You can run all of it yourself. See [benchmarks/](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor).
+The harness is kept outside this repository; each section below keeps its run's setup so the
+figures can be judged.
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -172,10 +180,7 @@ far, and less reliably.
 
 ## Reproducing this
 
-The harness is in [benchmarks/](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor). It drives real sessions
-against the same fixed jobs, so it costs real money — the cheap default run is
-about $3 on Sonnet. Start with `node runner/run.js --selftest`, which is free
-and proves every scorer catches a wrong answer before you spend anything.
-
-You will not reproduce these exact figures. If razor comes out leaner and no
+The harness that drove these sessions is kept outside this repository and is
+not distributed with the plugin. A rerun against the same fixed jobs costs real
+money, and you will not reproduce these exact figures. If razor comes out leaner and no
 pricier with correctness intact, the claim holds.
