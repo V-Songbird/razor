@@ -178,6 +178,15 @@ describe('integration: soft gate', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(freshSession(), 'git status'))), null);
   });
 
+  // Both words are members of every plain object, so a bare lookup in the
+  // subcommand table would find them.
+  for (const command of ['constructor add left-pad', '__proto__ install left-pad', 'Constructor.exe add x']) {
+    test(`a command named after an object member gets no decision: ${command}`, () => {
+      assert.strictEqual(check({ tool_name: 'Bash', cwd: os.tmpdir(), tool_input: { command } }, {}), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', input(freshSession(), command))), null);
+    });
+  }
+
   test('installing an already-declared dependency never checkpoints', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-dg-'));
     fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ dependencies: { lodash: '^4' } }));

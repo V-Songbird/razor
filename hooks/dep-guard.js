@@ -126,8 +126,8 @@ function parseSegment(segment) {
     return null;
   }
 
+  if (!Object.hasOwn(ADD_SUBCOMMANDS, cmd)) return null; // own keys only, never Object.prototype members
   const subs = ADD_SUBCOMMANDS[cmd];
-  if (!subs) return null;
   const sub = (tokens.shift() || '').toLowerCase();
   if (!subs.includes(sub)) return null;
 
