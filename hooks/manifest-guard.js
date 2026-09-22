@@ -97,8 +97,9 @@ function check(data, state) {
   const input = data.tool_input || {};
   const filePath = input.file_path;
   if (!filePath || /node_modules/.test(filePath)) return null;
-  const spec = GUARDED[path.basename(filePath).toLowerCase()];
-  if (!spec) return null;
+  const name = path.basename(filePath).toLowerCase();
+  if (!Object.hasOwn(GUARDED, name)) return null; // own keys only, never Object.prototype members
+  const spec = GUARDED[name];
 
   let existing;
   try {

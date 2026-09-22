@@ -7,7 +7,7 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { runHook, hookOutput, freshSession, HOOKS_DIR } = require('./helpers');
-const { jsonDepNames, reqDepNames, simulate } = require('../hooks/manifest-guard');
+const { check, jsonDepNames, reqDepNames, simulate } = require('../hooks/manifest-guard');
 
 const PKG = JSON.stringify(
   { name: 'ws', version: '1.0.0', dependencies: { express: '^4.19.2', lodash: '^4.17.21' } },
@@ -126,6 +126,18 @@ describe('integration: manifest gate', () => {
     });
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
   });
+
+  // Both names are members of every plain object, so a bare lookup in the
+  // manifest table would find them.
+  for (const name of ['constructor', '__proto__']) {
+    test(`an existing file named ${name} is not a manifest: no decision, no crash`, () => {
+      const file = path.join(workspace({}), name);
+      fs.writeFileSync(file, 'x\n');
+      const write = input(freshSession(), 'Write', { file_path: file, content: 'y\n' });
+      assert.strictEqual(check(write, {}), null);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write)), null);
+    });
+  }
 
   test('requirements.txt line adds are gated, python ecosystem named', () => {
     const ws = workspace({ 'requirements.txt': 'flask==3.0.3\nrequests==2.32.3\n' });
