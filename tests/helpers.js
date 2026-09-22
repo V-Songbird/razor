@@ -5,6 +5,22 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+// One private temp directory per test process, removed when the process
+// exits. TEMP, TMP and TMPDIR point at it, so os.tmpdir() in every test file
+// that loads this module, and in every hook a test spawns, lands inside it:
+// fixture workspaces and the state files hooks keep in temp never reach the
+// system temp directory, and the session-start sweep of old state files only
+// ever sees this process's own.
+const TEST_TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'razor-test-'));
+for (const key of ['TEMP', 'TMP', 'TMPDIR']) process.env[key] = TEST_TEMP;
+process.on('exit', () => {
+  try {
+    fs.rmSync(TEST_TEMP, { recursive: true, force: true });
+  } catch {
+    // a file still held open keeps the directory; the run's result stands
+  }
+});
+
 const HOOKS_DIR = path.join(__dirname, '..', 'hooks');
 
 /**

@@ -6,6 +6,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
+// Loaded for its private temp directory, where the audit fixtures land.
+require('./helpers');
 const {
   auditProject,
   knipAvailable,
