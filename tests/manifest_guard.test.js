@@ -5,7 +5,8 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { runHook, hookOutput, freshSession } = require('./helpers');
+const { spawnSync } = require('child_process');
+const { runHook, hookOutput, freshSession, HOOKS_DIR } = require('./helpers');
 const { jsonDepNames, reqDepNames, simulate } = require('../hooks/manifest-guard');
 
 const PKG = JSON.stringify(
@@ -59,6 +60,20 @@ describe('unit: dependency-name extraction', () => {
     assert.strictEqual(simulate('Edit', { old_string: 'b', new_string: 'x' }, 'abc'), 'axc');
     assert.strictEqual(simulate('Edit', { old_string: 'zz', new_string: 'x' }, 'abc'), null);
     assert.strictEqual(simulate('Write', { content: 'new' }, 'abc'), 'new');
+  });
+
+  test('simulate applies replacement text without $ patterns as written, as a fragment and as the whole file', () => {
+    const tagged = '"version": "1.0.0",\n  "scripts": { "tag": "git tag v$npm_package_version" },';
+    const next = PKG.split('"version": "1.0.0",').join(tagged);
+    assert.strictEqual(simulate('Edit', { old_string: '"version": "1.0.0",', new_string: tagged }, PKG), next);
+    assert.strictEqual(simulate('Edit', { old_string: PKG, new_string: next }, PKG), next);
+    assert.strictEqual(simulate('Edit', { old_string: '^4', new_string: '^5', replace_all: true }, PKG), PKG.split('^4').join('^5'));
+  });
+
+  test('simulate applies $ patterns in the replacement text as written', () => {
+    const text = "$& $` $' $$";
+    assert.strictEqual(simulate('Edit', { old_string: 'b', new_string: text }, 'abc'), 'a' + text + 'c');
+    assert.strictEqual(simulate('Edit', { old_string: 'abc', new_string: text }, 'abc'), text);
   });
 });
 
@@ -136,6 +151,80 @@ describe('integration: manifest gate', () => {
     const r = runHook('pre-tool-use.js', write, { RAZOR_MANIFEST_GUARD: 'off' });
     assert.strictEqual(hookOutput(r), null);
   });
+});
+
+describe('integration: a dependency added beside a $ pattern', () => {
+  // A replacement string reads $&, $`, $' and $$ as patterns. Read that way,
+  // the `$&` below would paste matched text into the simulated manifest, which
+  // would no longer parse, and `pg` would go unchecked. Every host's input
+  // form must be denied once and allowed on the identical retry.
+  const TAG = '  "scripts": { "tag": "echo $&" },';
+  const OLD = '"version": "1.0.0",\n  "dependencies": {';
+  const NEW = '"version": "1.0.0",\n' + TAG + '\n  "dependencies": {\n    "pg": "^8.11.0",';
+  const reasonOf = (r) => {
+    const out = hookOutput(r);
+    return out && out.hookSpecificOutput.permissionDecisionReason;
+  };
+
+  // The Codex and Antigravity entrypoints take the event as an argument.
+  function entrypoint(file, data, env) {
+    const r = spawnSync(process.execPath, [path.join(HOOKS_DIR, file), 'PreToolUse'], {
+      input: JSON.stringify(data), encoding: 'utf-8', timeout: 30000, env: { ...process.env, ...env },
+    });
+    if (r.error) throw r.error;
+    assert.strictEqual(r.status, 0, r.stderr);
+    return r;
+  }
+
+  const HOSTS = {
+    'a Claude Code Edit fragment': (ws) => {
+      const call = input(freshSession(), 'Edit', { file_path: path.join(ws, 'package.json'), old_string: OLD, new_string: NEW });
+      return () => reasonOf(runHook('pre-tool-use.js', call));
+    },
+    'the whole-file Edit the Codex and Antigravity previews send': (ws) => {
+      const call = input(freshSession(), 'Edit', {
+        file_path: path.join(ws, 'package.json'), old_string: PKG, new_string: PKG.split(OLD).join(NEW),
+      });
+      return () => reasonOf(runHook('pre-tool-use.js', call));
+    },
+    'a Codex apply_patch': (ws) => {
+      const command = [
+        '*** Begin Patch', '*** Update File: package.json', '@@',
+        '   "version": "1.0.0",', '+' + TAG, '   "dependencies": {', '+    "pg": "^8.11.0",', '*** End Patch',
+      ].join('\n');
+      const data = {
+        session_id: freshSession(), turn_id: 'turn-a', cwd: ws,
+        hook_event_name: 'PreToolUse', tool_name: 'apply_patch', tool_input: { command },
+      };
+      return () => reasonOf(entrypoint('codex-hook.js', data, { PLUGIN_DATA: path.join(ws, '.state') }));
+    },
+    'an Antigravity multi_replace_file_content': (ws) => {
+      const tmp = path.join(ws, '.tmp');
+      fs.mkdirSync(tmp);
+      const chunks = [
+        { TargetContent: '"version": "1.0.0",', ReplacementContent: '"version": "1.0.0",\n' + TAG },
+        { TargetContent: '"lodash": "^4.17.21"', ReplacementContent: '"lodash": "^4.17.21",\n    "pg": "^8.11.0"' },
+      ];
+      const data = {
+        conversationId: freshSession(), workspacePaths: [ws],
+        toolCall: { name: 'multi_replace_file_content', args: { TargetFile: path.join(ws, 'package.json'), ReplacementChunks: chunks } },
+      };
+      return () => {
+        const out = JSON.parse(entrypoint('antigravity-hook.js', data, { TMPDIR: tmp, TEMP: tmp, TMP: tmp }).stdout);
+        return out.decision === 'deny' ? out.reason : null;
+      };
+    },
+  };
+
+  for (const [host, arm] of Object.entries(HOSTS)) {
+    test(`${host} is denied once and allowed on the exact retry`, () => {
+      const send = arm(workspace({ 'package.json': PKG }));
+      const reason = send();
+      assert.ok(reason, 'the first call is denied');
+      assert.match(reason, /adds a new node dependency \(`pg`\)/);
+      assert.strictEqual(send(), null);
+    });
+  }
 });
 
 describe('integration: one reconsideration per dependency, across gates', () => {

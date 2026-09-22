@@ -78,13 +78,15 @@ function denyReason(tool, names, eco, manifestName, deps) {
 }
 
 // The resulting manifest content this tool call would produce, or null when
-// the call cannot land as written (the Edit would fail anyway).
+// the call cannot land as written (the Edit would fail anyway). new_string is
+// inserted through a function so it lands as written: a replacement string
+// would read $&, $`, $' and $$ in it as patterns.
 function simulate(toolName, input, existing) {
   if (toolName === 'Write') return input.content || null;
   const oldStr = input.old_string;
   const newStr = input.new_string;
   if (!oldStr || newStr === undefined || !existing.includes(oldStr)) return null;
-  return input.replace_all ? existing.split(oldStr).join(newStr) : existing.replace(oldStr, newStr);
+  return input.replace_all ? existing.split(oldStr).join(newStr) : existing.replace(oldStr, () => newStr);
 }
 
 // Dispatcher entry: mutates gate state, returns the deny reason or null.
