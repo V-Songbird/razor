@@ -36,6 +36,10 @@ function wholeManifestEdit(file, chunks) {
   return { file_path: file, old_string: existing, new_string: text };
 }
 
+// The host types TargetFile as a string. Any other value is left out, so no
+// gate reads it as a path.
+const targetFile = (args) => (typeof args.TargetFile === 'string' ? args.TargetFile : undefined);
+
 // Antigravity's tool names and arguments, read into the shape the gates
 // already speak. A multi-chunk edit is one Edit whose old and new text are the
 // chunks joined, which is all the import guard compares. The manifest guard
@@ -47,19 +51,20 @@ const TOOLS = {
   run_command: (args) => ({ tool_name: 'Bash', tool_input: { command: args.CommandLine || '' } }),
   write_to_file: (args) => ({
     tool_name: 'Write',
-    tool_input: { file_path: args.TargetFile, content: args.CodeContent || '' },
+    tool_input: { file_path: targetFile(args), content: args.CodeContent || '' },
   }),
   replace_file_content: (args) => ({
     tool_name: 'Edit',
-    tool_input: { file_path: args.TargetFile, old_string: args.TargetContent || '', new_string: args.ReplacementContent || '' },
+    tool_input: { file_path: targetFile(args), old_string: args.TargetContent || '', new_string: args.ReplacementContent || '' },
   }),
   multi_replace_file_content: (args) => {
+    const file = targetFile(args);
     const chunks = Array.isArray(args.ReplacementChunks) ? args.ReplacementChunks : [];
     const joined = (key) => chunks.map((chunk) => (chunk && chunk[key]) || '').join('\n');
     return {
       tool_name: 'Edit',
-      tool_input: wholeManifestEdit(args.TargetFile, chunks)
-        || { file_path: args.TargetFile, old_string: joined('TargetContent'), new_string: joined('ReplacementContent') },
+      tool_input: wholeManifestEdit(file, chunks)
+        || { file_path: file, old_string: joined('TargetContent'), new_string: joined('ReplacementContent') },
     };
   },
 };

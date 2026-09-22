@@ -255,6 +255,18 @@ test('malformed input, a missing conversation and the kill switch answer without
   assert.ok(!fs.existsSync(dir) || fs.readdirSync(dir).length === 0);
 });
 
+test('a file tool whose TargetFile is not a string gets the normal answer', () => {
+  const w = world();
+  nodeProject(w);
+  for (const TargetFile of [42, ['package.json']]) {
+    assert.deepEqual(run(w, 'PreToolUse', call('write_to_file', { TargetFile, CodeContent: 'x' })), { decision: 'allow' });
+    assert.deepEqual(run(w, 'PreToolUse', call('replace_file_content', { TargetFile, TargetContent: 'a', ReplacementContent: 'b' })), { decision: 'allow' });
+    assert.deepEqual(run(w, 'PreToolUse', call('multi_replace_file_content', {
+      TargetFile, ReplacementChunks: [{ TargetContent: 'a', ReplacementContent: 'b' }],
+    })), { decision: 'allow' });
+  }
+});
+
 test('the shipped hook command runs from the plugin directory with the payload on stdin', () => {
   const w = world();
   const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks.json'), 'utf8'));
