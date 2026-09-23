@@ -22,6 +22,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { SPAWN_TIMEOUT_MS } = require('./helpers');
 
 const HOOKS_DIR = path.join(__dirname, '..', 'hooks');
 const FIXTURES = path.join(__dirname, 'contract', 'fixtures');
@@ -238,7 +239,7 @@ function runScenario(scenario) {
   const result = spawnSync('node', [path.join(HOOKS_DIR, scenario.hook)], {
     input: JSON.stringify(loadFixture(scenario.name, world)),
     encoding: 'utf-8',
-    timeout: 30000,
+    timeout: SPAWN_TIMEOUT_MS,
     env: childEnv(dataDir, scenario.env),
   });
   if (result.error) throw result.error;

@@ -72,6 +72,10 @@ node --test tests/*.test.js
 Run it from a checkout outside your system temp directory. The new-file check
 skips temp paths, so its tests fail there.
 
+Each hook or shell the suite starts gets 30 seconds. On a loaded machine, set
+`RAZOR_TEST_SPAWN_TIMEOUT_MS` to allow more, for example `90000`. A value below
+30000 is ignored.
+
 Include regression coverage for changed script behavior. Hook contract tests
 check messages, counters, and file effects in isolated fixtures. They do not
 establish that a particular Claude Code, Codex or Antigravity installation has

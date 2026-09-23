@@ -6,7 +6,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { runHook, hookOutput, freshSession, HOOKS_DIR } = require('./helpers');
+const { runHook, hookOutput, freshSession, HOOKS_DIR, SPAWN_TIMEOUT_MS } = require('./helpers');
 const { check, jsonDepNames, reqDepNames, simulate } = require('../hooks/manifest-guard');
 
 const PKG = JSON.stringify(
@@ -224,7 +224,7 @@ describe('integration: a dependency added beside a $ pattern', () => {
   // The Codex and Antigravity entrypoints take the event as an argument.
   function entrypoint(file, data, env) {
     const r = spawnSync(process.execPath, [path.join(HOOKS_DIR, file), 'PreToolUse'], {
-      input: JSON.stringify(data), encoding: 'utf-8', timeout: 30000, env: { ...process.env, ...env },
+      input: JSON.stringify(data), encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS, env: { ...process.env, ...env },
     });
     if (r.error) throw r.error;
     assert.strictEqual(r.status, 0, r.stderr);

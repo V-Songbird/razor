@@ -11,6 +11,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { SPAWN_TIMEOUT_MS } = require('./helpers');
 
 const ROOT = path.resolve(__dirname, '..');
 const WRAPPER = path.join(ROOT, 'hooks/antigravity-hook.js');
@@ -43,7 +44,7 @@ function run(w, event, payload = {}, extraEnv = {}, raw) {
   const data = { conversationId: SESSION, workspacePaths: [w.cwd], ...payload };
   const result = spawnSync(process.execPath, [WRAPPER, event], {
     input: raw === undefined ? JSON.stringify(data) : raw,
-    encoding: 'utf8', timeout: 30000, env: envFor(w, extraEnv),
+    encoding: 'utf8', timeout: SPAWN_TIMEOUT_MS, env: envFor(w, extraEnv),
   });
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stderr);
@@ -351,7 +352,7 @@ test('the shipped hook command runs from the plugin directory with the payload o
   const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks.json'), 'utf8'));
   const hook = config.razor.PreToolUse[0].hooks[0];
   const r = spawnSync(hook.command, {
-    shell: true, cwd: ROOT, encoding: 'utf8', timeout: 30000, env: envFor(w),
+    shell: true, cwd: ROOT, encoding: 'utf8', timeout: SPAWN_TIMEOUT_MS, env: envFor(w),
     input: JSON.stringify(call('run_command', { CommandLine: 'echo hi', Cwd: w.cwd }, { conversationId: 'launcher', workspacePaths: [w.cwd] })),
   });
   assert.ifError(r.error);

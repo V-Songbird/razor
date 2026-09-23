@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { freshSession } = require('./helpers');
+const { freshSession, SPAWN_TIMEOUT_MS } = require('./helpers');
 const { parsePatch, previewUpdate, toToolCalls, nativeReason } = require('../hooks/lib/codex-tools');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -32,7 +32,7 @@ function workspace(t, files = {}) {
 
 function invoke(data, env = {}) {
   const result = spawnSync(process.execPath, [path.join(ROOT, 'hooks/codex-hook.js'), 'PreToolUse'], {
-    input: JSON.stringify(data), encoding: 'utf8', timeout: 30000,
+    input: JSON.stringify(data), encoding: 'utf8', timeout: SPAWN_TIMEOUT_MS,
     env: {
       ...process.env, PLUGIN_DATA: path.join(data.cwd, '.state'),
       RAZOR_FILE_BUDGET: '', RAZOR_IMPORT_GUARD: '', RAZOR_MANIFEST_GUARD: '',

@@ -11,6 +11,11 @@ const { spawnSync } = require('child_process');
 // host that sets one must not inherit it: every test file that loads this
 // module, and every hook it spawns, sees none of them, and a test that needs
 // one sets it explicitly.
+//
+// Every child the suite spawns gets 30 s. A loaded machine can need longer,
+// so RAZOR_TEST_SPAWN_TIMEOUT_MS raises that limit; a lower value never
+// applies. It is read here, before the cleanup below removes it.
+const SPAWN_TIMEOUT_MS = Math.max(30000, Number.parseInt(process.env.RAZOR_TEST_SPAWN_TIMEOUT_MS, 10) || 0);
 const INHERITED_HOST_ENV = /^(RAZOR_|CLAUDE_PLUGIN_|PLUGIN_DATA$)/;
 for (const key of Object.keys(process.env)) {
   if (INHERITED_HOST_ENV.test(key)) delete process.env[key];
@@ -51,7 +56,7 @@ function runHook(name, stdinData, env) {
   const result = spawnSync('node', [path.join(HOOKS_DIR, name)], {
     input: stdinData === undefined ? undefined : JSON.stringify(stdinData),
     encoding: 'utf-8',
-    timeout: 30000,
+    timeout: SPAWN_TIMEOUT_MS,
     env: { ...process.env, ...(env || {}) },
   });
   if (result.error) throw result.error;
@@ -93,4 +98,4 @@ function writeTranscript(uuid) {
   return file;
 }
 
-module.exports = { runHook, hookOutput, freshSession, writeTranscript, HOOKS_DIR };
+module.exports = { runHook, hookOutput, freshSession, writeTranscript, HOOKS_DIR, SPAWN_TIMEOUT_MS };

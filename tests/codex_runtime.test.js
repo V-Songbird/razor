@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { SPAWN_TIMEOUT_MS } = require('./helpers');
 
 const ROOT = path.resolve(__dirname, '..');
 const WRAPPER = path.join(ROOT, 'hooks/codex-hook.js');
@@ -36,7 +37,7 @@ function run(w, event, payload = {}, extraEnv = {}, raw) {
   const data = { session_id: 'codex-fixture', cwd: w.cwd, hook_event_name: event, ...payload };
   const result = spawnSync(process.execPath, [WRAPPER, event], {
     input: raw === undefined ? JSON.stringify(data) : raw,
-    encoding: 'utf8', timeout: 30000, env: envFor(w, extraEnv),
+    encoding: 'utf8', timeout: SPAWN_TIMEOUT_MS, env: envFor(w, extraEnv),
   });
   assert.ifError(result.error);
   assert.equal(result.status, 0, result.stderr);
@@ -166,12 +167,26 @@ test('the shipped hook command launches from a path with spaces using native plu
   const r = spawnSync(command, {
     shell: process.platform === 'win32' ? true : '/bin/sh',
     input: JSON.stringify({ session_id: 'launcher', hook_event_name: 'SessionStart', cwd: w.cwd }),
-    cwd: w.cwd, env: envFor(w, { PLUGIN_ROOT: copy }), encoding: 'utf8', timeout: 30000,
+    cwd: w.cwd, env: envFor(w, { PLUGIN_ROOT: copy }), encoding: 'utf8', timeout: SPAWN_TIMEOUT_MS,
   });
   assert.ifError(r.error);
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.stderr, '');
   assert.equal(r.stdout.trim(), fs.readFileSync(path.join(GOLDEN, 'session-start-startup.txt'), 'utf8').trim());
+});
+
+test('RAZOR_TEST_SPAWN_TIMEOUT_MS raises the suite spawn limit and never lowers it', () => {
+  const limit = (value) => {
+    const r = spawnSync(process.execPath, ['-p', "require('./tests/helpers').SPAWN_TIMEOUT_MS"], {
+      cwd: ROOT, encoding: 'utf8', env: { ...process.env, RAZOR_TEST_SPAWN_TIMEOUT_MS: value },
+    });
+    assert.equal(r.status, 0, r.stderr);
+    return Number(r.stdout.trim());
+  };
+  assert.equal(limit(''), 30000);
+  assert.equal(limit('1000'), 30000);
+  assert.equal(limit('not a number'), 30000);
+  assert.equal(limit('90000'), 90000);
 });
 test('Codex never loops a Stop continuation when state writes fail', () => {
   const w = world();
