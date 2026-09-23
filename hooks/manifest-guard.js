@@ -82,13 +82,16 @@ function denyReason(tool, names, eco, manifestName, deps) {
 // or matches more than once without replace_all. Splitting on old_string
 // counts its matches the way Claude Code's Edit does, and joining the parts
 // inserts new_string as written: a replacement string would read $&, $`, $'
-// and $$ in it as patterns.
+// and $$ in it as patterns. An old_string missing as written is looked for
+// again in the file's LF view, since an LF old_string lands in a CRLF file;
+// that view's result is LF throughout, which no name extraction minds.
 function simulate(toolName, input, existing) {
   if (toolName === 'Write') return input.content || null;
   const oldStr = input.old_string;
   const newStr = input.new_string;
   if (!oldStr || newStr === undefined) return null;
-  const parts = existing.split(oldStr);
+  let parts = existing.split(oldStr);
+  if (parts.length === 1) parts = existing.replace(/\r\n/g, '\n').split(oldStr);
   if (parts.length === 1 || (parts.length > 2 && !input.replace_all)) return null;
   return parts.join(newStr);
 }

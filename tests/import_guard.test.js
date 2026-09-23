@@ -216,6 +216,29 @@ describe('integration: import gate', () => {
     assert.match(all.hookSpecificOutput.permissionDecisionReason, /`axios`/);
   });
 
+  // The host matches an LF old_string in a CRLF file, so a multi-line Edit
+  // there lands and is gated; missing or repeated in that view, it cannot.
+  test('an Edit with LF lines on a CRLF file is gated when it lands, and silent when it cannot', () => {
+    const ws = makeWorkspace();
+    fs.writeFileSync(
+      path.join(ws, 'http_client.js'),
+      'function a() {\r\n  return 1;\r\n}\r\nfunction b() {\r\n  return 1;\r\n}\r\nmodule.exports = { a, b };\r\n'
+    );
+    const edit = (oldString, extra) => input(freshSession(), 'Edit', {
+      file_path: path.join(ws, 'http_client.js'),
+      old_string: oldString,
+      new_string: "const axios = require('axios');\n" + oldString,
+      ...extra,
+    });
+    const lands = hookOutput(runHook('pre-tool-use.js', edit('function a() {\n  return 1;')));
+    assert.strictEqual(lands.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(lands.hookSpecificOutput.permissionDecisionReason, /`axios`/);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit('function c() {\n  return 1;'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit('{\n  return 1;'))), null);
+    const all = hookOutput(runHook('pre-tool-use.js', edit('{\n  return 1;', { replace_all: true })));
+    assert.strictEqual(all.hookSpecificOutput.permissionDecision, 'deny');
+  });
+
   test('declared deps, builtins, and local imports pass silently', () => {
     const ws = makeWorkspace();
     const write = input(freshSession(), 'Write', {

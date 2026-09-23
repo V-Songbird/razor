@@ -70,6 +70,15 @@ describe('unit: dependency-name extraction', () => {
     assert.strictEqual(simulate('Edit', { old_string: '^4', new_string: '^5', replace_all: true }, PKG), PKG.split('^4').join('^5'));
   });
 
+  test('simulate matches LF lines in a CRLF file, missing or repeated there as it would be as written', () => {
+    const crlf = 'a\r\nb\r\na\r\nc\r\n';
+    assert.strictEqual(simulate('Edit', { old_string: 'b\na', new_string: 'x' }, crlf), 'a\nx\nc\n');
+    assert.strictEqual(simulate('Edit', { old_string: 'b\nc', new_string: 'x' }, crlf), null);
+    assert.strictEqual(simulate('Edit', { old_string: 'a\n', new_string: 'x' }, crlf), null);
+    assert.strictEqual(simulate('Edit', { old_string: 'a\n', new_string: 'x', replace_all: true }, crlf), 'xb\nxc\n');
+    assert.strictEqual(simulate('Edit', { old_string: 'b\r\n', new_string: 'x' }, crlf), 'a\r\nxa\r\nc\r\n');
+  });
+
   test('simulate applies $ patterns in the replacement text as written', () => {
     const text = "$& $` $' $$";
     assert.strictEqual(simulate('Edit', { old_string: 'b', new_string: text }, 'abc'), 'a' + text + 'c');
@@ -127,6 +136,19 @@ describe('integration: manifest gate', () => {
     const all = hookOutput(runHook('pre-tool-use.js', edit({ replace_all: true })));
     assert.strictEqual(all.hookSpecificOutput.permissionDecision, 'deny');
     assert.match(all.hookSpecificOutput.permissionDecisionReason, /`axios`/);
+  });
+
+  test('a multi-line Edit with LF lines to a CRLF manifest is gated', () => {
+    const ws = workspace({ 'package.json': PKG.replace(/\n/g, '\r\n') });
+    const edit = input(freshSession(), 'Edit', {
+      file_path: path.join(ws, 'package.json'),
+      old_string: '"lodash": "^4.17.21"\n  }',
+      new_string: '"lodash": "^4.17.21",\n    "axios": "^1.7.0"\n  }',
+    });
+    const first = hookOutput(runHook('pre-tool-use.js', edit));
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(first.hookSpecificOutput.permissionDecisionReason, /`axios`/);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit)), null);
   });
 
   test('version bumps of existing entries never fire', () => {
