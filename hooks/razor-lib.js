@@ -113,14 +113,18 @@ function isActive(state) {
 // Best-effort git call; null on any failure (not a repo, no git, timeout).
 // The per-call budget is deliberately small: SessionStart makes four of these
 // and Stop three, and every one of them has to finish inside the hook timeout
-// declared in hooks.json or the harness kills the process mid-work.
+// declared in hooks.json or the harness kills the process mid-work. The test
+// suite raises it through RAZOR_GIT_TIMEOUT_MS, so a loaded machine slows a
+// test instead of failing it; the variable can only raise the budget.
+const GIT_TIMEOUT_MS = Math.max(2000, Number.parseInt(process.env.RAZOR_GIT_TIMEOUT_MS, 10) || 0);
+
 function git(args, cwd) {
   if (!cwd) return null;
   try {
     return execFileSync('git', args, {
       cwd,
       encoding: 'utf-8',
-      timeout: 2000,
+      timeout: GIT_TIMEOUT_MS,
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
@@ -137,6 +141,7 @@ module.exports = {
   isActive,
   killed,
   git,
+  GIT_TIMEOUT_MS,
   // Re-exported from the harness boundary so no gate imports it directly.
   readInput: harness.readInput,
   emitContext: harness.emitContext,

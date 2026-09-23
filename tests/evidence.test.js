@@ -415,3 +415,23 @@ describe('integration: build ledger', () => {
     assert.strictEqual(hookOutput(runHook('build-ledger.js', { session_id: session, cwd: dir })), null);
   });
 });
+
+// Each git call gets 2 s in the product. Only a larger value can change it,
+// which is how this suite keeps a loaded machine from dropping the baseline.
+describe('the git budget', () => {
+  const budget = (value) => {
+    const env = { ...process.env };
+    delete env.RAZOR_GIT_TIMEOUT_MS;
+    if (value !== undefined) env.RAZOR_GIT_TIMEOUT_MS = value;
+    const lib = path.join(__dirname, '..', 'hooks', 'razor-lib.js');
+    const r = spawnSync(process.execPath, ['-e', `process.stdout.write(String(require(${JSON.stringify(lib)}).GIT_TIMEOUT_MS))`], { env, encoding: 'utf-8' });
+    return Number(r.stdout);
+  };
+
+  test('is 2000 ms by default and can only be raised', () => {
+    assert.strictEqual(budget(undefined), 2000);
+    assert.strictEqual(budget('500'), 2000);
+    assert.strictEqual(budget('not a number'), 2000);
+    assert.strictEqual(budget('10000'), 10000);
+  });
+});

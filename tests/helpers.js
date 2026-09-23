@@ -16,6 +16,11 @@ for (const key of Object.keys(process.env)) {
   if (INHERITED_HOST_ENV.test(key)) delete process.env[key];
 }
 
+// The hooks give each git call 2 s. A loaded machine can take longer, and a
+// slow git drops the build check's baseline, so the suite raises that budget
+// for itself and every hook it spawns. The product default is unchanged.
+process.env.RAZOR_GIT_TIMEOUT_MS = '10000';
+
 // One private temp directory per test process, removed when the process
 // exits. TEMP, TMP and TMPDIR point at it, so os.tmpdir() in every test file
 // that loads this module, and in every hook a test spawns, lands inside it:
