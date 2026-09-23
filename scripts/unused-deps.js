@@ -33,6 +33,7 @@ const {
   pyImportRoots,
   isDeclared,
   ecosystemOf,
+  KNOWN_IMPORT_NAMES,
 } = require('../hooks/import-guard');
 
 const MANIFEST_NAME = { node: 'package.json', python: 'requirements.txt / pyproject.toml' };
@@ -244,13 +245,25 @@ function mentionedOutsideImports(dep, haystack) {
 // which no import pattern can follow.
 const QUOTED_NAME = /(['"`])(@?[\w.-]+(?:\/[\w.-]+)*)\1/g;
 
+// Case, and - against _, never tell two package names apart.
+const nameKey = (name) => String(name).toLowerCase().replace(/-/g, '_');
+
 function quotedNames(text, eco) {
   const names = new Set();
   for (const [, , name] of text.matchAll(QUOTED_NAME)) {
-    names.add(name);
-    names.add(eco === 'python' ? name.split('.')[0] : name.split('/').slice(0, name.startsWith('@') ? 2 : 1).join('/'));
+    names.add(nameKey(name));
+    names.add(nameKey(eco === 'python' ? name.split('.')[0] : name.split('/').slice(0, name.startsWith('@') ? 2 : 1).join('/')));
   }
   return names;
+}
+
+// A quoted name names a dependency only as the dependency's own name or as an
+// import name the alias table lists (pyyaml is loaded as yaml). The import
+// check's looser forms, a py or python- prefix dropped, would read "test" as
+// pytest and "mongo" as pymongo.
+function namedInSource(dep, named) {
+  const key = String(dep).toLowerCase();
+  return named.has(nameKey(dep)) || (Object.hasOwn(KNOWN_IMPORT_NAMES, key) && named.has(nameKey(KNOWN_IMPORT_NAMES[key])));
 }
 
 // One directory's declared deps against one directory's source. Shared by the
@@ -299,7 +312,7 @@ function auditDir(projectDir) {
   const result = { ecosystems: [], usedCount: 0 };
   for (const { eco, deps } of ecosystems) {
     const roots = [...importsByEco[eco]];
-    const named = [...namedByEco[eco]];
+    const named = namedByEco[eco];
     const scanned = scannedByEco[eco];
     const devDeps = eco === 'node' ? packageJsonDevDeps(projectDir) : null;
     const evidence = eco === 'node' ? installedEvidence(projectDir) : null;
@@ -322,7 +335,7 @@ function auditDir(projectDir) {
       const toolchain = devDeps && nodeToolchainReason(dep, devDeps);
       if (toolchain) reasons.push(toolchain);
       if (mentionedOutsideImports(dep, outsideText[eco])) reasons.push('named in a script or config file');
-      if (named.some((name) => isDeclared(name, [dep]))) reasons.push('named in source outside an import');
+      if (namedInSource(dep, named)) reasons.push('named in source outside an import');
       if (evidence && evidence.bins.has(dep)) {
         reasons.push('the installed copy ships a command, so it may be run rather than imported');
       }

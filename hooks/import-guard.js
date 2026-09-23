@@ -191,6 +191,10 @@ function pyImportRoots(text) {
 // over-matching here means one missed nudge, never a false deny.
 // razor: a static alias list for the common odd pairs; full metadata-derived
 // mapping if these ever prove insufficient.
+// The pairs from pyyaml down are also reached by dropping a py, python- or
+// -binary part below; they are listed because the unused audit matches quoted
+// names through this table alone, where dropping a prefix would read "test"
+// as pytest.
 const KNOWN_IMPORT_NAMES = {
   pillow: 'pil',
   beautifulsoup4: 'bs4',
@@ -201,6 +205,18 @@ const KNOWN_IMPORT_NAMES = {
   protobuf: 'google',
   dnspython: 'dns',
   attrs: 'attr',
+  pyyaml: 'yaml',
+  pyjwt: 'jwt',
+  pyserial: 'serial',
+  pyzmq: 'zmq',
+  pygithub: 'github',
+  'python-dotenv': 'dotenv',
+  'python-dateutil': 'dateutil',
+  'python-docx': 'docx',
+  'python-pptx': 'pptx',
+  'python-magic': 'magic',
+  'python-multipart': 'multipart',
+  'psycopg2-binary': 'psycopg2',
 };
 
 function declaredNameForms(name) {
@@ -316,4 +332,4 @@ function check(data, state) {
   return denyReason(data.tool_name, unseen, eco, manifest.name, deps);
 }
 
-module.exports = { check, jsImportRoots, jsTypeImportRoots, pyImportRoots, newImports, isDeclared, isLocalPyModule, isTestFile, ecosystemOf, findManifest };
+module.exports = { check, jsImportRoots, jsTypeImportRoots, pyImportRoots, newImports, isDeclared, isLocalPyModule, isTestFile, ecosystemOf, findManifest, KNOWN_IMPORT_NAMES };

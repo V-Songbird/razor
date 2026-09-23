@@ -215,6 +215,26 @@ describe('unused-deps: python ecosystem bucketing', () => {
     assert.ok(!flagged.includes('python-dotenv'));
   });
 
+  // A quoted name matches only a dependency's own name or a listed import
+  // name. Dropping a py prefix would read "test" as pytest.
+  test('a quoted word that only a dropped prefix would match names no dependency', () => {
+    const dir = tmp('razor-unused-quoted-');
+    write(dir, 'requirements.txt', 'pytest==8.0.0\npymongo==4.6.0\n');
+    write(dir, 'settings.py', 'ENV = "test"\nDB = "mongo"\n');
+    const eco = python(auditProject(dir));
+    assert.deepStrictEqual(names(eco.likely), ['pymongo', 'pytest']);
+    assert.deepStrictEqual(names(eco.unknown), []);
+  });
+
+  test('a quoted import name from the alias table names its dependency', () => {
+    const dir = tmp('razor-unused-quoted-');
+    write(dir, 'requirements.txt', 'pyyaml==6.0\n');
+    write(dir, 'loader.py', 'import importlib\nyaml = importlib.import_module("yaml")\n');
+    const entry = python(auditProject(dir)).unknown.find((u) => u.dep === 'pyyaml');
+    assert.ok(entry, 'pyyaml should be unknown');
+    assert.strictEqual(entry.reason, 'named in source outside an import');
+  });
+
   test('a requirements file that includes another declares both files\' dependencies', () => {
     const dir = tmp('razor-unused-req-');
     write(dir, 'requirements.txt', '-r requirements-dev.txt\nrequests==2.31.0\n');
