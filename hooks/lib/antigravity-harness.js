@@ -47,12 +47,13 @@ const targetFile = (args) => (typeof args.TargetFile === 'string' ? args.TargetF
 
 // Antigravity's tool names and arguments, read into the shape the gates
 // already speak. AllowMultiple, which lets the host replace every match of a
-// target, is replace_all. A multi-chunk edit is one Edit whose old and new
-// text are the chunks joined, which is all the import guard compares. The
-// manifest guard only judges an Edit whose old text is on disk, which joined
-// chunks seldom are, so a package manifest's edit, when it can be previewed,
-// becomes the whole file it would produce, as Codex's patch preview does. Any
-// other tool passes through unchanged and matches no gate.
+// target, is replace_all. A multi-chunk edit is one Edit whose new text is
+// the chunks' replacements joined, which is all the import guard compares.
+// Its old text is left empty: joined targets are seldom on disk, and an empty
+// old_string tells the gates this is no edit the host could refuse. So a
+// package manifest's edit, when it can be previewed, becomes the whole file
+// it would produce, as Codex's patch preview does. Any other tool passes
+// through unchanged and matches no gate.
 const TOOLS = {
   run_command: (args) => ({ tool_name: 'Bash', tool_input: { command: args.CommandLine || '' } }),
   write_to_file: (args) => ({
@@ -71,11 +72,10 @@ const TOOLS = {
   multi_replace_file_content: (args) => {
     const file = targetFile(args);
     const chunks = Array.isArray(args.ReplacementChunks) ? args.ReplacementChunks : [];
-    const joined = (key) => chunks.map((chunk) => (chunk && chunk[key]) || '').join('\n');
+    const replacements = chunks.map((chunk) => (chunk && chunk.ReplacementContent) || '').join('\n');
     return {
       tool_name: 'Edit',
-      tool_input: wholeManifestEdit(file, chunks)
-        || { file_path: file, old_string: joined('TargetContent'), new_string: joined('ReplacementContent') },
+      tool_input: wholeManifestEdit(file, chunks) || { file_path: file, old_string: '', new_string: replacements },
     };
   },
 };

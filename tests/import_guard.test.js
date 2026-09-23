@@ -198,6 +198,24 @@ describe('integration: import gate', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit)), null);
   });
 
+  // The host refuses an Edit whose old_string is missing, or repeated without
+  // replace_all, so its import never lands and there is nothing to ask.
+  test('an Edit that cannot land gets no decision; the repeated one with replace_all is gated', () => {
+    const ws = makeWorkspace();
+    fs.writeFileSync(path.join(ws, 'http_client.js'), 'function a() {}\nfunction b() {}\nmodule.exports = { a, b };\n');
+    const edit = (oldString, extra) => input(freshSession(), 'Edit', {
+      file_path: path.join(ws, 'http_client.js'),
+      old_string: oldString,
+      new_string: "() { return require('axios'); }",
+      ...extra,
+    });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit('function absent() {}'))), null);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit('() {}'))), null);
+    const all = hookOutput(runHook('pre-tool-use.js', edit('() {}', { replace_all: true })));
+    assert.strictEqual(all.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(all.hookSpecificOutput.permissionDecisionReason, /`axios`/);
+  });
+
   test('declared deps, builtins, and local imports pass silently', () => {
     const ws = makeWorkspace();
     const write = input(freshSession(), 'Write', {

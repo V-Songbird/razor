@@ -30,6 +30,7 @@ const fs = require('fs');
 const path = require('path');
 const { settingOff } = require('./razor-lib');
 const { installedDeps, evidenceReason, ledgerName } = require('./dep-guard');
+const { simulate } = require('./manifest-guard');
 
 // Node core modules — importing one is never a new dependency.
 const NODE_BUILTINS = new Set([
@@ -315,6 +316,12 @@ function check(data, state) {
   // anything the file already imports — via any earlier edit — never re-fires.
   let existing = '';
   try { existing = fs.readFileSync(path.resolve(filePath), 'utf-8'); } catch { /* new file */ }
+
+  // An Edit that cannot land adds no import: the host refuses one whose
+  // old_string is missing or repeated without replace_all, the rule the
+  // manifest check's simulate() applies. An empty old_string marks text an
+  // adapter assembled for the gates alone, which is checked as before.
+  if (data.tool_name === 'Edit' && input.old_string && simulate('Edit', input, existing) === null) return null;
 
   const deps = installedDeps(eco === 'node' ? 'npm' : 'pip', fileDir);
   let fresh = newImports(eco, incoming, existing, deps);
