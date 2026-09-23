@@ -50,7 +50,7 @@ functional tests only. `CLAUDE.md` imports this file; keep shared contributor fa
 
 ## Pitfalls
 
-- **Claude Code substitutes `${CLAUDE_PLUGIN_ROOT}` in skill text; Codex does not.** Codex needs a path relative to the skill file.
+- **Claude Code substitutes `${CLAUDE_PLUGIN_ROOT}` in skill text; Codex and Antigravity do not.** They need a path relative to the skill file.
 - **`tests/dispatcher.test.js` and `tests/contract.test.js` build workspaces inside the plugin root.** `disp-ws-*/` and `contract-ws-*/` residue from a failed run is ignored, never staged.
 - **Files written by a shell command skip the file checks in every host.** Only the assistant's own editing tool passes through them.
 - **Antigravity has no session, prompt or subagent event.** The ladder rides the first model call of a conversation, the drift note the first call after each stop, and the toggle and the subagent checklist do not exist there; a turn is the stretch between two stops.

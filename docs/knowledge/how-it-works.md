@@ -166,8 +166,8 @@ already in your manifest that no file imports.
 It sorts what it finds into three piles:
 
 - **confirmed unused** — it read your installed packages and proved nothing
-  needs the package: no import, no shipped command, no other package requiring
-  it as a peer.
+  needs the package: no import, no quoted mention in your source, no shipped
+  command, no other package requiring it as a peer.
 - **likely unused** — nothing referenced it, but no resolver was available, so
   nothing proved it. Treat these as leads.
 - **unknown** — something references it, or only a resolver can settle it.

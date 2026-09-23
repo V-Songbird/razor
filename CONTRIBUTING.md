@@ -76,6 +76,10 @@ Each hook or shell the suite starts gets 30 seconds. On a loaded machine, set
 `RAZOR_TEST_SPAWN_TIMEOUT_MS` to allow more, for example `90000`. A value below
 30000 is ignored.
 
+The suite also fixes `RAZOR_GIT_TIMEOUT_MS` at 10000 for itself and every hook
+it starts, so a slow `git` cannot drop the build check's starting point.
+Exporting another value does not reach the suite.
+
 Include regression coverage for changed script behavior. Hook contract tests
 check messages, counters, and file effects in isolated fixtures. They do not
 establish that a particular Claude Code, Codex or Antigravity installation has

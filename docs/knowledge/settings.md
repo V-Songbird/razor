@@ -74,6 +74,7 @@ by design. There are no levels.
 | `RAZOR_FILE_BUDGET` | 4 | New code files allowed in one turn before razor speaks up |
 | `RAZOR_LEDGER_LOC` | 500 | Net lines a session can add before the build check asks |
 | `RAZOR_LEDGER_FILES` | 8 | New files a session can add before the build check asks |
+| `RAZOR_GIT_TIMEOUT_MS` | 2000 | Milliseconds each of razor's read-only `git` calls may take; a lower value is ignored |
 
 > [!NOTE]
 > By default the new-file budget counts **production files only**. Tests,
@@ -91,6 +92,11 @@ Set `RAZOR_FILE_BUDGET=0` to switch the new-file check off entirely.
 working tree against where the session started, so files another session writes
 in the same checkout count toward them. Edits inside parts of a file that were
 already changed at session start are only approximated.
+
+`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository,
+where a `git` call that runs out of time leaves the build check without its
+starting point. The whole hook still has to finish inside the timeout its host
+gives it, 5 to 10 seconds, so a much larger value does not help.
 
 ## Subagents
 
