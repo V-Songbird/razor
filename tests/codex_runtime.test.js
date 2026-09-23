@@ -24,10 +24,12 @@ after(() => {
   for (const cwd of worlds) fs.rmSync(cwd, { recursive: true, force: true });
 });
 
+// The larger git budget matches helpers.js: a loaded machine cannot drop the
+// build check's baseline.
 function envFor(w, extra = {}) {
   const env = Object.fromEntries(Object.entries(process.env).filter(([k]) =>
     !/^(RAZOR_|PLUGIN_|CLAUDE_PLUGIN_|GIT_)/.test(k)));
-  return { ...env, PLUGIN_ROOT: ROOT, PLUGIN_DATA: w.dataDir, ...extra };
+  return { ...env, RAZOR_GIT_TIMEOUT_MS: '10000', PLUGIN_ROOT: ROOT, PLUGIN_DATA: w.dataDir, ...extra };
 }
 
 function run(w, event, payload = {}, extraEnv = {}, raw) {

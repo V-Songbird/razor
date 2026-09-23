@@ -215,13 +215,16 @@ function loadFixture(name, world) {
 }
 
 // A hook must behave the same for every user, so the child sees no ambient
-// RAZOR_* or CLAUDE_PLUGIN_* from the developer's own shell.
+// RAZOR_* or CLAUDE_PLUGIN_* from the developer's own shell. It does get a
+// larger git budget, as in helpers.js, so a loaded machine cannot drop the
+// build check's baseline.
 function childEnv(dataDir, extra) {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) {
     if (/^(RAZOR_|CLAUDE_PLUGIN_)/.test(k)) continue;
     env[k] = v;
   }
+  env.RAZOR_GIT_TIMEOUT_MS = '10000';
   env.CLAUDE_PLUGIN_DATA = dataDir;
   return { ...env, ...(extra || {}) };
 }
