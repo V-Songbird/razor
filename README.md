@@ -145,7 +145,7 @@ Original Claude Code benchmark visualization. These measurements describe the re
 
 ## Going deeper
 
-[How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Changelog](docs/knowledge/changelog.md)
+[How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Codex benchmark details](docs/knowledge/benchmarks.md#codex) · [Changelog](docs/knowledge/changelog.md)
 
 [Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The research records and both benchmark harnesses are kept outside this repository and are not distributed with the plugin.
 

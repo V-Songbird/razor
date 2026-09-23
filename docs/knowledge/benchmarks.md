@@ -1,15 +1,18 @@
 ---
 type: knowledge
-summary: "The Claude Code benchmark results behind the README: correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win; read before changing a published number."
+summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, and the exploratory Codex run; read before changing a published number."
 related_files:
   - README.md
 ---
 
 # The numbers
 
-Everything here comes from real Claude Code sessions — full conversations, not
-canned replies — run on Claude Sonnet and Claude Opus, once with no plugin and
-once with razor. Cost and token counts come out of the API's own usage data.
+Everything here comes from real sessions — full conversations, not canned
+replies. Most sections are Claude Code runs on Claude Sonnet and Claude Opus,
+once with no plugin and once with razor. The two runs the README's table shows,
+[Claude Opus 5 beside a rival plugin](#claude-opus-5-beside-a-rival-plugin) and
+[Codex](#codex), have their own sections at the end and are not pooled with the
+others. Cost and token counts come out of the API's own usage data.
 Every session is scored on the code it left behind, and correctness is checked
 by running that code. **A short answer that breaks the task scores as a
 failure, not a win.**
@@ -177,6 +180,50 @@ Opus saving reproduces.
 **The gains are smaller on Sonnet across the board.** Most of the headline
 numbers on this page are Opus numbers. Sonnet moves in the same direction, less
 far, and less reliably.
+
+## Claude Opus 5 beside a rival plugin
+
+| | |
+| --- | --- |
+| Host | Claude Code, CLI version not recorded |
+| Model | Claude Opus 5 |
+| Setups | no plugin, [ponytail](https://github.com/DietrichGebert/ponytail) (a plugin that also tells Claude to write less), razor |
+| n | 39 sessions per setup, in one run |
+| Date | date unknown: the retained record does not state the run date |
+| Revision | razor `623dd2c549786336c447296115f9b1ff3112a5a8` |
+
+| setup | clean sessions | mean coding lines | mean session cost |
+| --- | --- | --- | --- |
+| no plugin | 35 / 39 | 18.3 | $0.155 |
+| ponytail | 39 / 39 | 12.2 | $0.151 |
+| **razor** | **39 / 39** | **9.6** | **$0.121** |
+
+A clean session is correct and adds no package. Lines are averaged over the
+eleven coding jobs; razor wrote fewer lines than ponytail on nine of them and
+tied on the other two. ponytail also blocked every unnecessary package.
+
+## Codex
+
+| | |
+| --- | --- |
+| Host | Codex CLI 0.153.4 on Windows |
+| Model | GPT-5.6 Sol, high reasoning |
+| Setups | no plugin, razor |
+| n | 19 tasks, 2 repetitions each, per setup (38 cases); the full task group is 26 of them |
+| Date | 2026-09-08 |
+| Revision | razor `66a5b7f404c5d7f75d938354093d044287903fda` |
+| Status | exploratory: two repetitions are not a stable estimate |
+
+| task group | setup | correct and safe | mean coding lines |
+| --- | --- | --- | --- |
+| full | no plugin | 19 / 26 | 19.2 |
+| full | **razor** | **26 / 26** | **9.6** |
+| all | no plugin | 29 / 38 | — |
+| all | **razor** | **38 / 38** | — |
+
+On the pairs both setups passed, elapsed time was 1.8% higher and input tokens
+0.8% higher with razor; neither improved. This compares Sol with and without
+razor. It does not compare Sol against Claude.
 
 ## Reproducing this
 
