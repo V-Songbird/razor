@@ -1,18 +1,15 @@
 'use strict';
 
-// Canonical source for the symlink-refusing, atomic-rename file write used
-// by hush (hooks/lib/safe-write.js) and razor (hooks/lib/safe-write.js).
-// CONTRIBUTING.md's "no shared runtime between plugins" rule means neither
-// plugin can require() this file directly -- each is installed from its own
-// independent repo, with no guarantee this monorepo is present on disk.
-// razor also trusts Codex's PLUGIN_DATA directory.
-// The original plugins ship byte-identical copies. Fix shared logic first,
-// then copy the change into both plugin copies in the same commit.
+// Symlink-refusing, atomic-rename file write.
 //
-// Throws on refusal or I/O failure; every current call site (hush's
-// sidecar/state writes, razor's state writes) wraps the call in try/catch,
-// so a throw here degrades to the feature silently skipping (fail-open),
-// never a broken session.
+// hush carries a copy of this file in its own repository. The header comment
+// may differ, but the code after it must match hush's copy; Foundry's
+// scripts/check-shared-copies.js checks that. Mirror any functional fix in
+// both copies.
+//
+// Throws on refusal or I/O failure; every call site wraps the call in
+// try/catch, so a throw here degrades to the feature silently skipping
+// (fail-open), never a broken session.
 //
 // win32 has no uid, so a symlinked parent dir is trusted only when it
 // resolves under tmpdir/homedir (case-insensitive); O_NOFOLLOW degrades to 0
