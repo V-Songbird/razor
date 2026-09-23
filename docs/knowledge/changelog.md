@@ -46,10 +46,29 @@ after `sh -c`, `bash -c` or `zsh -c`, and the command after `pwsh -Command` or
 longer reads quoted text as commands, so a commit message or a `node -e`
 script that mentions an install draws no question.
 
-The manifest check no longer asks about an edit whose old text matches more
-than once without `replace_all`. The host refuses that edit, so the question
-only cost a turn. On Antigravity, an edit that sets `AllowMultiple` is judged
-by the manifest that replacing every match would produce.
+The install check also sees PowerShell's call operator, as in
+`& npm install x`, an install inside a script block, as in
+`pwsh -Command "& { npm install x }"`, and a package manager named by its
+path, as in `& "C:\Program Files\nodejs\npm.cmd" install x`.
+
+The import and manifest checks no longer ask about an edit that cannot land:
+one whose old text is missing, or matches more than once without
+`replace_all`. The host refuses that edit, so the question only cost a turn.
+On Antigravity, an edit that sets `AllowMultiple` is judged by the manifest
+that replacing every match would produce.
+
+An edit whose old text has LF line endings, in a file saved with CRLF as on a
+Windows checkout, counts as one that lands. The manifest check now asks about
+it, including an Antigravity edit to a manifest in several chunks. Before, that
+edit drew no question.
+
+The manifest check now sees a dependency added in the same edit as text such
+as `$&` or `$$`, for example an npm script that uses them. Before, that edit
+went unchecked.
+
+A command whose first word is `constructor` or `__proto__`, or an edit to an
+existing file with either name, no longer crashes razor's checks before the
+tool runs. It now gets no decision.
 
 In Claude Code, a new-file budget of 4 saved in the settings panel, the
 default, keeps counting production files only. Before, any saved value
