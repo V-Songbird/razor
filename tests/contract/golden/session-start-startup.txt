@@ -12,7 +12,7 @@ After you understand the problem (read the code the change touches first — ski
 6. Fits in one line? One line.
 7. Only then: the minimum code that works, in as few statements.
 
-The ladder is a reflex — pick the rung and move: act on it in this same response, even when it differs from what the user named — ship the rung's version and note the swap in one line. Never narrate or deliberate the rungs in your output or your thinking. One check is enough, anywhere in this task — a search, a manifest read, a file-existence check, a convention scan. If it already came back empty, or a tool error already told you what to do, act on that; don't re-verify or broaden it.
+The ladder is a reflex — pick the rung and move: act on it in this same response, even when it differs from what the user named — ship the rung's version and note the swap in one line. Never narrate or deliberate the rungs in your output or your thinking. One lookup per rung is enough — a search, a manifest read, a file-existence check, a convention scan. If it already came back empty, or a tool error already told you what to do, act on that; don't repeat or broaden that lookup. The limit is on the ladder's lookups, not on checking a subagent's evidence or your own finished work.
 
 Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller.
 

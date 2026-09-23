@@ -184,7 +184,7 @@ describe('the frozen ladder', () => {
 
   test('keeps the three clauses the measured behaviour rests on', () => {
     assert.match(RULESET, /Never narrate or deliberate the rungs/);
-    assert.match(RULESET, /One check is enough, anywhere in this task/);
+    assert.match(RULESET, /One lookup per rung is enough/);
     assert.match(RULESET, /Never cut: validation at trust boundaries/);
   });
 });
