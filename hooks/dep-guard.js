@@ -102,19 +102,18 @@ const WRAPPED = new RegExp(`^${SHELL_C}`);
 // Parse one shell segment; returns each {manager, packages} it adds as a new
 // named dependency, or [] when it adds none.
 function parseSegment(segment) {
-  const tokens = segment.trim().split(/\s+/).filter(Boolean);
   // Wrapper prefixes (`sudo pip …`, `env PIP_X=1 pip …`, `command pip …`)
   // resolve to the same install; strip them so the manager is what's judged.
-  while (tokens.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[0]) || ['sudo', 'env', 'command'].includes(tokens[0]))) {
-    tokens.shift();
-  }
-  if (!tokens.length) return [];
+  const rest = segment.trim().replace(/^(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|env|command)(?:\s+|$))*/, '');
 
-  // A shell's -c command is a command line of its own. Inside double quotes
-  // the shell drops the backslash before " \ $ and `, so the parser does too.
-  const wrapped = tokens.join(' ').match(WRAPPED);
+  // A shell's -c command is a command line of its own, line breaks included.
+  // Inside double quotes the shell drops the backslash before " \ $ and `, so
+  // the parser does too.
+  const wrapped = rest.match(WRAPPED);
   if (wrapped) return parseInstallCommands(wrapped[1] ?? wrapped[2].replace(/\\(["\\$`])/g, '$1'));
 
+  const tokens = rest.split(/\s+/).filter(Boolean);
+  if (!tokens.length) return [];
   let cmd = tokens.shift().toLowerCase().replace(/\.(exe|cmd)$/, '');
 
   // python -m pip install …  →  pip install …
@@ -152,20 +151,31 @@ function parseSegment(segment) {
   return [{ manager: cmd, packages }];
 }
 
-// Shell chaining (&&, ||, ; and |) splits a command line into segments,
-// except inside the quoted command a shell runs with -c: that stays in one
-// segment, separators and all, for parseSegment to unwrap. Every other quote
-// splits as it always has.
-const SEGMENT = new RegExp(String.raw`(?:(?<!\S)${SHELL_C}|(?<!&)&(?!&)|[^;&|])+`, 'g');
+// Shell chaining (&&, ||, ; and |) and a line break split a command line into
+// segments, except inside the quoted command a shell runs with -c: that stays
+// in one segment, separators and all, for parseSegment to unwrap. A quoted
+// string that spans lines keeps its line breaks too. Every other quote splits
+// on chaining as it always has.
+const SEGMENT = new RegExp(
+  String.raw`(?:(?<!\S)${SHELL_C}|'[^']*\n[^']*'|"(?:\\.|[^"\\])*\n(?:\\.|[^"\\])*"|(?<!&)&(?!&)|[^;&|\n])+`,
+  'g'
+);
+
+// A here-document's body is data, not commands: everything after the line
+// that opens it, up to the line holding only its delimiter.
+const HEREDOC = /((?<!<)<<(?!<)-?[ \t]*(['"]?)([A-Za-z_][\w.-]*)\2[^\n]*)\n(?:[\s\S]*?\n)?[ \t]*\3[ \t]*(?=\r?\n|$)/g;
 
 // razor: parses the command exactly as the model issued it. hush's
 // preserve-exit-code.js rewrites Bash/PowerShell commands via updatedInput
 // under bypassPermissions/HUSH_WRAP=1, but PreToolUse hooks from separate
 // plugins don't chain — each one gets the same original tool_input, never a
 // sibling's rewrite (verified live 2026-07-14). Nothing here undoes that rewrite.
-// Scan a whole command line (split on shell chaining) for a dependency add.
+// Scan a whole command line (split on shell chaining and line breaks) for a
+// dependency add. A backslash, or PowerShell's backtick, before a line break
+// continues the line, so it joins the next one.
 function parseInstallCommands(command) {
-  return (String(command || '').match(SEGMENT) || []).flatMap((segment) => parseSegment(segment));
+  const text = String(command || '').replace(/[\\`]\r?\n/g, ' ').replace(HEREDOC, '$1');
+  return (text.match(SEGMENT) || []).flatMap((segment) => parseSegment(segment));
 }
 
 // The first install in the line. Kept for callers that want one answer.

@@ -176,6 +176,37 @@ describe('installs wrapped in sh -c, bash -c or zsh -c', () => {
   });
 });
 
+// A shell runs every line of a command, so an install on a later line is an
+// install. A quoted line break, a continued line and a here-document's body
+// start no command.
+describe('installs on every line of a multi-line command', () => {
+  const cases = [
+    ['cd app\nnpm install axios', [['axios']]],
+    ['echo start\npip install requests', [['requests']]],
+    ['cd app\r\nnpm install axios\r\n', [['axios']]],
+    ['git commit -m "line one\nnpm install axios"', []],
+    ["echo 'line one\nnpm install axios'", []],
+    ['npm install \\\n  axios', [['axios']]],
+    ["cat > setup.sh <<'EOF'\nnpm install express\nEOF\nnpm install axios", [['axios']]],
+    ['bash -c "cd app\nnpm install axios"', [['axios']]],
+  ];
+  for (const [command, packages] of cases) {
+    test(`${JSON.stringify(command)} → ${JSON.stringify(packages)}`, () => {
+      assert.deepStrictEqual(parseInstallCommands(command).map((h) => h.packages), packages);
+    });
+  }
+
+  for (const [command, pkg] of [['cd app\nnpm install axios', 'axios'], ['echo start\npip install requests', 'requests']]) {
+    test(`${JSON.stringify(command)} is denied once naming ${pkg}, and the exact retry passes`, () => {
+      const call = { session_id: freshSession(), tool_name: 'Bash', tool_input: { command } };
+      const first = hookOutput(runHook('pre-tool-use.js', call));
+      assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+      assert.match(first.hookSpecificOutput.permissionDecisionReason, new RegExp(`'${pkg}' adds a new`));
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', call)), null);
+    });
+  }
+});
+
 describe('integration: soft gate', () => {
   const input = (sessionId, command) => ({
     session_id: sessionId,
