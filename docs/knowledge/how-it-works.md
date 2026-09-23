@@ -79,7 +79,12 @@ any host. Shell commands are checked for dependency installs, and the build
 check can still notice the resulting growth. In Codex, the file checks preview
 local `apply_patch` changes without editing your files. If a patch needs fuzzy
 matching, has ambiguous context or colliding paths, or targets remote or
-unreadable content, razor stays silent.
+unreadable content, razor stays silent. In Antigravity, a
+`multi_replace_file_content` edit to a package manifest is judged by the whole
+file it would produce, a chunk that sets `AllowMultiple` replacing every match.
+When that file cannot be previewed, because a target is missing, repeats
+without `AllowMultiple`, or the file cannot be read, the manifest check stays
+silent; the import check still reads the edit's new text.
 
 Each new dependency gets its own reconsideration. A shell command containing
 several separate installs can therefore receive another nudge for a different
