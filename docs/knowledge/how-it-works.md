@@ -152,7 +152,8 @@ before the host starts is the switch.
 One line, at most once per session, when a later request has clearly left the
 task the session started on. It tells you a fresh session would keep things
 focused. It never blocks, never asks you anything, and it stays quiet when you
-are simply correcting the original job.
+are simply correcting the original job. It can miss a drift: about one in six
+went unnoted when it was measured.
 
 Turn it off with `RAZOR_DRIFT_NOTE=off`.
 
