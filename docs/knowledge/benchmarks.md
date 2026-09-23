@@ -34,7 +34,7 @@ not pooled.
 | --- | --- | --- | --- | --- | --- |
 | corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
 | held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
-| 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 132 judged pairs, per section | not recorded |
+| 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
 
@@ -197,15 +197,16 @@ do it.
 
 ## Where razor does not win
 
-*Runs: the blind review is the 2026-08-29 batch, 132 judged pairs; the Sonnet cost runs are the corpus.*
+*Runs: the blind review is the 2026-08-29 batch, 66 pairs judged in both orders (132 judge calls); the Sonnet cost runs are the corpus.*
 
 > [!IMPORTANT]
 > These are real results and they are here on purpose.
 
 **It does not make code easier to review.** We showed 66 pairs of answers to a
 blind reviewer, the same job each time, with the labels stripped and the order
-swapped so position could not sway it. razor's answer was preferred **41% of
-the time**, against a 60% bar we set beforehand. Its code is not measurably
+swapped so position could not sway it: 132 judge calls. A pair counted only when
+both orders gave the same answer, and 27 did. razor's answer was preferred in
+**11 of those 27 (41%)**, against a 60% bar we set beforehand. Its code is not measurably
 flatter or less branchy per line either — the raw advantage there turns out to
 be the length advantage wearing a different hat.
 
