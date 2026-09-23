@@ -5,6 +5,17 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+// Hooks read their settings and host from these variables: RAZOR_* (every
+// setting, RAZOR_DISABLE and RAZOR_HOST), Claude Code's plugin options and
+// data directory, and Codex's PLUGIN_DATA. A suite started from a shell or a
+// host that sets one must not inherit it: every test file that loads this
+// module, and every hook it spawns, sees none of them, and a test that needs
+// one sets it explicitly.
+const INHERITED_HOST_ENV = /^(RAZOR_|CLAUDE_PLUGIN_|PLUGIN_DATA$)/;
+for (const key of Object.keys(process.env)) {
+  if (INHERITED_HOST_ENV.test(key)) delete process.env[key];
+}
+
 // One private temp directory per test process, removed when the process
 // exits. TEMP, TMP and TMPDIR point at it, so os.tmpdir() in every test file
 // that loads this module, and in every hook a test spawns, lands inside it:
