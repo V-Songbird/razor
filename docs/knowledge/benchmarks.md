@@ -35,7 +35,7 @@ not pooled.
 | corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
 | held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
 | 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 132 judged pairs, per section | not recorded |
-| [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | `623dd2c` |
+| [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
 
 The batch ran on a newer Claude Code than the corpus, so its figures are not
@@ -55,10 +55,11 @@ Across 156 sessions per setup, on both models:
 | no plugin | 146 / 156 |
 | **razor** | **156 / 156** |
 
-Widened to every session on the then-current build, seven runs including the
-corpus, dates not all recorded: **razor is 258 for 258**, with
-zero package installs attempted. The no-plugin arm, over 240 sessions, got 10
-wrong, added packages in 13, and reached for a package manager 5 times.
+A pooled total, unlike the rest of this page: every session on the
+then-current build, seven runs including the corpus, dates not all recorded.
+Pooled that way, **razor is 258 for 258**, with zero package installs
+attempted. The no-plugin arm, over 240 sessions, got 10 wrong, added packages
+in 13, and reached for a package manager 5 times.
 
 Every single package-manager command in the whole set came from the no-plugin
 arm.
@@ -225,7 +226,7 @@ far, and less reliably.
 | Setups | no plugin, [ponytail](https://github.com/DietrichGebert/ponytail) (a plugin that also tells Claude to write less), razor |
 | n | 39 sessions per setup, in one run |
 | Date | date unknown: the retained record does not state the run date |
-| Revision | razor `623dd2c549786336c447296115f9b1ff3112a5a8` |
+| Revision | not recorded; published 2026-09-01 (`cbc92f3`) |
 
 | setup | clean sessions | mean coding lines | mean session cost |
 | --- | --- | --- | --- |
