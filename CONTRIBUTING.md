@@ -94,7 +94,8 @@ git config core.hooksPath scripts/git-hooks
 
 This enables the following commit checks:
 
-- `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory.
+- `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory. It also blocks a commit that stages a `README.md` whose navigation links no longer resolve.
+- The three plugins keep byte-identical copies of `pre-commit`; change them together.
 - Public source names and attribution are allowed in documentation and commit messages. Keep credentials and personal session data out of commits.
 
 ---
