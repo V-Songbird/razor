@@ -37,7 +37,24 @@ The unused-dependency audit no longer calls a package unused when your source
 names it as a quoted string, the usual sign of a package loaded through
 `import(variable)`. It now lands under unknown with the reason "named in
 source outside an import". Before, it read as likely unused, or as confirmed
-unused once dependencies were installed.
+unused once dependencies were installed. A string names a package only by the
+package's own name or a known import name, such as `yaml` for `pyyaml`.
+
+The install check now sees installs that another shell runs: a quoted command
+after `sh -c`, `bash -c` or `zsh -c`, and the command after `pwsh -Command` or
+`cmd /c`. It checks an install on any line of a multi-line command. It no
+longer reads quoted text as commands, so a commit message or a `node -e`
+script that mentions an install draws no question.
+
+The manifest check no longer asks about an edit whose old text matches more
+than once without `replace_all`. The host refuses that edit, so the question
+only cost a turn. On Antigravity, an edit that sets `AllowMultiple` is judged
+by the manifest that replacing every match would produce.
+
+In Claude Code, a new-file budget of 4 saved in the settings panel, the
+default, keeps counting production files only. Before, any saved value
+switched the check to counting every new file. Another value, or
+`RAZOR_FILE_BUDGET`, still does.
 
 ## 1.6.0 — 2026-09-15
 
