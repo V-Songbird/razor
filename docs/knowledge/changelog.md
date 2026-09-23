@@ -16,6 +16,10 @@ and `plugin.json`.
 
 ## 1.7.0 — Unreleased
 
+The README now states that razor needs Claude Code 2.1.139 or later. Its hooks
+start each script directly, without a shell, which older Claude Code releases
+do not support.
+
 razor now runs on Antigravity from the same package, installed from a clone
 with `agy plugin install`. The checklist arrives at the first model call of a
 conversation and the scope-drift note at the first call of each turn. The

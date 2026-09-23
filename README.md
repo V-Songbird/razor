@@ -61,6 +61,8 @@ Review and enable its hooks, then start a new Codex session.
 
 ### Claude Code
 
+Requirements: Node.js 22 or later, Git and Claude Code 2.1.139 or later.
+
 Inside Claude Code:
 
 ```text
