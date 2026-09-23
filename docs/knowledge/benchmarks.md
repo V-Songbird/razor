@@ -25,7 +25,25 @@ figures can be judged.
 > sessions against a live model, not a powered experiment. Read the direction,
 > not the decimals. Where two runs disagree, this page says so.
 
+## The runs on this page
+
+Each section below names the run it comes from. Runs in different rows are
+not pooled.
+
+| run | host | model | date | n | razor revision |
+| --- | --- | --- | --- | --- | --- |
+| corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
+| held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
+| 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 132 judged pairs, per section | not recorded |
+| [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | `623dd2c` |
+| [Codex](#codex) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
+
+The batch ran on a newer Claude Code than the corpus, so its figures are not
+comparable with the corpus tables.
+
 ## Does it still work?
+
+*Run: corpus.*
 
 The first question, because everything else is worthless without it.
 
@@ -37,7 +55,8 @@ Across 156 sessions per setup, on both models:
 | no plugin | 146 / 156 |
 | **razor** | **156 / 156** |
 
-Widened to every session on the current build: **razor is 258 for 258**, with
+Widened to every session on the then-current build, seven runs including the
+corpus, dates not all recorded: **razor is 258 for 258**, with
 zero package installs attempted. The no-plugin arm, over 240 sessions, got 10
 wrong, added packages in 13, and reached for a package manager 5 times.
 
@@ -45,6 +64,8 @@ Every single package-manager command in the whole set came from the no-plugin
 arm.
 
 ## The job razor exists for
+
+*Run: corpus.*
 
 Three of the jobs plant a throwaway phrase in the prompt — *"just use axios"*,
 *"p-retry's the move"*, *"dotenv does this"*. 36 sessions per setup.
@@ -59,6 +80,8 @@ of 6**. It took the throwaway line literally, wrote `require('axios')` into a
 project that does not have axios, and the delivered code would not load.
 
 ## How much code
+
+*Run: corpus.*
 
 Lines of production code for the same job, averaged over 66 sessions per setup
 per model. Test files are counted separately and are not in these figures.
@@ -76,6 +99,8 @@ no-plugin sessions run to 49 lines; razor's run to 27. Sessions that spiral past
 9 tool calls: 15 out of 78 without the plugin, 3 out of 78 with it.
 
 ## Over a whole session
+
+*Run: 2026-08-29 batch, 24 sessions.*
 
 Every figure above is one request. This one is five, on the same codebase:
 build a feature, build another, fix a bug in the second one, build two more.
@@ -102,6 +127,8 @@ The whole five-turn conversation also cost 20% less on Opus.
 
 ## Does the shorter code do less?
 
+*Run: held-out tests.*
+
 The fair question, and the one we most wanted to be sure about.
 
 We wrote 102 test cases straight from the job descriptions — before looking at
@@ -113,6 +140,8 @@ Replayed across 240 finished sessions: **every setup passed 100% of them.**
 There is not one behaviour razor's answer misses that the longer answer catches.
 
 ## In a real repository
+
+*Run: 2026-08-29 batch, 48 sessions.*
 
 The jobs above live in small folders. This one is a 61-file project with 8
 installed packages, a real folder layout and a house convention you only see if
@@ -133,6 +162,8 @@ fewer tool calls for 22% less money**.
 
 ## Speed and cost
 
+*Run: corpus.*
+
 Per session, averaged over 78 sessions per setup per model.
 
 | model | setup | turns | seconds | words written | context used |
@@ -146,6 +177,8 @@ On a job with nothing to trim — a plain question, no code — razor's checklis
 costs a few percent more and earns most of it back in a shorter answer.
 
 ## Spawned agents
+
+*Run: 2026-08-29 batch, 24 sessions.*
 
 When Claude splits work across five helper agents, the checklist goes to each
 one. That is five copies, so it is fair to ask what it costs.
@@ -162,6 +195,8 @@ where splitting the work was the wrong call, both setups correctly declined to
 do it.
 
 ## Where razor does not win
+
+*Runs: the blind review is the 2026-08-29 batch, 132 judged pairs; the Sonnet cost runs are the corpus.*
 
 > [!IMPORTANT]
 > These are real results and they are here on purpose.
