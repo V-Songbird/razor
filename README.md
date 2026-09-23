@@ -121,6 +121,15 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 
 A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results.
 
+**Antigravity**
+
+<!-- foundry:evidence {"platform":"Antigravity","status":"pending","reason":"No Antigravity performance measurements are available."} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Not measured | Not measured | Not measured | Not measured |
+
+No Antigravity session has been measured yet.
+
 *Results can vary between runs.*
 
 <p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
