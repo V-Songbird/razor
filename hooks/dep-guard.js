@@ -185,7 +185,7 @@ const HEREDOC = /((?<!<)<<(?!<)-?[ \t]*(['"]?)([A-Za-z_][\w.-]*)\2[^\n]*)\n(?:[\
 // preserve-exit-code.js rewrites Bash/PowerShell commands via updatedInput
 // under bypassPermissions/HUSH_WRAP=1, but PreToolUse hooks from separate
 // plugins don't chain — each one gets the same original tool_input, never a
-// sibling's rewrite (verified live 2026-07-14). Nothing here undoes that rewrite.
+// sibling's rewrite. Nothing here undoes that rewrite.
 // Scan a whole command line (split on shell chaining and line breaks) for a
 // dependency add. A backslash, or PowerShell's backtick, before a line break
 // continues the line, so it joins the next one.
