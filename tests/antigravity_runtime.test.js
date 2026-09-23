@@ -169,6 +169,26 @@ test('a manifest edit in chunks is judged by the whole file it would produce: de
   assert.match(single.reason, /axios/);
 });
 
+// A target with LF lines is looked for in a CRLF manifest's LF view, as the
+// manifest check does for a single edit.
+test('a manifest edit in chunks with LF lines is judged the same on a CRLF file as on an LF one', () => {
+  for (const eol of ['\n', '\r\n']) {
+    const w = world();
+    nodeProject(w);
+    const manifest = path.join(w.cwd, 'package.json');
+    fs.writeFileSync(manifest, fs.readFileSync(manifest, 'utf8').replace(/\n/g, eol));
+    const chunks = [
+      { TargetContent: '"version": "1.0.0"', ReplacementContent: '"version": "1.1.0"' },
+      { TargetContent: '"express": "^4.19.2"\n  }', ReplacementContent: '"express": "^4.19.2",\n    "lodash": "^4.17.21"\n  }' },
+    ];
+    const edit = () => run(w, 'PreToolUse', call('multi_replace_file_content', { TargetFile: manifest, ReplacementChunks: chunks }));
+    const deny = edit();
+    assert.equal(deny.decision, 'deny', JSON.stringify(eol));
+    assert.match(deny.reason, /this multi_replace_file_content to package\.json adds a new node dependency \(`lodash`\)/);
+    assert.deepEqual(edit(), { decision: 'allow' });
+  }
+});
+
 test('a code edit keeps its chunks joined, so an import in a chunk that does not match the file is still caught', () => {
   const w = world();
   nodeProject(w);

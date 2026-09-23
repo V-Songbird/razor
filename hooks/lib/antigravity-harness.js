@@ -17,7 +17,9 @@ const claude = require('./harness');
 // is missing leaves nothing to preview, and so does a file that cannot be read.
 // A target that occurs more than once is replaced everywhere when its chunk
 // sets AllowMultiple, as the host does, and otherwise leaves nothing to
-// preview, because the host refuses that chunk. The manifest guard is required
+// preview, because the host refuses that chunk. When the chunks do not apply
+// as written, they are applied again to the file's LF view, as the manifest
+// guard's simulate() does for a single edit. The manifest guard is required
 // on use because it loads razor-lib, which loads this adapter.
 function wholeManifestEdit(file, chunks) {
   const { GUARDED } = require('../manifest-guard');
@@ -28,7 +30,11 @@ function wholeManifestEdit(file, chunks) {
   } catch {
     return null;
   }
-  let text = existing;
+  const text = applyChunks(existing, chunks) ?? applyChunks(existing.replace(/\r\n/g, '\n'), chunks);
+  return text === null ? null : { file_path: file, old_string: existing, new_string: text };
+}
+
+function applyChunks(text, chunks) {
   for (const chunk of chunks) {
     const target = chunk && chunk.TargetContent;
     const at = typeof target === 'string' && target ? text.indexOf(target) : -1;
@@ -38,7 +44,7 @@ function wholeManifestEdit(file, chunks) {
     else if (text.includes(target, at + 1)) return null;
     else text = text.slice(0, at) + replacement + text.slice(at + target.length);
   }
-  return { file_path: file, old_string: existing, new_string: text };
+  return text;
 }
 
 // The host types TargetFile as a string. Any other value is left out, so no
