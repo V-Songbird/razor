@@ -93,8 +93,14 @@ function packageArgs(args) {
   return out;
 }
 
-// Parse one shell segment; returns {manager, packages} when it adds a new
-// named dependency, null otherwise.
+// The command a shell runs with -c: `bash -c '<command>'`, and the same for
+// sh, zsh and an option cluster ending in c such as -lc. Group 1 holds a
+// single-quoted command, group 2 a double-quoted one.
+const SHELL_C = String.raw`(?:sh|bash|zsh)\s+-[a-z]*c\s+(?:'([^']*)'|"((?:\\.|[^"\\])*)")`;
+const WRAPPED = new RegExp(`^${SHELL_C}`);
+
+// Parse one shell segment; returns each {manager, packages} it adds as a new
+// named dependency, or [] when it adds none.
 function parseSegment(segment) {
   const tokens = segment.trim().split(/\s+/).filter(Boolean);
   // Wrapper prefixes (`sudo pip …`, `env PIP_X=1 pip …`, `command pip …`)
@@ -102,7 +108,12 @@ function parseSegment(segment) {
   while (tokens.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[0]) || ['sudo', 'env', 'command'].includes(tokens[0]))) {
     tokens.shift();
   }
-  if (!tokens.length) return null;
+  if (!tokens.length) return [];
+
+  // A shell's -c command is a command line of its own. Inside double quotes
+  // the shell drops the backslash before " \ $ and `, so the parser does too.
+  const wrapped = tokens.join(' ').match(WRAPPED);
+  if (wrapped) return parseInstallCommands(wrapped[1] ?? wrapped[2].replace(/\\(["\\$`])/g, '$1'));
 
   let cmd = tokens.shift().toLowerCase().replace(/\.(exe|cmd)$/, '');
 
@@ -122,38 +133,39 @@ function parseSegment(segment) {
   // dotnet add [proj] package Name
   if (cmd === 'dotnet' && tokens[0] === 'add') {
     const idx = tokens.indexOf('package');
-    if (idx !== -1 && tokens[idx + 1]) return { manager: 'dotnet', packages: [tokens[idx + 1]] };
-    return null;
+    if (idx !== -1 && tokens[idx + 1]) return [{ manager: 'dotnet', packages: [tokens[idx + 1]] }];
+    return [];
   }
 
-  if (!Object.hasOwn(ADD_SUBCOMMANDS, cmd)) return null; // own keys only, never Object.prototype members
+  if (!Object.hasOwn(ADD_SUBCOMMANDS, cmd)) return []; // own keys only, never Object.prototype members
   const subs = ADD_SUBCOMMANDS[cmd];
   const sub = (tokens.shift() || '').toLowerCase();
-  if (!subs.includes(sub)) return null;
+  if (!subs.includes(sub)) return [];
 
-  if (/^pip3?$/.test(cmd) && tokens.some((t) => PIP_RESTORE_FLAGS.has(t))) return null;
+  if (/^pip3?$/.test(cmd) && tokens.some((t) => PIP_RESTORE_FLAGS.has(t))) return [];
 
   const packages = packageArgs(tokens);
-  if (!packages.length) return null; // bare install = lockfile restore
+  if (!packages.length) return []; // bare install = lockfile restore
   // `pip install --upgrade pip` upgrades the tool, it does not add a project
   // dependency. Same for any manager asked to install only itself.
-  if (packages.length === 1 && packages[0].toLowerCase() === cmd) return null;
-  return { manager: cmd, packages };
+  if (packages.length === 1 && packages[0].toLowerCase() === cmd) return [];
+  return [{ manager: cmd, packages }];
 }
+
+// Shell chaining (&&, ||, ; and |) splits a command line into segments,
+// except inside the quoted command a shell runs with -c: that stays in one
+// segment, separators and all, for parseSegment to unwrap. Every other quote
+// splits as it always has.
+const SEGMENT = new RegExp(String.raw`(?:(?<!\S)${SHELL_C}|(?<!&)&(?!&)|[^;&|])+`, 'g');
 
 // razor: parses the command exactly as the model issued it. hush's
 // preserve-exit-code.js rewrites Bash/PowerShell commands via updatedInput
 // under bypassPermissions/HUSH_WRAP=1, but PreToolUse hooks from separate
 // plugins don't chain — each one gets the same original tool_input, never a
-// sibling's rewrite (verified live 2026-07-14). No unwrap step needed here.
+// sibling's rewrite (verified live 2026-07-14). Nothing here undoes that rewrite.
 // Scan a whole command line (split on shell chaining) for a dependency add.
 function parseInstallCommands(command) {
-  const hits = [];
-  for (const segment of String(command || '').split(/&&|\|\||;|\|/)) {
-    const hit = parseSegment(segment);
-    if (hit) hits.push(hit);
-  }
-  return hits;
+  return (String(command || '').match(SEGMENT) || []).flatMap((segment) => parseSegment(segment));
 }
 
 // The first install in the line. Kept for callers that want one answer.

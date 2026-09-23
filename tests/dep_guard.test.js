@@ -141,6 +141,41 @@ describe('unit: parseInstallCommand', () => {
   });
 });
 
+// A shell's -c command is a command line of its own. The whole wrapper read
+// as one command that installs nothing, and the chaining split cut inside its
+// quotes, so `bash -c "npm install axios; echo done"` went unseen.
+describe('installs wrapped in sh -c, bash -c or zsh -c', () => {
+  const cases = [
+    ['bash -c "npm install axios"', [['axios']]],
+    ["sh -c 'pip install requests'", [['requests']]],
+    ['bash -c "npm install axios; echo done"', [['axios']]],
+    ['zsh -lc "cd app; npm install axios && npm install lodash"', [['axios'], ['lodash']]],
+    ['bash -c "pip install \\"flask>=2.1\\""', [['flask>=2.1']]],
+    ['sudo bash -c "npm i -g serve" > install.log 2>&1', [['serve']]],
+    ['bash -c "npm run build; echo done"', []],
+    ["sh -c 'git status'", []],
+  ];
+  for (const [command, packages] of cases) {
+    test(`${command} → ${JSON.stringify(packages)}`, () => {
+      assert.deepStrictEqual(parseInstallCommands(command).map((h) => h.packages), packages);
+    });
+  }
+
+  const call = (command) => ({ session_id: freshSession(), tool_name: 'Bash', tool_input: { command } });
+
+  test('bash -c "npm install axios" is denied once, and the exact retry passes', () => {
+    const wrapped = call('bash -c "npm install axios"');
+    const first = hookOutput(runHook('pre-tool-use.js', wrapped));
+    assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(first.hookSpecificOutput.permissionDecisionReason, /'axios' adds a new npm dependency/);
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', wrapped)), null);
+  });
+
+  test('a -c command that installs nothing stays silent', () => {
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', call('bash -c "npm run build; echo done"'))), null);
+  });
+});
+
 describe('integration: soft gate', () => {
   const input = (sessionId, command) => ({
     session_id: sessionId,
