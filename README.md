@@ -72,14 +72,23 @@ Start a new session to load the plugin.
 
 ### Antigravity
 
-Requirements: Node.js 22 or later, Git and the Antigravity CLI. Antigravity has no marketplace for third-party plugins, so install from a clone of this repository. Replace `<path-to-clone>` with that directory:
+Requirements: Node.js 22 or later, Git and the Antigravity CLI. Antigravity has no marketplace for third-party plugins, so install razor from a clone of Foundry, which checks razor out at the commit the Claude Code and Codex catalogs pin. Replace `<path-to-clone>` with the directory to clone into:
 
 ```shell
-agy plugin install "<path-to-clone>"
+git clone --recurse-submodules https://github.com/V-Songbird/foundry.git <path-to-clone>
+agy plugin install <path-to-clone>/razor
 agy plugin list
 ```
 
 The list should name `razor`. Start a new conversation to load it. The checklist arrives at the first model call, the drift note at the first call of each turn, and the build check speaks through the stop hook. Antigravity has no subagent event, so subagents there receive no checklist.
+
+The install is a copy, so it stays at that commit. To take a new release, update the clone, install again and start a new conversation:
+
+```shell
+git -C <path-to-clone> pull
+git -C <path-to-clone> submodule update --init
+agy plugin install <path-to-clone>/razor
+```
 
 ## Good to know
 
