@@ -197,6 +197,47 @@ test('a manifest edit that cannot be previewed stays silent and never throws', (
   assert.deepEqual(state(w).deniedImports || {}, {});
 });
 
+// AllowMultiple lets the host replace every match of a target. With it, a
+// repeated target is judged by the file every replacement would produce;
+// without it, the host refuses the edit, so there is nothing to ask about.
+test('AllowMultiple decides a manifest edit whose target repeats, on both edit tools', () => {
+  const repeated = { TargetContent: '"^4.19.2"', ReplacementContent: '"^4.19.2",\n    "dayjs": "^1.11.0"' };
+  const tools = {
+    replace_file_content: (file, allowMultiple) => ({ TargetFile: file, ...repeated, AllowMultiple: allowMultiple }),
+    multi_replace_file_content: (file, allowMultiple) => ({
+      TargetFile: file,
+      ReplacementChunks: [
+        { TargetContent: '"version": "1.0.0"', ReplacementContent: '"version": "1.1.0"', AllowMultiple: false },
+        { ...repeated, AllowMultiple: allowMultiple },
+      ],
+    }),
+  };
+  for (const [tool, args] of Object.entries(tools)) {
+    const w = world();
+    nodeProject(w, { express: '^4.19.2', cors: '^4.19.2' });
+    const edit = (allowMultiple) => run(w, 'PreToolUse', call(tool, args(path.join(w.cwd, 'package.json'), allowMultiple)));
+    assert.deepEqual(edit(false), { decision: 'allow' }, tool);
+    const deny = edit(true);
+    assert.equal(deny.decision, 'deny', tool);
+    assert.match(deny.reason, /adds a new node dependency \(`dayjs`\)/);
+    assertToolNamed(deny.reason, tool);
+    assert.deepEqual(edit(true), { decision: 'allow' }, tool);
+  }
+});
+
+// The import guard reads only the incoming text, never whether the target is
+// unique, so a repeated target never hid an import from it.
+test('a code edit that sets AllowMultiple on a repeated target is still checked for imports', () => {
+  const w = world();
+  nodeProject(w);
+  const edit = run(w, 'PreToolUse', call('replace_file_content', {
+    TargetFile: path.join(w.cwd, 'src', 'app.js'),
+    TargetContent: '\n', ReplacementContent: "\nconst chalk = require('chalk');\n", AllowMultiple: true,
+  }));
+  assert.equal(edit.decision, 'deny');
+  assert.match(edit.reason, /chalk/);
+});
+
 test('the new-file budget counts one turn and starts over after a Stop', () => {
   const w = world();
   nodeProject(w);

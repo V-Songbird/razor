@@ -14,9 +14,11 @@ const claude = require('./harness');
 
 // A package manifest's content before and after a multi-chunk edit, its chunks
 // applied in order, or null. As with locate() in ./codex-tools, a target that
-// is missing or occurs more than once leaves nothing to preview, and so does a
-// file that cannot be read. The manifest guard is required on use because it
-// loads razor-lib, which loads this adapter.
+// is missing leaves nothing to preview, and so does a file that cannot be read.
+// A target that occurs more than once is replaced everywhere when its chunk
+// sets AllowMultiple, as the host does, and otherwise leaves nothing to
+// preview, because the host refuses that chunk. The manifest guard is required
+// on use because it loads razor-lib, which loads this adapter.
 function wholeManifestEdit(file, chunks) {
   const { GUARDED } = require('../manifest-guard');
   if (typeof file !== 'string' || !Object.hasOwn(GUARDED, path.basename(file).toLowerCase())) return null;
@@ -30,8 +32,11 @@ function wholeManifestEdit(file, chunks) {
   for (const chunk of chunks) {
     const target = chunk && chunk.TargetContent;
     const at = typeof target === 'string' && target ? text.indexOf(target) : -1;
-    if (at === -1 || text.includes(target, at + 1)) return null;
-    text = text.slice(0, at) + (chunk.ReplacementContent || '') + text.slice(at + target.length);
+    if (at === -1) return null;
+    const replacement = chunk.ReplacementContent || '';
+    if (chunk.AllowMultiple === true) text = text.split(target).join(replacement);
+    else if (text.includes(target, at + 1)) return null;
+    else text = text.slice(0, at) + replacement + text.slice(at + target.length);
   }
   return { file_path: file, old_string: existing, new_string: text };
 }
@@ -41,12 +46,13 @@ function wholeManifestEdit(file, chunks) {
 const targetFile = (args) => (typeof args.TargetFile === 'string' ? args.TargetFile : undefined);
 
 // Antigravity's tool names and arguments, read into the shape the gates
-// already speak. A multi-chunk edit is one Edit whose old and new text are the
-// chunks joined, which is all the import guard compares. The manifest guard
-// only judges an Edit whose old text is on disk, which joined chunks seldom
-// are, so a package manifest's edit, when it can be previewed, becomes the
-// whole file it would produce, as Codex's patch preview does. Any other tool
-// passes through unchanged and matches no gate.
+// already speak. AllowMultiple, which lets the host replace every match of a
+// target, is replace_all. A multi-chunk edit is one Edit whose old and new
+// text are the chunks joined, which is all the import guard compares. The
+// manifest guard only judges an Edit whose old text is on disk, which joined
+// chunks seldom are, so a package manifest's edit, when it can be previewed,
+// becomes the whole file it would produce, as Codex's patch preview does. Any
+// other tool passes through unchanged and matches no gate.
 const TOOLS = {
   run_command: (args) => ({ tool_name: 'Bash', tool_input: { command: args.CommandLine || '' } }),
   write_to_file: (args) => ({
@@ -55,7 +61,12 @@ const TOOLS = {
   }),
   replace_file_content: (args) => ({
     tool_name: 'Edit',
-    tool_input: { file_path: targetFile(args), old_string: args.TargetContent || '', new_string: args.ReplacementContent || '' },
+    tool_input: {
+      file_path: targetFile(args),
+      old_string: args.TargetContent || '',
+      new_string: args.ReplacementContent || '',
+      replace_all: args.AllowMultiple === true,
+    },
   }),
   multi_replace_file_content: (args) => {
     const file = targetFile(args);
