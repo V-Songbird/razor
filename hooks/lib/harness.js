@@ -81,12 +81,18 @@ function settingNumber(name, fallback) {
 
 // True when the setting was named explicitly rather than left at its
 // default — the difference between "the operator chose this ceiling" and
-// "razor picked one".
+// "razor picked one". The host exports an option to hooks only once
+// settings.json holds a value for it, and a stored value equal to the
+// manifest default reads the same as the default: only a different value
+// counts as a choice. The manifest is read only when an option arrived, so
+// the other hosts, which load this file for its output helpers, never need it.
 function settingGiven(name) {
   const env = process.env[`RAZOR_${name}`];
   if (env !== undefined && env !== '') return true;
   const opt = process.env[`CLAUDE_PLUGIN_OPTION_${name}`];
-  return opt !== undefined && opt !== '';
+  if (opt === undefined || opt === '') return false;
+  const option = require('../../.claude-plugin/plugin.json').userConfig[name.toLowerCase()];
+  return !option || opt !== String(option.default);
 }
 
 // ---- state location ----

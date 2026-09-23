@@ -3,6 +3,7 @@ type: knowledge
 summary: "Every razor environment variable, where to set it on each host, the per-check switches, the numeric budgets, the subagent lists and where razor keeps its state; read before adding or renaming a setting."
 related_files:
   - hooks/razor-lib.js
+  - hooks/lib/harness.js
   - hooks/file-meter.js
   - hooks/build-ledger.js
   - hooks/subagent-start.js
@@ -78,8 +79,11 @@ by design. There are no levels.
 > By default the new-file budget counts **production files only**. Tests,
 > fixtures, migrations, docs, config and generated output are recognised and
 > never charged, so a feature that ships with its tests is not sprawl. The
-> moment you set `RAZOR_FILE_BUDGET` yourself, it becomes a plain ceiling on
-> every new file — you asked for a number, you get that number.
+> moment you choose a number yourself, it becomes a plain ceiling on every new
+> file — you asked for a number, you get that number. `RAZOR_FILE_BUDGET`
+> always counts as a choice. In Claude Code, the settings panel's value counts
+> only when it differs from the default of 4: a stored 4 looks to razor like
+> the default. For a plain ceiling of 4, set `RAZOR_FILE_BUDGET=4`.
 
 Set `RAZOR_FILE_BUDGET=0` to switch the new-file check off entirely.
 

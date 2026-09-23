@@ -9,6 +9,7 @@ const { runHook, hookOutput, freshSession } = require('./helpers');
 const { shouldFire } = require('../hooks/build-ledger');
 
 const newFile = (i) => path.join(__dirname, '..', 'does-not-exist', `s${i}.js`);
+const newTestFile = (i) => path.join(__dirname, '..', 'does-not-exist', `s${i}.test.js`);
 
 const input = (sessionId, toolName, toolInput, extra) => ({
   session_id: sessionId,
@@ -31,6 +32,29 @@ describe('integration: plugin options (CLAUDE_PLUGIN_OPTION_*)', () => {
     );
     assert.strictEqual(deny.hookSpecificOutput.permissionDecision, 'deny');
   });
+
+  // Claude Code exports an option to hooks once settings.json holds a value
+  // for it. A stored 4 is the manifest default, not a chosen ceiling, so
+  // tests stay uncharged.
+  test('file_budget at its manifest default keeps production-only counting', () => {
+    const session = freshSession();
+    const env = { CLAUDE_PLUGIN_OPTION_FILE_BUDGET: '4' };
+    for (let i = 1; i <= 5; i++) {
+      const write = input(session, 'Write', { file_path: newTestFile(i) }, { prompt_id: 'p1' });
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write, env)), null);
+    }
+  });
+
+  for (const env of [{ RAZOR_FILE_BUDGET: '4' }, { CLAUDE_PLUGIN_OPTION_FILE_BUDGET: '3' }]) {
+    test(`${Object.keys(env)[0]}=${Object.values(env)[0]} is a raw ceiling on every new file`, () => {
+      const session = freshSession();
+      const budget = Number(Object.values(env)[0]);
+      const write = (i) => input(session, 'Write', { file_path: newTestFile(i) }, { prompt_id: 'p1' });
+      for (let i = 1; i <= budget; i++) assert.strictEqual(hookOutput(runHook('pre-tool-use.js', write(i), env)), null);
+      const deny = hookOutput(runHook('pre-tool-use.js', write(budget + 1), env));
+      assert.strictEqual(deny.hookSpecificOutput.permissionDecision, 'deny');
+    });
+  }
 
   test('an explicit RAZOR_FILE_BUDGET env var overrides the option', () => {
     const session = freshSession();
