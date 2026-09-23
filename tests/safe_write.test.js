@@ -5,6 +5,9 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+// Loaded first: the caller's RAZOR_* and host variables never reach the
+// adapter razor-lib picks, and temp files land in the suite's own directory.
+require('./helpers');
 const { safeWriteFileSync } = require('../hooks/lib/safe-write');
 const { gcStateFiles } = require('../hooks/razor-lib');
 
