@@ -113,7 +113,7 @@ function main() {
     'Stop',
     `razor ledger: +${stats.insertions} / -${stats.deletions} LOC, ` +
       `${stats.newFiles} new files since session start. ` +
-      'Deletion-positive diffs are the goal — is all of this needed? ' +
+      'Is all of this needed? ' +
       '(fires once per session; RAZOR_LEDGER=off to silence)'
   );
 }

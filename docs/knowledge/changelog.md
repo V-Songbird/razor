@@ -29,6 +29,10 @@ the subagent checklist are not available there; `RAZOR_DISABLE=1` before the
 host starts still turns everything off. Its state lives in a `razor-antigravity`
 folder under the system temp directory.
 
+The build check's question at the end of a turn no longer says that
+deletion-positive diffs are the goal. It still reports how much the session
+grew and asks whether all of it is needed.
+
 ## 1.6.0 — 2026-09-15
 
 razor is now one package for Claude Code and Codex. Both get the same checks
