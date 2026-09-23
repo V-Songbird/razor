@@ -53,7 +53,7 @@ most once, then gets out of the way — **the retry always goes through.**
 
 | Check | When it runs | What it looks at |
 | --- | --- | --- |
-| Install guard | before a shell command | `npm install`, `pip install`, `cargo add` and 12 other package managers |
+| Install guard | before a shell command | a command that adds a named package with npm, pnpm, yarn, bun, pip (also `pip3`, `python -m pip` and `uv pip`), pipenv, poetry, uv, cargo, go, composer, gem or dotnet |
 | Import guard | before a file change | an `import`/`require` of a package that is not in your manifest |
 | Manifest guard | before a file change | a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
 | New-file check | before a new file | how many new production files this one turn has already created |
