@@ -132,14 +132,14 @@ No Antigravity session has been measured yet.
 
 *Results can vary between runs.*
 
-<p align="center"><img src="assets/hero.svg" alt="Razor original product visualization" width="700"></p>
+<p align="center"><img src="assets/hero.svg" alt="The razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where razor's middle session landed on the same job: 193 lines above the edge never shipped with razor." width="700"></p>
 
-Original Claude Code benchmark visualization. These measurements describe the recorded Claude sessions, not Codex performance.
+The Claude Opus 5 run in the table above, in Claude Code (razor revision 623dd2c, run date not recorded): its 27 no-plugin sessions on the nine dependency jobs. These measurements describe the recorded Claude sessions, not Codex performance.
 
 <details>
-<summary>Watch the recorded Claude Code demo</summary>
+<summary>Watch the recorded Claude Code demo: one real session each on Claude Opus 5, replayed on the recorded clock, published September 4, 2026</summary>
 
-<p align="center"><img src="assets/demo.svg" alt="Recorded Claude Code demonstration of Razor" width="700"></p>
+<p align="center"><img src="assets/demo.svg" alt="The same ask side by side: implement parseQuery in query.js. Without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on Object.fromEntries and URLSearchParams. Across the run, 3 sessions each way averaged 18 and 4 lines." width="700"></p>
 
 </details>
 
