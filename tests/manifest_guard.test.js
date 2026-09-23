@@ -108,6 +108,27 @@ describe('integration: manifest gate', () => {
     assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit)), null);
   });
 
+  // The Edit tool fails when old_string matches more than once without
+  // replace_all, so that call cannot add the dependency it names.
+  test('Edit fragment that matches twice adds nothing without replace_all, and is gated with it', () => {
+    const pkg = JSON.stringify(
+      { name: 'ws', version: '1.0.0', dependencies: { express: '^4.19.2' }, devDependencies: { '@types/express': '^4.19.2' } },
+      null,
+      2
+    );
+    const ws = workspace({ 'package.json': pkg });
+    const edit = (extra) => input(freshSession(), 'Edit', {
+      file_path: path.join(ws, 'package.json'),
+      old_string: '"^4.19.2"\n  }',
+      new_string: '"^4.19.2",\n    "axios": "^1.7.0"\n  }',
+      ...extra,
+    });
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', edit())), null);
+    const all = hookOutput(runHook('pre-tool-use.js', edit({ replace_all: true })));
+    assert.strictEqual(all.hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(all.hookSpecificOutput.permissionDecisionReason, /`axios`/);
+  });
+
   test('version bumps of existing entries never fire', () => {
     const ws = workspace({ 'package.json': PKG });
     const edit = input(freshSession(), 'Edit', {
