@@ -102,6 +102,12 @@ short extra reply. It never stops to wait for you, and it then stays quiet for
 the rest of the session. It needs a git repository to compare against, so in a
 folder that is not one it never runs.
 
+It compares the whole working tree, not only what this session wrote. Files
+another session or tool writes in the same checkout count toward this one, so
+a parallel session can make it fire. Changes already in the tree when the
+session started are subtracted by count, so an edit inside a part of a file
+that was already changed is only approximated.
+
 ## Where it hooks in
 
 razor uses the same five hook events in Claude Code and Codex. Claude Code reads

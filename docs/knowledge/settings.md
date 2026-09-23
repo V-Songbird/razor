@@ -87,6 +87,11 @@ by design. There are no levels.
 
 Set `RAZOR_FILE_BUDGET=0` to switch the new-file check off entirely.
 
+`RAZOR_LEDGER_LOC` and `RAZOR_LEDGER_FILES` are measured across the whole
+working tree against where the session started, so files another session writes
+in the same checkout count toward them. Edits inside parts of a file that were
+already changed at session start are only approximated.
+
 ## Subagents
 
 | Variable | What it does |
