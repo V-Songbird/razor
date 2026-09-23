@@ -159,12 +159,15 @@ It sorts what it finds into three piles:
 - **likely unused** — nothing referenced it, but no resolver was available, so
   nothing proved it. Treat these as leads.
 - **unknown** — something references it, or only a resolver can settle it.
-  Type definitions and build tooling usually land here.
+  Type definitions, build tooling and packages whose name appears as a quoted
+  string in your source usually land here.
 
 It never edits your manifest and never uninstalls anything. Static scanning
-cannot see `import(someVariable)` or a package loaded by a runtime string, so a
-package used only that way can show up as *likely unused*. That is why the
-high-confidence pile is separate.
+cannot follow `import(someVariable)` or a package loaded by a runtime string.
+When the package's name appears as a quoted string in a scanned source file,
+the audit reports it as *unknown* with that reason. A name built at runtime
+stays invisible, so even *confirmed unused* is not a promise that nothing loads
+the package.
 
 ## What razor touches
 

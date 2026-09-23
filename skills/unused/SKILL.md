@@ -34,9 +34,9 @@ The three buckets, and what separates them:
 
 | Bucket | What it means |
 | --- | --- |
-| **Confirmed unused** | The installed tree was read: no import, the package ships no command, and no installed package peer-requires it. Only possible when dependencies are installed. |
+| **Confirmed unused** | The installed tree was read: no import, no quoted mention in source, the package ships no command, and no installed package peer-requires it. Only possible when dependencies are installed. |
 | **Likely unused** | Nothing referenced it, but nothing could prove it — no installed tree to read, or a python project, where no package metadata was available. A lead, not a verdict. |
-| **Unknown** | Something references it, or only a resolver can settle it: named in a script or config file, a `@types/*`/toolchain dep, a package that ships a command, or one that satisfies another package's peer dependency. |
+| **Unknown** | Something references it, or only a resolver can settle it: named in a script or config file, named as a quoted string in source outside an import (how a package loaded through `import(variable)` shows up), a `@types/*`/toolchain dep, a package that ships a command, or one that satisfies another package's peer dependency. |
 
 For a node project, the script also detects whether **knip** is installed or resolvable from the target project. It resolves what this audit still cannot: entry-point reachability, config-only plugin loading, and true `@types` pairing. When knip is present, the report names it as the authoritative escalation for those classes. When it isn't, the report says nothing about it — razor never suggests installing a new tool into the target project.
 

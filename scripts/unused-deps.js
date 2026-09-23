@@ -11,7 +11,8 @@
 // actually be checked:
 //
 //   confirmed — a resolver-grade check ran and found nothing: no import, no
-//               command shipped, and no installed package peer-requires it.
+//               quoted mention in source, no command shipped, and no
+//               installed package peer-requires it.
 //   likely    — nothing references it, but no resolver was available, so
 //               nothing PROVED it. Never called high confidence.
 //   unknown   — something references it, or only a resolver can settle it.
@@ -237,6 +238,21 @@ function mentionedOutsideImports(dep, haystack) {
   return new RegExp(`${left}${escaped}\\b`, 'i').test(haystack);
 }
 
+// Quoted strings shaped like a package name or module path, each with the
+// package or module it would load. A dependency named this way and never
+// imported is usually loaded through import(variable) or require-by-string,
+// which no import pattern can follow.
+const QUOTED_NAME = /(['"`])(@?[\w.-]+(?:\/[\w.-]+)*)\1/g;
+
+function quotedNames(text, eco) {
+  const names = new Set();
+  for (const [, , name] of text.matchAll(QUOTED_NAME)) {
+    names.add(name);
+    names.add(eco === 'python' ? name.split('.')[0] : name.split('/').slice(0, name.startsWith('@') ? 2 : 1).join('/'));
+  }
+  return names;
+}
+
 // One directory's declared deps against one directory's source. Shared by the
 // root project and by every workspace package, so a workspace is audited
 // against its own manifest and its own files, never the root's.
@@ -253,6 +269,7 @@ function auditDir(projectDir) {
 
   const files = walkSourceFiles(projectDir);
   const importsByEco = { node: new Set(), python: new Set() };
+  const namedByEco = { node: new Set(), python: new Set() };
   const scannedByEco = { node: 0, python: 0 };
   for (const file of files) {
     const eco = fileEcosystem(file);
@@ -270,6 +287,7 @@ function auditDir(projectDir) {
     } else {
       for (const root of pyImportRoots(text)) importsByEco.python.add(root);
     }
+    for (const name of quotedNames(text, eco)) namedByEco[eco].add(name);
   }
 
   const outsideText = {
@@ -281,6 +299,7 @@ function auditDir(projectDir) {
   const result = { ecosystems: [], usedCount: 0 };
   for (const { eco, deps } of ecosystems) {
     const roots = [...importsByEco[eco]];
+    const named = [...namedByEco[eco]];
     const scanned = scannedByEco[eco];
     const devDeps = eco === 'node' ? packageJsonDevDeps(projectDir) : null;
     const evidence = eco === 'node' ? installedEvidence(projectDir) : null;
@@ -303,6 +322,7 @@ function auditDir(projectDir) {
       const toolchain = devDeps && nodeToolchainReason(dep, devDeps);
       if (toolchain) reasons.push(toolchain);
       if (mentionedOutsideImports(dep, outsideText[eco])) reasons.push('named in a script or config file');
+      if (named.some((name) => isDeclared(name, [dep]))) reasons.push('named in source outside an import');
       if (evidence && evidence.bins.has(dep)) {
         reasons.push('the installed copy ships a command, so it may be run rather than imported');
       }
@@ -407,13 +427,16 @@ function auditProject(projectDir) {
 }
 
 const KNOWN_LIMITS =
-  'Known limits: static scanning cannot see dynamic import(variable) calls or ' +
-  'runtime require-by-string, and a python distribution whose import name differs from its ' +
-  'name beyond the common aliases can read as unimported. "Confirmed unused" means the ' +
-  'installed tree was read and found no command and no peer relationship either — it is not ' +
-  'a promise that no runtime string references the package. "Likely unused" means nothing ' +
-  'referenced it and nothing could prove it: treat those as leads, not verdicts. Nothing ' +
-  'here edits a manifest; removing a dependency is always your call.';
+  'Known limits: static scanning cannot follow dynamic import(variable) calls or ' +
+  'runtime require-by-string. A dependency whose name appears as a quoted string in a ' +
+  'scanned source file is reported as unknown for that reason, but a name built at runtime ' +
+  'or kept in a file this audit does not scan stays invisible, and a python distribution ' +
+  'whose import name differs from its name beyond the common aliases can read as unimported. ' +
+  '"Confirmed unused" means the installed tree was read and found no command, no peer ' +
+  'relationship and no quoted mention either — it is not a promise that no runtime string ' +
+  'references the package. "Likely unused" means nothing referenced it and nothing could ' +
+  'prove it: treat those as leads, not verdicts. Nothing here edits a manifest; removing a ' +
+  'dependency is always your call.';
 
 // knip is JS/TS-only and resolves what this audit still cannot: transitive
 // import graphs, config-only plugin loading, and entry-point reachability.

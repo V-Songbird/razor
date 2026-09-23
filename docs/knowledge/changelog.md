@@ -33,6 +33,12 @@ The build check's question at the end of a turn no longer says that
 deletion-positive diffs are the goal. It still reports how much the session
 grew and asks whether all of it is needed.
 
+The unused-dependency audit no longer calls a package unused when your source
+names it as a quoted string, the usual sign of a package loaded through
+`import(variable)`. It now lands under unknown with the reason "named in
+source outside an import". Before, it read as likely unused, or as confirmed
+unused once dependencies were installed.
+
 ## 1.6.0 — 2026-09-15
 
 razor is now one package for Claude Code and Codex. Both get the same checks

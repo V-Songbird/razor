@@ -106,6 +106,25 @@ describe('unused-deps: node ecosystem bucketing', () => {
     assert.match(eco.unknown.find((u) => u.dep === 'lodash').evidence, /ships a command/);
   });
 
+  test('an installed dep loaded through import(variable) is UNKNOWN, never confirmed', () => {
+    const dir = makeNodeWorkspace();
+    installPackage(dir, 'express', {});
+    installPackage(dir, 'lodash', {});
+    write(dir, 'src/lazy.js', "const name = 'lodash';\nmodule.exports = () => import(name);\n");
+    const eco = node(auditProject(dir));
+    assert.deepStrictEqual(names(eco.confirmed), []);
+    const entry = eco.unknown.find((u) => u.dep === 'lodash');
+    assert.ok(entry, 'lodash should be unknown, not confirmed unused');
+    assert.strictEqual(entry.reason, 'named in source outside an import');
+  });
+
+  test('a sentence that mentions a dep does not name it', () => {
+    const dir = makeNodeWorkspace();
+    installPackage(dir, 'express', {});
+    write(dir, 'src/log.js', "console.log('lodash is not loaded here');\n");
+    assert.deepStrictEqual(names(node(auditProject(dir)).confirmed), ['lodash']);
+  });
+
   test('a type-only import counts as usage', () => {
     const dir = makeNodeWorkspace();
     write(dir, 'src/types.ts', "import type { Debounced } from 'lodash';\nexport type X = Debounced;\n");
