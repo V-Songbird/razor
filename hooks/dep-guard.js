@@ -110,7 +110,11 @@ const WRAPPERS = [
 function parseSegment(segment) {
   // Wrapper prefixes (`sudo pip …`, `env PIP_X=1 pip …`, `command pip …`)
   // resolve to the same install; strip them so the manager is what's judged.
-  const rest = segment.trim().replace(/^(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|env|command)(?:\s+|$))*/, '');
+  // So do PowerShell's call operator (`& npm …`) and the braces of a script
+  // block or brace group (`{ npm … }`), whose `}` may close a later segment.
+  const rest = segment.trim()
+    .replace(/^(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|env|command|&)(?:\s+|$)|\{\s*)*/, '')
+    .replace(/(?<!\$\{[^\s{}]*)\s*\}$/, '');
 
   // Another shell's command is a command line of its own, line breaks
   // included. Inside double quotes the shell drops the backslash before
@@ -122,9 +126,12 @@ function parseSegment(segment) {
     return parseInstallCommands(single ?? bare ?? double.replace(/\\(["\\$`])/g, '$1'));
   }
 
-  const tokens = rest.split(/\s+/).filter(Boolean);
-  if (!tokens.length) return [];
-  let cmd = tokens.shift().toLowerCase().replace(/\.(exe|cmd)$/, '');
+  // A program named by its path, quoted or not, is still that program:
+  // `& "C:\Program Files\nodejs\npm.cmd" install x` runs npm.
+  const program = rest.match(/^(?:"([^"]*)"|'([^']*)'|(\S+))/);
+  if (!program) return [];
+  const tokens = rest.slice(program[0].length).split(/\s+/).filter(Boolean);
+  let cmd = path.win32.basename(program[1] ?? program[2] ?? program[3]).toLowerCase().replace(/\.(exe|cmd)$/, '');
 
   // python -m pip install …  →  pip install …
   if ((cmd === 'python' || cmd === 'python3' || cmd === 'py') && tokens[0] === '-m' && /^pip3?$/.test(tokens[1] || '')) {

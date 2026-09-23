@@ -244,6 +244,33 @@ describe('quoted text, and commands run by PowerShell or cmd', () => {
   });
 });
 
+// PowerShell runs the program after its call operator, inside a script block
+// too, and a program named by its path is still that program.
+describe("installs behind PowerShell's call operator", () => {
+  const forms = [
+    '& npm install x',
+    'pwsh -Command "& { npm install x }"',
+    '& "C:\\Program Files\\nodejs\\npm.cmd" install x',
+  ];
+  for (const command of forms) {
+    test(`${command} → [["x"]]`, () => {
+      assert.deepStrictEqual(parseInstallCommands(command).map((h) => h.packages), [['x']]);
+    });
+    test(`${command} is denied once naming x, and the exact retry passes`, () => {
+      const call = { session_id: freshSession(), tool_name: 'PowerShell', tool_input: { command } };
+      const first = hookOutput(runHook('pre-tool-use.js', call));
+      assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+      assert.match(first.hookSpecificOutput.permissionDecisionReason, /'x' adds a new npm dependency/);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', call)), null);
+    });
+  }
+
+  test('a script block that installs nothing, and a variable package name, keep their shape', () => {
+    assert.deepStrictEqual(parseInstallCommands('& { Get-ChildItem }'), []);
+    assert.deepStrictEqual(parseInstallCommands('npm install ${PKG}').map((h) => h.packages), [['${PKG}']]);
+  });
+});
+
 describe('integration: soft gate', () => {
   const input = (sessionId, command) => ({
     session_id: sessionId,
