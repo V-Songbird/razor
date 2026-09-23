@@ -207,6 +207,43 @@ describe('installs on every line of a multi-line command', () => {
   }
 });
 
+// Quoted text is not a command line: a commit message or a node -e script that
+// mentions an install used to be split at its ';' and denied. The quoted
+// command PowerShell or cmd runs is one, and is parsed as one.
+describe('quoted text, and commands run by PowerShell or cmd', () => {
+  const cases = [
+    ['git commit -m "fix; npm install y"', []],
+    ["node -e \"const x = 1; console.log('npm install axios')\"", []],
+    ['pwsh -Command "cd app; npm i x"', [['x']]],
+    ['powershell -NoProfile -ExecutionPolicy Bypass -Command "npm install x"', [['x']]],
+    ['pwsh -Command npm install x', [['x']]],
+    ['cmd /c "cd app && npm i x"', [['x']]],
+    ['cmd.exe /s /c "npm install a && npm install b"', [['a'], ['b']]],
+    ['cmd /c npm install x', [['x']]],
+    ['pwsh -Command "Get-ChildItem"; npm install z', [['z']]],
+  ];
+  for (const [command, packages] of cases) {
+    test(`${command} → ${JSON.stringify(packages)}`, () => {
+      assert.deepStrictEqual(parseInstallCommands(command).map((h) => h.packages), packages);
+    });
+  }
+
+  for (const command of ['pwsh -Command "cd app; npm i x"', 'cmd /c "cd app && npm i x"']) {
+    test(`${command} is denied once naming x, and the exact retry passes`, () => {
+      const call = { session_id: freshSession(), tool_name: 'Bash', tool_input: { command } };
+      const first = hookOutput(runHook('pre-tool-use.js', call));
+      assert.strictEqual(first.hookSpecificOutput.permissionDecision, 'deny');
+      assert.match(first.hookSpecificOutput.permissionDecisionReason, /'x' adds a new npm dependency/);
+      assert.strictEqual(hookOutput(runHook('pre-tool-use.js', call)), null);
+    });
+  }
+
+  test('a commit message that mentions an install stays silent', () => {
+    const call = { session_id: freshSession(), tool_name: 'Bash', tool_input: { command: 'git commit -m "fix; npm install y"' } };
+    assert.strictEqual(hookOutput(runHook('pre-tool-use.js', call)), null);
+  });
+});
+
 describe('integration: soft gate', () => {
   const input = (sessionId, command) => ({
     session_id: sessionId,

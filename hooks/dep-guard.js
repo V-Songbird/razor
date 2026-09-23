@@ -93,11 +93,17 @@ function packageArgs(args) {
   return out;
 }
 
-// The command a shell runs with -c: `bash -c '<command>'`, and the same for
-// sh, zsh and an option cluster ending in c such as -lc. Group 1 holds a
-// single-quoted command, group 2 a double-quoted one.
-const SHELL_C = String.raw`(?:sh|bash|zsh)\s+-[a-z]*c\s+(?:'([^']*)'|"((?:\\.|[^"\\])*)")`;
-const WRAPPED = new RegExp(`^${SHELL_C}`);
+// A command another shell runs: `bash -c '<command>'` (also sh, zsh and an
+// option cluster ending in c such as -lc), `pwsh -Command "<command>"` (also
+// powershell and -c, after other switches) and `cmd /c "<command>"` (also
+// /k). PowerShell and cmd also run an unquoted rest of the line; a POSIX
+// shell's -c takes one word, so only its quoted form holds a command line.
+const QUOTED = String.raw`(?:'(?<single>[^']*)'|"(?<double>(?:\\.|[^"\\])*)")`;
+const WRAPPERS = [
+  new RegExp(String.raw`^(?:sh|bash|zsh)\s+-[a-z]*c\s+${QUOTED}`),
+  new RegExp(String.raw`^(?:pwsh|powershell)(?:\.exe)?(?:\s+-(?!(?:c|command)\b)\w+(?:\s+[^\s"'-]\S*)?)*\s+-(?:c|command)\s+(?:${QUOTED}|(?<bare>.+))`, 'is'),
+  new RegExp(String.raw`^cmd(?:\.exe)?(?:\s+\/[a-z])*\s+\/[ck]\s+(?:${QUOTED}|(?<bare>.+))`, 'is'),
+];
 
 // Parse one shell segment; returns each {manager, packages} it adds as a new
 // named dependency, or [] when it adds none.
@@ -106,11 +112,15 @@ function parseSegment(segment) {
   // resolve to the same install; strip them so the manager is what's judged.
   const rest = segment.trim().replace(/^(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|env|command)(?:\s+|$))*/, '');
 
-  // A shell's -c command is a command line of its own, line breaks included.
-  // Inside double quotes the shell drops the backslash before " \ $ and `, so
-  // the parser does too.
-  const wrapped = rest.match(WRAPPED);
-  if (wrapped) return parseInstallCommands(wrapped[1] ?? wrapped[2].replace(/\\(["\\$`])/g, '$1'));
+  // Another shell's command is a command line of its own, line breaks
+  // included. Inside double quotes the shell drops the backslash before
+  // " \ $ and `, so the parser does too.
+  for (const wrapper of WRAPPERS) {
+    const found = rest.match(wrapper);
+    if (!found) continue;
+    const { single, double, bare } = found.groups;
+    return parseInstallCommands(single ?? bare ?? double.replace(/\\(["\\$`])/g, '$1'));
+  }
 
   const tokens = rest.split(/\s+/).filter(Boolean);
   if (!tokens.length) return [];
@@ -152,14 +162,13 @@ function parseSegment(segment) {
 }
 
 // Shell chaining (&&, ||, ; and |) and a line break split a command line into
-// segments, except inside the quoted command a shell runs with -c: that stays
-// in one segment, separators and all, for parseSegment to unwrap. A quoted
-// string that spans lines keeps its line breaks too. Every other quote splits
-// on chaining as it always has.
-const SEGMENT = new RegExp(
-  String.raw`(?:(?<!\S)${SHELL_C}|'[^']*\n[^']*'|"(?:\\.|[^"\\])*\n(?:\\.|[^"\\])*"|(?<!&)&(?!&)|[^;&|\n])+`,
-  'g'
-);
+// segments, never inside quotes: a commit message or a node -e script that
+// mentions an install starts no command, and the quoted command another shell
+// runs stays whole for parseSegment to unwrap. A backslash before a quote
+// outside quotes makes it an ordinary character, and so does a quote with no
+// match. A backslash before anything else stays literal, as a Windows path
+// needs in PowerShell.
+const SEGMENT = /(?:\\['"]|'[^']*'|"(?:\\.|[^"\\])*"|(?<!&)&(?!&)|[^;&|\n])+/g;
 
 // A here-document's body is data, not commands: everything after the line
 // that opens it, up to the line holding only its delimiter.
