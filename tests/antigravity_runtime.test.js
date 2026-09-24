@@ -84,22 +84,32 @@ function nodeProject(w, deps = { express: '^4.19.2' }) {
   fs.writeFileSync(path.join(w.cwd, 'src', 'app.js'), "const express = require('express');\nmodule.exports = express;\n");
 }
 
-test('the first model call carries the ladder and the drift note, later calls of the turn nothing, the next turn the note again', () => {
+// An injected message reaches only the model call it rides, so every call of
+// every turn carries both; the ledger baseline stays the first call's.
+test('every model call carries the ladder and the drift note, and only the first takes the ledger baseline', () => {
   const w = world();
+  fs.writeFileSync(path.join(w.cwd, 'a.js'), 'base\n');
+  git(w, 'init', '-q');
+  git(w, 'add', '.');
+  git(w, 'commit', '-qm', 'fixture baseline');
   const ladder = fs.readFileSync(path.join(GOLDEN, 'session-start-startup.txt'), 'utf8');
-  const first = run(w, 'PreInvocation', { invocationNum: 0 });
-  assert.equal(first.injectSteps.length, 2);
-  assert.equal(first.injectSteps[0].ephemeralMessage, ladder);
-  assert.match(first.injectSteps[1].ephemeralMessage, /^Stay on the task/);
-  assert.deepEqual(run(w, 'PreInvocation', { invocationNum: 1 }), {});
+  const both = (answer) => {
+    assert.equal(answer.injectSteps.length, 2);
+    assert.equal(answer.injectSteps[0].ephemeralMessage, ladder);
+    assert.match(answer.injectSteps[1].ephemeralMessage, /^Stay on the task/);
+  };
+  both(run(w, 'PreInvocation', { invocationNum: 0 }));
+  const baseline = state(w).ledger;
+  assert.equal(baseline.baseInsertions, 0);
+  fs.appendFileSync(path.join(w.cwd, 'a.js'), 'later\n'.repeat(5));
+  both(run(w, 'PreInvocation', { invocationNum: 1 }));
   assert.deepEqual(run(w, 'Stop', { executionNum: 0, fullyIdle: true }), {});
-  const next = run(w, 'PreInvocation', { invocationNum: 0 });
-  assert.equal(next.injectSteps.length, 1);
-  assert.match(next.injectSteps[0].ephemeralMessage, /^Stay on the task/);
-  assert.deepEqual(run(w, 'PreInvocation', { invocationNum: 1 }), {});
-  assert.equal(state(w).ladderInjected, true);
+  both(run(w, 'PreInvocation', { invocationNum: 0 }));
+  both(run(w, 'PreInvocation', { invocationNum: 1 }));
+  assert.deepEqual(state(w).ledger, baseline);
   assert.equal(state(w).antigravityTurn, 1);
-  assert.deepEqual(run(w, 'PreInvocation', { invocationNum: 0 }, { RAZOR_DRIFT_NOTE: 'off' }), {});
+  const noNote = run(w, 'PreInvocation', { invocationNum: 2 }, { RAZOR_DRIFT_NOTE: 'off' });
+  assert.deepEqual(noNote.injectSteps.map((s) => s.ephemeralMessage), [ladder]);
 });
 
 test('an undeclared install is denied once and allowed on the exact retry; a declared one passes', () => {

@@ -82,7 +82,7 @@ agy plugin install <path-to-clone>/razor
 agy plugin list
 ```
 
-The list should name `razor`. Start a new conversation to load it. The checklist arrives at the first model call, the drift note at the first call of each turn, and the build check speaks through the stop hook. Antigravity has no subagent event, so subagents there receive no checklist.
+The list should name `razor`. Start a new conversation to load it. The checklist and the drift note ride every model call, because a message injected there reaches only the call it rides, and the build check speaks through the stop hook. Antigravity has no subagent event, so subagents there receive no checklist.
 
 The install is a copy, so it stays at that commit. To take a new release, update the clone, install again and start a new conversation:
 

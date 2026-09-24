@@ -5,30 +5,33 @@
 // do not detect hosts. One process per event, one JSON answer per process.
 //
 // Antigravity has no session, prompt or subagent event, so its three events
-// carry razor as follows. PreInvocation fires before every model call: the
-// first one a conversation sees carries the ladder and the ledger baseline,
-// as SessionStart does elsewhere, and the first one after each Stop carries
-// the drift note, as UserPromptSubmit does. A turn is the stretch between two
-// Stops, counted in the session state, and that count also keys the per-turn
-// file budget. PreToolUse runs the same gates on the translated call. Stop
-// runs the build check and asks for one more turn only once its
-// once-per-session mark is on disk.
+// carry razor as follows. PreInvocation fires before every model call, and an
+// injected message reaches only the call it rides, so every call carries the
+// ladder, as SessionStart context does in every Claude Code request, and the
+// drift note, as UserPromptSubmit does. Only the first call a conversation
+// sees takes the ledger baseline. A turn is the stretch between two Stops,
+// counted in the session state, and that count keys the per-turn file budget.
+// PreToolUse runs the same gates on the translated call. Stop runs the build
+// check and asks for one more turn only once its once-per-session mark is on
+// disk.
 process.env.RAZOR_HOST = 'antigravity';
 
 const harness = require('./lib/antigravity-harness');
-const { readState, writeState, isActive } = require('./razor-lib');
+const { RULESET, readState, writeState, isActive, emitContext } = require('./razor-lib');
 
 function preInvocation(data) {
   const seen = readState(data.session_id);
   if (!isActive(seen)) return harness.flush('PreInvocation');
-  const turn = seen.antigravityTurn || 0;
-  if (!seen.ladderInjected) require('./session-start').main();
-  if (!seen.ladderInjected || seen.noteTurn !== turn) require('./mode-toggle').main();
-  // Read again: session-start may have saved the ledger baseline meanwhile.
-  const state = readState(data.session_id);
-  state.ladderInjected = true;
-  state.noteTurn = turn;
-  writeState(data.session_id, state);
+  if (seen.ladderInjected) {
+    emitContext('PreInvocation', RULESET);
+  } else {
+    require('./session-start').main();
+    // Read again: session-start may have saved the ledger baseline meanwhile.
+    const state = readState(data.session_id);
+    state.ladderInjected = true;
+    writeState(data.session_id, state);
+  }
+  require('./mode-toggle').main();
   harness.flush('PreInvocation');
 }
 

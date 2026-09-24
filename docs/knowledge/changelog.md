@@ -21,8 +21,8 @@ start each script directly, without a shell, which older Claude Code releases
 do not support.
 
 razor now runs on Antigravity from the same package, installed from a clone
-with `agy plugin install`. The checklist arrives at the first model call of a
-conversation and the scope-drift note at the first call of each turn. The
+with `agy plugin install`. The checklist and the scope-drift note ride every
+model call, because a message injected there reaches only the call it rides. The
 install check reads `run_command`; the import, manifest and new-file checks
 read `write_to_file`, `replace_file_content` and `multi_replace_file_content`;
 the build check speaks once per conversation through the stop hook. `/unused`
