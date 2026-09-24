@@ -9,11 +9,12 @@
 // injected message reaches only the call it rides, so every call carries the
 // ladder, as SessionStart context does in every Claude Code request, and the
 // drift note, as UserPromptSubmit does. Only the first call a conversation
-// sees takes the ledger baseline. A turn is the stretch between two Stops,
-// counted in the session state, and that count keys the per-turn file budget.
-// PreToolUse runs the same gates on the translated call. Stop runs the build
-// check and asks for one more turn only once its once-per-session mark is on
-// disk.
+// sees takes the ledger baseline. A turn starts at the call whose
+// invocationNum is 0: the host restarts that count on each user turn, but not
+// when a Stop continues the model, and a turn can end without a Stop. The
+// turns counted in the session state key the per-turn file budget. PreToolUse
+// runs the same gates on the translated call. Stop only runs the build check,
+// and has the model continue only once its once-per-session mark is on disk.
 process.env.RAZOR_HOST = 'antigravity';
 
 const harness = require('./lib/antigravity-harness');
@@ -22,6 +23,10 @@ const { RULESET, readState, writeState, isActive, emitContext } = require('./raz
 function preInvocation(data) {
   const seen = readState(data.session_id);
   if (!isActive(seen)) return harness.flush('PreInvocation');
+  if (data.invocationNum === 0) {
+    seen.antigravityTurn = (seen.antigravityTurn || 0) + 1;
+    writeState(data.session_id, seen);
+  }
   if (seen.ladderInjected) {
     emitContext('PreInvocation', RULESET);
   } else {
@@ -42,10 +47,6 @@ function preToolUse(data) {
 }
 
 function stop(data) {
-  const state = readState(data.session_id);
-  if (!isActive(state)) return harness.flush('Stop');
-  state.antigravityTurn = (state.antigravityTurn || 0) + 1;
-  writeState(data.session_id, state);
   require('./build-ledger').main();
   const ledger = readState(data.session_id).ledger;
   harness.flush('Stop', { persisted: Boolean(ledger && ledger.fired === true) });

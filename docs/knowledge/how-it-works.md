@@ -139,10 +139,12 @@ prompt or subagent event, so the same checks are wired to what exists:
 | --- | --- |
 | `PreInvocation` | on every model call, writes the checklist and the scope-drift note; on the first call of a conversation, also takes the snapshot |
 | `PreToolUse` | the install check on `run_command`, and the import, manifest and new-file checks on the three file tools |
-| `Stop` | runs the build check, once per conversation, and asks for one more turn when it fires |
+| `Stop` | runs the build check, once per conversation, and has the model continue when it fires |
 
-A turn there is the stretch between two stops, which is what the new-file
-budget counts. A message injected there reaches only the model call it rides,
+A turn there starts at the first model call after you send a message, which
+Antigravity numbers 0, and that turn is what the new-file budget counts. The
+model continuing after the build check stays in the same turn, and a turn that
+ends without a stop, as one ended by a denied command does, still ends. A message injected there reaches only the model call it rides,
 so the checklist and the note go with every call, including the calls of a
 resumed conversation; together they are about 2,500 characters per call. Subagents receive
 no checklist. `razor on` and `razor off` do not exist there; `RAZOR_DISABLE=1`

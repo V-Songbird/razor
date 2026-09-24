@@ -25,8 +25,10 @@ with `agy plugin install`. The checklist and the scope-drift note ride every
 model call, because a message injected there reaches only the call it rides. The
 install check reads `run_command`; the import, manifest and new-file checks
 read `write_to_file`, `replace_file_content` and `multi_replace_file_content`;
-the build check speaks once per conversation through the stop hook. `/unused`
-gives the dependency report there.
+the build check speaks once per conversation through the stop hook. The
+new-file budget there counts one turn, from the first model call after each
+message you send; the model continuing after the build check stays in that
+turn. `/unused` gives the dependency report there.
 
 Antigravity has no prompt or subagent event, so `razor off` and `razor on` and
 the subagent checklist are not available there; `RAZOR_DISABLE=1` before the

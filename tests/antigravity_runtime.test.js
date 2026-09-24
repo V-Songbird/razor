@@ -107,7 +107,7 @@ test('every model call carries the ladder and the drift note, and only the first
   both(run(w, 'PreInvocation', { invocationNum: 0 }));
   both(run(w, 'PreInvocation', { invocationNum: 1 }));
   assert.deepEqual(state(w).ledger, baseline);
-  assert.equal(state(w).antigravityTurn, 1);
+  assert.equal(state(w).antigravityTurn, 2);
   const noNote = run(w, 'PreInvocation', { invocationNum: 2 }, { RAZOR_DRIFT_NOTE: 'off' });
   assert.deepEqual(noNote.injectSteps.map((s) => s.ephemeralMessage), [ladder]);
 });
@@ -271,23 +271,30 @@ test('a code edit that sets AllowMultiple on a repeated target is still checked 
   assert.match(edit.reason, /chalk/);
 });
 
-test('the new-file budget counts one turn and starts over after a Stop', () => {
+// The host numbers a user turn's model calls from 0 and keeps counting after a
+// Stop continues the model, and a turn it ends on a denied command fires no
+// Stop, so the call numbered 0 is what starts a turn.
+test('the new-file budget counts one user turn: a Stop continuation stays in it, and a turn without a Stop still ends', () => {
   const w = world();
   nodeProject(w);
   const write = (n) => run(w, 'PreToolUse', call('write_to_file', {
     TargetFile: path.join(w.cwd, 'src', `new-${n}.js`), CodeContent: 'export const x = 1;\n',
   }), { RAZOR_FILE_BUDGET: '1' });
+  run(w, 'PreInvocation', { invocationNum: 0 });
   assert.deepEqual(write(1), { decision: 'allow' });
+  assert.deepEqual(run(w, 'Stop', { executionNum: 0, fullyIdle: true }), {});
+  run(w, 'PreInvocation', { invocationNum: 1 });
   const over = write(2);
   assert.equal(over.decision, 'deny');
   assert.match(over.reason, /new file #2/);
   assertToolNamed(over.reason, 'write_to_file');
   assert.deepEqual(write(3), { decision: 'allow' });
-  assert.equal(state(w).turn.turnKey, '0');
-  assert.deepEqual(run(w, 'Stop', { executionNum: 0, fullyIdle: true }), {});
+  assert.equal(state(w).turn.turnKey, '1');
+  const next = run(w, 'PreInvocation', { invocationNum: 0 });
+  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^Stay on the task/);
   assert.deepEqual(write(4), { decision: 'allow' });
   assert.equal(write(5).decision, 'deny');
-  assert.equal(state(w).turn.turnKey, '1');
+  assert.equal(state(w).turn.turnKey, '2');
 });
 
 test('the build check asks for one more turn once per conversation', () => {
@@ -300,14 +307,16 @@ test('the build check asks for one more turn once per conversation', () => {
   run(w, 'PreInvocation', { invocationNum: 0 });
   assert.equal(state(w).ledger.baseInsertions, 30);
   assert.deepEqual(run(w, 'Stop', { executionNum: 0, fullyIdle: true }), {});
+  run(w, 'PreInvocation', { invocationNum: 0 });
   fs.appendFileSync(path.join(w.cwd, 'a.js'), 'new\n'.repeat(600));
   const stop = run(w, 'Stop', { executionNum: 1, fullyIdle: true });
   assert.equal(stop.decision, 'continue');
   assert.match(stop.reason, /\+600 \/ -0 LOC/);
   assert.match(stop.reason, /fires once per session/);
   assert.equal(state(w).ledger.fired, true);
+  run(w, 'PreInvocation', { invocationNum: 1 });
   assert.deepEqual(run(w, 'Stop', { executionNum: 2, fullyIdle: true }), {});
-  assert.equal(state(w).antigravityTurn, 3);
+  assert.equal(state(w).antigravityTurn, 2);
 });
 
 test('the build check stays quiet when its once-per-session mark cannot be saved', () => {

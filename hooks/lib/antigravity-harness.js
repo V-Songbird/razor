@@ -177,8 +177,8 @@ function stateDir() {
 }
 
 // A tool call names no turn here. The entrypoint stamps `turn_id` with the
-// number of Stop events the conversation has seen, so a turn is the stretch
-// between two stops.
+// number of model calls numbered 0 the conversation has seen, so a turn starts
+// at each user turn's first call.
 function turnKey(data) {
   return typeof data.turn_id === 'string' && data.turn_id ? data.turn_id : 'unknown-turn';
 }
