@@ -137,9 +137,9 @@ function emitDeny(event, reason) {
 
 // PreToolUse answers out loud in both directions: silence is not documented
 // as consent here. PreInvocation injects each buffered text as one transient
-// message. Stop asks for one more turn only when the caller confirmed the
-// once-per-session mark reached disk, so a state file that cannot be written
-// never turns the build check into a loop.
+// message. Stop has the model continue in the same turn only when the caller
+// confirmed the once-per-session mark reached disk, so a state file that
+// cannot be written never turns the build check into a loop.
 function flush(event, { persisted = true } = {}) {
   let answer = {};
   if (event === 'PreToolUse') {
