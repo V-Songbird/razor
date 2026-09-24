@@ -2,13 +2,9 @@
   "razor": {
     "PreInvocation": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ./hooks/antigravity-hook.js PreInvocation",
-            "timeout": 10
-          }
-        ]
+        "type": "command",
+        "command": "node ./hooks/antigravity-hook.js PreInvocation",
+        "timeout": 10
       }
     ],
     "PreToolUse": [
@@ -25,13 +21,9 @@
     ],
     "Stop": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ./hooks/antigravity-hook.js Stop",
-            "timeout": 10
-          }
-        ]
+        "type": "command",
+        "command": "node ./hooks/antigravity-hook.js Stop",
+        "timeout": 10
       }
     ]
   }

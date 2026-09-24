@@ -372,13 +372,16 @@ test('the Antigravity manifest and registration agree with the other hosts', () 
   const hooks = read('hooks.json');
   assert.deepEqual(Object.keys(hooks), ['razor']);
   assert.deepEqual(Object.keys(hooks.razor).sort(), ['PreInvocation', 'PreToolUse', 'Stop']);
-  for (const [event, groups] of Object.entries(hooks.razor)) {
-    for (const group of groups) {
-      for (const hook of group.hooks) {
-        assert.equal(hook.type, 'command');
-        assert.equal(hook.command, `node ./hooks/antigravity-hook.js ${event}`);
-        assert.ok(Number.isInteger(hook.timeout) && hook.timeout > 0, 'timeouts are whole seconds');
-      }
+  // Antigravity's parser takes PreToolUse and PostToolUse as matcher groups
+  // and every other event as a flat list of handlers; one wrapped handler
+  // there fails the whole file, and no razor hook runs.
+  for (const [event, entries] of Object.entries(hooks.razor)) {
+    const grouped = event === 'PreToolUse' || event === 'PostToolUse';
+    const handlers = grouped ? entries.flatMap((group) => (assert.equal(typeof group.matcher, 'string', event), group.hooks)) : entries;
+    for (const hook of handlers) {
+      assert.equal(hook.type, 'command', `${event} handlers carry type and command directly`);
+      assert.equal(hook.command, `node ./hooks/antigravity-hook.js ${event}`);
+      assert.ok(Number.isInteger(hook.timeout) && hook.timeout > 0, 'timeouts are whole seconds');
     }
   }
   for (const tool of ['run_command', 'write_to_file', 'replace_file_content', 'multi_replace_file_content']) {
