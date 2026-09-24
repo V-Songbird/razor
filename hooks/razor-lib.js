@@ -12,7 +12,9 @@ const { safeWriteFileSync } = require('./lib/safe-write');
 const HARNESSES = { codex: './lib/codex-harness', antigravity: './lib/antigravity-harness' };
 const harness = require(HARNESSES[process.env.RAZOR_HOST] || './lib/harness');
 
-// Kept compact on purpose (~300 tokens per injection). The no-narration
+// Kept compact on purpose: 2,070 characters, about 590 tokens per injection
+// by Anthropic's documented estimate of 3.5 characters per token (an
+// estimate, not a tokenizer count; DRIFT_NOTE adds about 115). The no-narration
 // line covers the output only: the Claude Opus 5.5 system card (6.6.4.4)
 // measures the model's control over its own reasoning text as low and
 // rates low control as better for monitoring, so the ladder leaves
