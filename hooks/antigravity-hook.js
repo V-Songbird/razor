@@ -8,13 +8,15 @@
 // carry razor as follows. PreInvocation fires before every model call, and an
 // injected message reaches only the call it rides, so every call carries the
 // ladder, as SessionStart context does in every Claude Code request, and the
-// drift note, as UserPromptSubmit does. Only the first call a conversation
+// drift note, as UserPromptSubmit does, except on the calls that answer the
+// build check's continuation. Only the first call a conversation
 // sees takes the ledger baseline. A turn starts at the call whose
 // invocationNum is 0: the host restarts that count on each user turn, but not
 // when a Stop continues the model, and a turn can end without a Stop. The
 // turns counted in the session state key the per-turn file budget. PreToolUse
 // runs the same gates on the translated call. Stop only runs the build check,
-// and has the model continue only once its once-per-session mark is on disk.
+// and has the model continue only once its once-per-session mark is on disk;
+// the turn it continues then goes without the drift note.
 process.env.RAZOR_HOST = 'antigravity';
 
 const harness = require('./lib/antigravity-harness');
@@ -36,7 +38,9 @@ function preInvocation(data) {
     state.ladderInjected = true;
     writeState(data.session_id, state);
   }
-  require('./mode-toggle').main();
+  // The calls that answer the build check come after the turn's own answer, and
+  // with the note beside that question the model took it for a later request.
+  if (seen.continuedTurn !== (seen.antigravityTurn || 0)) require('./mode-toggle').main();
   harness.flush('PreInvocation');
 }
 
@@ -48,8 +52,15 @@ function preToolUse(data) {
 
 function stop(data) {
   require('./build-ledger').main();
-  const ledger = readState(data.session_id).ledger;
-  harness.flush('Stop', { persisted: Boolean(ledger && ledger.fired === true) });
+  const state = readState(data.session_id);
+  const persisted = Boolean(state.ledger && state.ledger.fired === true);
+  // The build check fires once per conversation, so the first Stop that finds
+  // its mark is the one that continues the model.
+  if (persisted && state.continuedTurn === undefined) {
+    state.continuedTurn = state.antigravityTurn || 0;
+    writeState(data.session_id, state);
+  }
+  harness.flush('Stop', { persisted });
 }
 
 const EVENTS = { PreInvocation: preInvocation, PreToolUse: preToolUse, Stop: stop };

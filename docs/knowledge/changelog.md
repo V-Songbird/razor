@@ -22,7 +22,8 @@ do not support.
 
 razor now runs on Antigravity from the same package, installed from a clone
 with `agy plugin install`. The checklist and the scope-drift note ride every
-model call, because a message injected there reaches only the call it rides. The
+model call, because a message injected there reaches only the call it rides;
+the note skips the calls that answer the build check. The
 install check reads `run_command`; the import, manifest and new-file checks
 read `write_to_file` and `replace_file_content`; the build check speaks once
 per conversation through the stop hook. The

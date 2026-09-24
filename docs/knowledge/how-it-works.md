@@ -132,7 +132,7 @@ prompt or subagent event, so the same checks are wired to what exists:
 
 | Event | What razor does |
 | --- | --- |
-| `PreInvocation` | on every model call, writes the checklist and the scope-drift note; on the first call of a conversation, also takes the snapshot |
+| `PreInvocation` | on every model call, writes the checklist and, except while the model answers the build check, the scope-drift note; on the first call of a conversation, also takes the snapshot |
 | `PreToolUse` | the install check on `run_command`, and the import, manifest and new-file checks on the three file tools |
 | `Stop` | runs the build check, once per conversation, and has the model continue when it fires |
 
@@ -141,7 +141,9 @@ Antigravity numbers 0, and that turn is what the new-file budget counts. The
 model continuing after the build check stays in the same turn, and a turn that
 ends without a stop, as one ended by a denied command does, still ends. A message injected there reaches only the model call it rides,
 so the checklist and the note go with every call, including the calls of a
-resumed conversation; together they are about 2,500 characters per call. Subagents receive
+resumed conversation; together they are about 2,500 characters per call. The
+calls that answer the build check leave the note out: beside that question,
+the model took the question for a new request. The next turn has the note again. Subagents receive
 no checklist. `razor on` and `razor off` do not exist there; `RAZOR_DISABLE=1`
 before the host starts is the switch.
 

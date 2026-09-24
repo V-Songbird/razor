@@ -314,9 +314,16 @@ test('the build check asks for one more turn once per conversation', () => {
   assert.match(stop.reason, /\+600 \/ -0 LOC/);
   assert.match(stop.reason, /fires once per session/);
   assert.equal(state(w).ledger.fired, true);
-  run(w, 'PreInvocation', { invocationNum: 1 });
+  // The call answering the build check keeps the ladder but not the drift note,
+  // beside which the model took that question for a later request; the next
+  // user turn has both.
+  const ladder = fs.readFileSync(path.join(GOLDEN, 'session-start-startup.txt'), 'utf8');
+  const answering = run(w, 'PreInvocation', { invocationNum: 1 });
+  assert.deepEqual(answering.injectSteps.map((s) => s.ephemeralMessage), [ladder]);
   assert.deepEqual(run(w, 'Stop', { executionNum: 2, fullyIdle: true }), {});
   assert.equal(state(w).antigravityTurn, 2);
+  const next = run(w, 'PreInvocation', { invocationNum: 0 });
+  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^Stay on the task/);
 });
 
 test('the build check stays quiet when its once-per-session mark cannot be saved', () => {
