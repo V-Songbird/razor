@@ -161,8 +161,8 @@ describe('Codex patch preview', () => {
   });
 
   test('native output names only the tool the model can retry', () => {
-    assert.equal(nativeReason('this Edit: exact same Edit'), 'this apply_patch: exact same apply_patch');
-    assert.equal(nativeReason('this Write: exact same Write'), 'this apply_patch: exact same apply_patch');
+    assert.equal(nativeReason('in this Edit adds'), 'in this apply_patch adds');
+    assert.equal(nativeReason('this Write to package.json'), 'this apply_patch to package.json');
     assert.equal(nativeReason(null), null);
   });
 });
@@ -177,7 +177,7 @@ describe('Codex PreToolUse native integration', () => {
     ));
     const reason = denyReason(invoke(data, { RAZOR_FILE_BUDGET: '1' }));
     assert.match(reason, /this apply_patch to package.json/);
-    assert.match(reason, /exact same apply_patch/);
+    assert.match(reason, /a later attempt to add it goes to the host's normal permissions\.$/);
     assert.doesNotMatch(reason, /\bWrite\b|\bEdit\b/);
     const booked = state(data);
     for (const name of ['zod', 'axios', 'got']) assert.equal(booked.deniedImports['node:' + name], true);

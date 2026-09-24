@@ -228,9 +228,7 @@ function toToolCalls(data) {
 
 function nativeReason(reason) {
   if (!reason) return reason;
-  return reason
-    .replace(/this (Write|Edit)\b/g, 'this apply_patch')
-    .replace(/exact same (Write|Edit)\b/g, 'exact same apply_patch');
+  return reason.replace(/this (Write|Edit)\b/g, 'this apply_patch');
 }
 
 module.exports = { toToolCalls, nativeReason, parsePatch, previewUpdate, pathKey };

@@ -72,8 +72,7 @@ function denyReason(tool, names, eco, manifestName, deps) {
   const what = names.map((n) => `\`${n}\``).join(', ');
   return evidenceReason(
     `razor: this ${tool} to ${manifestName} adds a new ${eco} dependency (${what}) without an install. `,
-    deps,
-    tool
+    deps
   );
 }
 

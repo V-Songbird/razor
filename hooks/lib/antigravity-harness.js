@@ -124,15 +124,14 @@ function emitContext(event, text) {
   if (text) context.push(text);
 }
 
-// A deny names the tool the call used, in its reason and in the retry sentence
-// that asks for the exact same call. The gates speak of Write and Edit, which
-// this host does not have; nativeReason() in ./codex-tools does the same for
-// Codex.
+// A deny names the tool the call used. The gates speak of this Write or this
+// Edit, which this host does not have; nativeReason() in ./codex-tools does the
+// same for Codex.
 function emitDeny(event, reason) {
   if (!reason) return;
   const call = readInput().toolCall;
   const tool = call && typeof call.name === 'string' ? call.name : '';
-  denial = tool ? reason.replace(/\b(this|exact same) (?:Write|Edit)\b/g, (_, lead) => `${lead} ${tool}`) : reason;
+  denial = tool ? reason.replace(/\bthis (?:Write|Edit)\b/g, () => `this ${tool}`) : reason;
 }
 
 // PreToolUse answers out loud in both directions: silence is not documented

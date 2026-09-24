@@ -54,10 +54,10 @@ function run(w, event, payload = {}, extraEnv = {}, raw) {
 
 const call = (name, args, extra = {}) => ({ toolCall: { name, args }, stepIdx: 1, ...extra });
 
-// A deny's retry sentence names the tool the call used, and no sentence names
-// Claude Code's Write or Edit, which this host does not have.
+// A deny names the tool the call used, and no sentence names Claude Code's
+// Write or Edit, which this host does not have.
 function assertToolNamed(reason, tool) {
-  assert.match(reason, new RegExp(`exact same ${tool} —`));
+  assert.match(reason, new RegExp(`\\bthis ${tool}\\b`));
   assert.doesNotMatch(reason, /\bWrite\b|\bEdit\b/);
 }
 
@@ -287,7 +287,7 @@ test('the new-file budget counts one user turn: a Stop continuation stays in it,
   const over = write(2);
   assert.equal(over.decision, 'deny');
   assert.match(over.reason, /new file #2/);
-  assertToolNamed(over.reason, 'write_to_file');
+  assert.doesNotMatch(over.reason, /\bWrite\b|\bEdit\b/);
   assert.deepEqual(write(3), { decision: 'allow' });
   assert.equal(state(w).turn.turnKey, '1');
   const next = run(w, 'PreInvocation', { invocationNum: 0 });

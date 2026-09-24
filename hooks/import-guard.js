@@ -289,8 +289,7 @@ function denyReason(tool, roots, eco, manifestName, deps) {
   const what = roots.map((r) => `\`${r}\``).join(', ');
   return evidenceReason(
     `razor: importing ${what} in this ${tool} adds a new ${eco} dependency — not in ${manifestName}. `,
-    deps,
-    tool
+    deps
   );
 }
 

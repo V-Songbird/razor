@@ -473,23 +473,20 @@ function installedDeps(manager, startDir) {
 
 const LIST_CAP = 30;
 
-// The retry contract is spelled out as the base prompt's own "adjustment":
-// the harness tells the model a denied call means the user declined and to
-// adjust rather than retry verbatim — so the reason declares its automated
-// provenance and frames the unchanged re-run AS the correct adjustment.
+// The base prompt tells the model a denied call means the user declined, so
+// each reason declares its automated provenance, then states what razor
+// recorded: it speaks once, and a later attempt goes to the host's normal
+// permissions. It states and never orders a re-run: the gates pass any later
+// attempt, identical or not, and an order inside a tool result reads like an
+// injected instruction.
 const PROVENANCE = "This is razor's automated checkpoint, not the user declining. ";
-
-function retryContract(what) {
-  return (
-    `the correct adjustment is to re-issue the exact same ${what} — ` +
-    'razor asks once and the retry passes; nothing here needs the user.'
-  );
-}
+const ONCE_PER_DEPENDENCY =
+  "It speaks once per dependency: if nothing covers it, a later attempt to add it goes to the host's normal permissions.";
 
 // One deny body for all three dependency gates; only the head sentence
 // differs. The list is what the manifest declares — evidence, not a claim
 // about what's physically installed.
-function evidenceReason(head, deps, what) {
+function evidenceReason(head, deps) {
   if (deps && deps.length) {
     const sorted = [...new Set(deps)].sort((a, b) => a.localeCompare(b));
     const shown = sorted.slice(0, LIST_CAP).join(', ') + (sorted.length > LIST_CAP ? ', …' : '');
@@ -498,21 +495,19 @@ function evidenceReason(head, deps, what) {
       `Already declared (${sorted.length}): ${shown}. ` +
       'Rungs 3-5 — check the stdlib, the platform, and those first, even when the user names the library. ' +
       PROVENANCE +
-      'If nothing covers it, ' +
-      retryContract(what)
+      ONCE_PER_DEPENDENCY
     );
   }
   return (
     head +
     'Rungs 3-5 — check the stdlib, the platform, and already-declared deps first, even when the user names the library. ' +
     PROVENANCE +
-    'If nothing covers it, ' +
-    retryContract(what)
+    ONCE_PER_DEPENDENCY
   );
 }
 
 function denyReason(hit, deps) {
-  return evidenceReason(`razor: '${hit.packages.join(' ')}' adds a new ${hit.manager} dependency. `, deps, 'command');
+  return evidenceReason(`razor: '${hit.packages.join(' ')}' adds a new ${hit.manager} dependency. `, deps);
 }
 
 // Ecosystem of a manager, for the reconsideration ledger shared with the
@@ -564,7 +559,7 @@ function checkHit(hit, data, state) {
 }
 
 module.exports = {
-  check, parseInstallCommand, parseInstallCommands, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE, retryContract,
+  check, parseInstallCommand, parseInstallCommands, depKey, packageName, ledgerName, installedDeps, denyReason, evidenceReason, PROVENANCE,
   // The two readers scripts/unused-deps.js consumes — it reuses them so the
   // audit and the gates can never silently disagree. The other ecosystems'
   // readers stay internal; nothing outside this file has ever called them.

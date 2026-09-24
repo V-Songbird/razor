@@ -25,7 +25,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { turnKey, settingNumber, settingGiven } = require('./razor-lib');
-const { PROVENANCE, retryContract } = require('./dep-guard');
+const { PROVENANCE } = require('./dep-guard');
 
 const BUDGET = settingNumber('FILE_BUDGET', 4);
 // An explicitly named budget is an explicit ceiling: count everything.
@@ -143,8 +143,8 @@ function check(data, state) {
     otherKinds(next.kinds) +
     'Rung 2 — does an existing file or module already cover this, and does this shape match what was asked for? ' +
     PROVENANCE +
-    'If every new file is genuinely needed, ' +
-    retryContract('Write')
+    'It speaks once per turn: if every new file is genuinely needed, ' +
+    "this file and any other new one this turn go to the host's normal permissions."
   );
 }
 

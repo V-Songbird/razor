@@ -60,6 +60,15 @@ thinking half was kept to save thinking tokens; that saving was never
 measured. Every published razor number was measured with the earlier wording;
 the new sentence has not been measured.
 
+The install, import, manifest and new-file checks no longer tell the model to
+re-issue the exact same command, Write or Edit. Each deny still says it is
+razor's automated checkpoint, not you declining, and now states that the check
+speaks once per dependency, or once per turn for new files, and that a later
+attempt goes to the host's normal permissions. The checks are unchanged: they
+already let any later attempt through, identical or not. Every published razor
+number was measured with the earlier wording; the new sentences have not been
+measured.
+
 The unused-dependency audit no longer calls a package unused when your source
 names it as a quoted string, the usual sign of a package loaded through
 `import(variable)`. It now lands under unknown with the reason "named in
