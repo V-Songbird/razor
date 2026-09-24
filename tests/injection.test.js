@@ -215,10 +215,14 @@ describe('the drift note', () => {
     assert.match(DRIFT_NOTE, /Say it at most once in a session/);
   });
 
-  test('it is a note, not a gate: it never asks and never refuses', () => {
+  test('it is a note, not a gate: drift alone never stops, asks or declines', () => {
     assert.match(DRIFT_NOTE, /do the work anyway/);
-    assert.match(DRIFT_NOTE, /Never stop to ask, never refuse/);
+    assert.match(DRIFT_NOTE, /Drift alone is no reason to stop, ask or decline/);
     assert.match(DRIFT_NOTE, /never say it when the request is still the same job/);
+  });
+
+  test('it gives no standing order against asking or refusing for other reasons', () => {
+    assert.doesNotMatch(DRIFT_NOTE, /never (stop to )?ask|never refuse/i);
   });
 
   test('a toggle prompt answers the toggle instead', () => {

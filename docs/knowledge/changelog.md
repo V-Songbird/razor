@@ -46,6 +46,12 @@ not checking a subagent's evidence or your own finished work (`d7ad590`). Every
 published razor number was measured with the earlier wording; the new sentence
 has not been measured.
 
+The scope-drift note no longer says "Never stop to ask, never refuse". It now
+says that drift alone is no reason to stop, ask or decline, so it no longer
+reads as an order against asking or refusing for any other reason. The note's
+measured recall was taken with the earlier wording; the new sentence has not
+been measured.
+
 The unused-dependency audit no longer calls a package unused when your source
 names it as a quoted string, the usual sign of a package loaded through
 `import(variable)`. It now lands under unknown with the reason "named in
