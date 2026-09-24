@@ -75,6 +75,10 @@ const TOOLS = {
       replace_all: args.AllowMultiple === true,
     },
   }),
+  // Neither the agy 1.2.9 CLI nor the editor offered this tool on 2026-09-24.
+  // Its mapping follows the documented ReplacementChunks and stays for a
+  // release that does; an argument shape it does not know gives the gates no
+  // new text.
   multi_replace_file_content: (args) => {
     const file = targetFile(args);
     const chunks = Array.isArray(args.ReplacementChunks) ? args.ReplacementChunks : [];

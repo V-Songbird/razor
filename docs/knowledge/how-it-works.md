@@ -60,8 +60,8 @@ most once, then gets out of the way — **the retry always goes through.**
 | Build check | at the end of a turn | whether the session grew a lot with almost no deletions |
 
 A file change is a `Write` or `Edit` call in Claude Code, an `apply_patch`
-change in Codex, and a `write_to_file`, `replace_file_content` or
-`multi_replace_file_content` call in Antigravity.
+change in Codex, and a `write_to_file` or `replace_file_content` call in
+Antigravity.
 
 The first three read your project's own manifests, so a package you already
 declared is never treated as new. That includes `optionalDependencies` and
@@ -79,12 +79,7 @@ any host. Shell commands are checked for dependency installs, and the build
 check can still notice the resulting growth. In Codex, the file checks preview
 local `apply_patch` changes without editing your files. If a patch needs fuzzy
 matching, has ambiguous context or colliding paths, or targets remote or
-unreadable content, razor stays silent. In Antigravity, a
-`multi_replace_file_content` edit to a package manifest is judged by the whole
-file it would produce, a chunk that sets `AllowMultiple` replacing every match.
-When that file cannot be previewed, because a target is missing, repeats
-without `AllowMultiple`, or the file cannot be read, the manifest check stays
-silent; the import check still reads the edit's new text.
+unreadable content, razor stays silent.
 
 Each new dependency gets its own reconsideration. A shell command containing
 several separate installs can therefore receive another nudge for a different

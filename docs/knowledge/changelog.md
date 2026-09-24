@@ -24,8 +24,8 @@ razor now runs on Antigravity from the same package, installed from a clone
 with `agy plugin install`. The checklist and the scope-drift note ride every
 model call, because a message injected there reaches only the call it rides. The
 install check reads `run_command`; the import, manifest and new-file checks
-read `write_to_file`, `replace_file_content` and `multi_replace_file_content`;
-the build check speaks once per conversation through the stop hook. The
+read `write_to_file` and `replace_file_content`; the build check speaks once
+per conversation through the stop hook. The
 new-file budget there counts one turn, from the first model call after each
 message you send; the model continuing after the build check stays in that
 turn. `/unused` gives the dependency report there.
@@ -66,13 +66,12 @@ path, as in `& "C:\Program Files\nodejs\npm.cmd" install x`.
 The import and manifest checks no longer ask about an edit that cannot land:
 one whose old text is missing, or matches more than once without
 `replace_all`. The host refuses that edit, so the question only cost a turn.
-On Antigravity, an edit that sets `AllowMultiple` is judged by the manifest
-that replacing every match would produce.
+On Antigravity, a `replace_file_content` edit that sets `AllowMultiple` is
+judged by the manifest that replacing every match would produce.
 
 An edit whose old text has LF line endings, in a file saved with CRLF as on a
 Windows checkout, counts as one that lands. The manifest check now asks about
-it, including an Antigravity edit to a manifest in several chunks. Before, that
-edit drew no question.
+it. Before, that edit drew no question.
 
 The manifest check now sees a dependency added in the same edit as text such
 as `$&` or `$$`, for example an npm script that uses them. Before, that edit
