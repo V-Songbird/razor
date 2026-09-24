@@ -184,9 +184,13 @@ describe('the frozen ladder', () => {
   });
 
   test('keeps the no-narration, one-lookup-per-rung and never-cut clauses', () => {
-    assert.match(RULESET, /Never narrate or deliberate the rungs/);
+    assert.match(RULESET, /Never narrate or deliberate the rungs in your output\./);
     assert.match(RULESET, /One lookup per rung is enough/);
     assert.match(RULESET, /Never cut: validation at trust boundaries/);
+  });
+
+  test('gives no order about the model\'s own reasoning', () => {
+    assert.doesNotMatch(RULESET, /thinking|reasoning/i);
   });
 });
 

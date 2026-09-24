@@ -52,6 +52,14 @@ reads as an order against asking or refusing for any other reason. The note's
 measured recall was taken with the earlier wording; the new sentence has not
 been measured.
 
+The checklist no longer tells the model how to think. "Never narrate or
+deliberate the rungs in your output or your thinking" now ends at "in your
+output": the Claude Opus 5.5 system card measures the model's control over its
+own reasoning as low and treats low control as better for monitoring. The
+thinking half was kept to save thinking tokens; that saving was never
+measured. Every published razor number was measured with the earlier wording;
+the new sentence has not been measured.
+
 The unused-dependency audit no longer calls a package unused when your source
 names it as a quoted string, the usual sign of a package loaded through
 `import(variable)`. It now lands under unknown with the reason "named in
