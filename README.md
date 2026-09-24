@@ -102,9 +102,9 @@ File checks see the edits made through the assistant's own editing tool: `apply_
 
 Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. Every recorded run used the checklist's earlier "One check is enough, anywhere in this task" wording; its current one-lookup-per-rung sentence has not been measured.
 
-**Codex**
+### Codex results
 
-<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/razor/validation/codex-benchmark-source-2026-09-08.md","date":"2026-09-08"} -->
+<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/knowledge/benchmarks.md","date":"2026-09-08"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | GPT-5.6 Sol | No plugin | 19/26 | 19.2 |
@@ -112,9 +112,9 @@ Each result belongs to the named model and recorded run. Missing measurements re
 
 Controlled Codex run at high reasoning on Windows: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, elapsed time was 1.8% higher and input tokens 0.8% higher; those measures did not improve. This exploratory result does not compare Sol against Claude.
 
-**Claude Code**
+### Claude Code results
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/razor/validation/claude-readme-benchmark-source-2026-09-08.md","date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-09-08"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-09-08"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5 | No plugin | 35/39 | 18.3 |
@@ -123,7 +123,7 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 
 A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results.
 
-**Antigravity**
+### Antigravity results
 
 <!-- foundry:evidence {"platform":"Antigravity","status":"pending","reason":"No Antigravity performance measurements are available."} -->
 | Model | Setup | Correct and safe | Mean coding lines |
