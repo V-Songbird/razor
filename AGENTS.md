@@ -24,7 +24,7 @@ razor submodule and ships from `main`.
 | Command | Purpose | Cost |
 | --- | --- | --- |
 | `node --test tests/*.test.js` | The suite | Local fixtures inside the plugin root; fails from a checkout under the system temp directory |
-| `node scripts/git-hooks/check-readme-nav.js README.md` | Every README nav anchor resolves | Local |
+| `node scripts/git-hooks/check-readme-nav.js` | The root README has its nav, and every heading anchor linked from a tracked Markdown file resolves | Local |
 | `claude plugin validate .` | Claude Code package shape | Local |
 | `agy plugin validate .` | Antigravity package shape | Local; needs the Antigravity CLI |
 | `git config core.hooksPath scripts/git-hooks` | One-time: the pre-commit hook runs the suite and the nav check | Local |
