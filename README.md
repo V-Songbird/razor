@@ -100,7 +100,7 @@ File checks see the edits made through the assistant's own editing tool: `apply_
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. Every recorded run used the checklist's earlier "One check is enough, anywhere in this task" wording; its current one-lookup-per-rung sentence has not been measured.
 
 **Codex**
 

@@ -37,6 +37,12 @@ The build check's question at the end of a turn no longer says that
 deletion-positive diffs are the goal. It still reports how much the session
 grew and asks whether all of it is needed.
 
+The checklist no longer says "One check is enough, anywhere in this task". It
+now allows one lookup per rung and says the limit covers the ladder's lookups,
+not checking a subagent's evidence or your own finished work (`d7ad590`). Every
+published razor number was measured with the earlier wording; the new sentence
+has not been measured.
+
 The unused-dependency audit no longer calls a package unused when your source
 names it as a quoted string, the usual sign of a package loaded through
 `import(variable)`. It now lands under unknown with the reason "named in

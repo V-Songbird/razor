@@ -41,6 +41,10 @@ not pooled.
 The batch ran on a newer Claude Code than the corpus, so its figures are not
 comparable with the corpus tables.
 
+Every run on this page used the checklist's earlier "One check is enough,
+anywhere in this task" wording; the current one-lookup-per-rung sentence
+(`d7ad590`) has not been measured.
+
 ## Does it still work?
 
 *Run: corpus.*

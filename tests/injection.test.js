@@ -153,10 +153,11 @@ describe('integration: injection lifecycle', () => {
   });
 });
 
-// The ladder is frozen by owner decision and the published benchmark numbers
-// are tied to its exact text, but nothing detected a change to it: the only
-// assertion compared the emitted string to the same constant it came from.
-// These pin the content itself, with literals, so a drift fails here.
+// The ladder is frozen by owner decision, but nothing detected a change to it:
+// the only assertion compared the emitted string to the same constant it came
+// from. These pin the content itself, with literals, so a drift fails here.
+// The published benchmark numbers predate the one-lookup-per-rung sentence;
+// they were measured with the earlier "One check is enough" wording.
 describe('the frozen ladder', () => {
   test('opens with the marker the harness matches on', () => {
     assert.ok(RULESET.startsWith('RAZOR ACTIVE\n'), RULESET.slice(0, 40));
@@ -182,7 +183,7 @@ describe('the frozen ladder', () => {
     assert.strictEqual(RULESET.match(/^\d\. /gm).length, 7);
   });
 
-  test('keeps the three clauses the measured behaviour rests on', () => {
+  test('keeps the no-narration, one-lookup-per-rung and never-cut clauses', () => {
     assert.match(RULESET, /Never narrate or deliberate the rungs/);
     assert.match(RULESET, /One lookup per rung is enough/);
     assert.match(RULESET, /Never cut: validation at trust boundaries/);
