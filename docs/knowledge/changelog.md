@@ -110,6 +110,11 @@ default, keeps counting production files only. Before, any saved value
 switched the check to counting every new file. Another value, or
 `RAZOR_FILE_BUDGET`, still does.
 
+On Windows, a session state file that another process has open for a moment,
+such as a second hook writing the same file or an antivirus scan, no longer
+drops razor's write. The write now retries for up to 155 ms. Before, it was
+skipped without a word.
+
 ## 1.6.0 — 2026-09-15
 
 razor is now one package for Claude Code and Codex. Both get the same checks

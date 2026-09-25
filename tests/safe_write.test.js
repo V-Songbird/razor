@@ -234,3 +234,40 @@ describe('safeWriteFileSync: failure cleanup', () => {
     assert.deepStrictEqual(tmpLeftovers(dir), []);
   });
 });
+
+describe('safeWriteFileSync: a rename Windows refuses for a moment', () => {
+  // On win32 a rename onto a file another process has open (a racing writer,
+  // an antivirus or indexer scan) fails briefly with EPERM. Two writers
+  // hammering one target lost ~7% of their writes this way.
+  function withRenameFailures(count, fn) {
+    const origRename = fs.renameSync;
+    const origPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
+    let left = count;
+    Object.defineProperty(process, 'platform', { value: 'win32' });
+    fs.renameSync = (...args) => {
+      if (left-- > 0) throw Object.assign(new Error('EPERM: operation not permitted, rename'), { code: 'EPERM' });
+      return origRename(...args);
+    };
+    try {
+      return fn();
+    } finally {
+      fs.renameSync = origRename;
+      Object.defineProperty(process, 'platform', origPlatform);
+    }
+  }
+
+  test('retries the rename and lands the write', () => {
+    const dir = tmpDir();
+    const target = path.join(dir, 'a.json');
+    withRenameFailures(2, () => safeWriteFileSync(target, '{"n":1}'));
+    assert.strictEqual(fs.readFileSync(target, 'utf-8'), '{"n":1}');
+    assert.deepStrictEqual(tmpLeftovers(dir), []);
+  });
+
+  test('gives up after a bounded number of retries and cleans up', () => {
+    const dir = tmpDir();
+    const target = path.join(dir, 'a.json');
+    assert.throws(() => withRenameFailures(Infinity, () => safeWriteFileSync(target, 'x')), { code: 'EPERM' });
+    assert.deepStrictEqual(tmpLeftovers(dir), []);
+  });
+});
