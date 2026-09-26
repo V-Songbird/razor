@@ -51,11 +51,13 @@ Observe actual hook delivery. Plugin listings and fixture tests do not establish
 that a particular installation is active.
 
 Last live check: Codex CLI 0.157.1 on Windows 11, `codex exec`, razor at
-b4ca2db. The package installed, its five hooks were listed once and trusted,
-and `$unused` reported without changing files. No razor hook ran, so none of
-the hook checks above passed there. On that machine the Windows hook command
-printed nothing and exited 0 when run through PowerShell; it worked through
-`cmd.exe`.
+ec7e04e, with its five hooks trusted. The checklist appeared at startup, the
+hooks for each prompt and for the end of a turn ran, and a patch that imported
+an undeclared package was denied. That check did not cover the checklist after
+compaction, the writing subagent, the retry after a denial, the
+declared-dependency and manifest checks, the file budget, `razor off` and
+`razor on`, or a build-note continuation. An earlier check at b4ca2db showed
+`$unused` reporting without changing files.
 
 ## Coverage
 
