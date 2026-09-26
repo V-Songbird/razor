@@ -68,7 +68,9 @@ for (const [parent, spawnArgs] of Object.entries(PARENTS)) {
 test('the Windows launcher falls back to fnm when Node is not on PATH', { skip: process.platform !== 'win32' }, (t) => {
   if (!onPath('fnm.exe')) return t.skip('fnm is not installed on this runner');
   const paths = (process.env.PATH || '').split(path.delimiter);
-  const env = { ...process.env, PLUGIN_ROOT: ROOT };
+  // A cold module analysis cache makes Windows PowerShell write progress
+  // records, which reach a redirected stderr unless the launcher silences them.
+  const env = { ...process.env, PLUGIN_ROOT: ROOT, PSModuleAnalysisCachePath: path.join(temp, 'fnm-module-cache') };
   env.PATH = paths.filter((dir) => !['node.exe', 'node.cmd', 'node.bat'].some((exe) => fs.existsSync(path.join(dir, exe)))).join(path.delimiter);
   delete env.FNM_MULTISHELL_PATH;
   assert.notEqual(spawnSync('where.exe', ['/q', 'node'], { env }).status, 0, 'Node is still on the fixture PATH');
@@ -79,5 +81,6 @@ test('the Windows launcher falls back to fnm when Node is not on PATH', { skip: 
   });
   assert.ifError(r.error);
   assert.equal(r.status, 0, r.stderr);
+  assert.equal(r.stderr, '');
   assert.match(r.stdout, /RAZOR ACTIVE/);
 });
