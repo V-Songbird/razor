@@ -115,6 +115,12 @@ such as a second hook writing the same file or an antivirus scan, no longer
 drops razor's write. The write now retries for up to 155 ms. Before, it was
 skipped without a word.
 
+In Codex on Windows, razor's hooks now run when Codex starts them from
+PowerShell. Before, every hook exited without running under a PowerShell
+parent, so no check spoke; only a `cmd.exe` parent worked. The hook command
+now uses the Node.js on `PATH` and loads fnm only when Node.js is missing
+there. Before, it loaded fnm whenever fnm was installed.
+
 ## 1.6.0 — 2026-09-15
 
 razor is now one package for Claude Code and Codex. Both get the same checks

@@ -38,9 +38,10 @@ RAZOR_FILE_BUDGET=6 codex
 ```
 
 A desktop app already running will not inherit changes made in a new shell.
-Restart it with the intended environment. The Windows hook command initializes
-fnm when it is available, then runs Node. On other platforms, initialize your
-version manager before launching Codex so Node is available in its `PATH`.
+Restart it with the intended environment. The Windows hook command runs the
+Node.js on `PATH`; when Node.js is not there, it loads fnm's default version
+first. On other platforms, initialize your version manager before launching
+Codex so Node is available in its `PATH`.
 
 In **Antigravity**, the same environment variables apply, set before the CLI
 or the editor starts; its hook commands run plain `node`, so Node must be on
