@@ -50,6 +50,13 @@ installation is unnecessary when checking a hook decision.
 Observe actual hook delivery. Plugin listings and fixture tests do not establish
 that a particular installation is active.
 
+Last live check: Codex CLI 0.157.1 on Windows 11, `codex exec`, razor at
+b4ca2db. The package installed, its five hooks were listed once and trusted,
+and `$unused` reported without changing files. No razor hook ran, so none of
+the hook checks above passed there. On that machine the Windows hook command
+printed nothing and exited 0 when run through PowerShell; it worked through
+`cmd.exe`.
+
 ## Coverage
 
 Patch guards cover previewable local `apply_patch` changes. Ambiguous context,
