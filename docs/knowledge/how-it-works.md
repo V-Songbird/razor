@@ -72,7 +72,10 @@ migrations, docs, config and generated output are recognised and never charged
 against the budget, so a feature that ships with its tests is not sprawl. Set a
 number yourself and it becomes a plain ceiling on every new file instead.
 
-Anything under your system temp directory is treated as scratch and skipped.
+Anything under your system temp directory, or anywhere inside a folder named
+`scratchpad` in any letter case, is treated as scratch and skipped. This
+includes a real project that sits inside a folder named `scratchpad`: its new
+files never count against the budget.
 
 Files written inside a shell command do not pass through the file checks in
 any host. Shell commands are checked for dependency installs, and the build

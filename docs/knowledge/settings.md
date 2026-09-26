@@ -89,6 +89,11 @@ by design. There are no levels.
 
 Set `RAZOR_FILE_BUDGET=0` to switch the new-file check off entirely.
 
+The new-file budget never counts files under your system temp directory or
+anywhere inside a folder named `scratchpad`, in any letter case, whatever
+number you set. A real project inside a folder named `scratchpad` is skipped
+too, so move it elsewhere if you want its new files counted.
+
 `RAZOR_LEDGER_LOC` and `RAZOR_LEDGER_FILES` are measured across the whole
 working tree against where the session started, so files another session writes
 in the same checkout count toward them. Edits inside parts of a file that were
