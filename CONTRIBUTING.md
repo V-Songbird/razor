@@ -72,9 +72,10 @@ node --test tests/*.test.js
 Run it from a checkout outside your system temp directory. The new-file check
 skips temp paths, so its tests fail there.
 
-Each hook or shell the suite starts gets 30 seconds. On a loaded machine, set
-`RAZOR_TEST_SPAWN_TIMEOUT_MS` to allow more, for example `90000`. A value below
-30000 is ignored.
+Each hook or shell the suite starts gets 90 seconds, so the suite still passes
+while other suites run on the same machine, and a hung hook still fails. To
+allow more, set `RAZOR_TEST_SPAWN_TIMEOUT_MS`, for example to `180000`. A value
+below 90000 is ignored.
 
 The suite also fixes `RAZOR_GIT_TIMEOUT_MS` at 10000 for itself and every hook
 it starts, so a slow `git` cannot drop the build check's starting point.

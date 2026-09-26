@@ -12,10 +12,11 @@ const { spawnSync } = require('child_process');
 // module, and every hook it spawns, sees none of them, and a test that needs
 // one sets it explicitly.
 //
-// Every child the suite spawns gets 30 s. A loaded machine can need longer,
-// so RAZOR_TEST_SPAWN_TIMEOUT_MS raises that limit; a lower value never
-// applies. It is read here, before the cleanup below removes it.
-const SPAWN_TIMEOUT_MS = Math.max(30000, Number.parseInt(process.env.RAZOR_TEST_SPAWN_TIMEOUT_MS, 10) || 0);
+// Every child the suite spawns gets 90 s, so a machine running several suites
+// at once still passes while a hung child fails. RAZOR_TEST_SPAWN_TIMEOUT_MS
+// raises that limit; a lower value never applies. It is read here, before the
+// cleanup below removes it.
+const SPAWN_TIMEOUT_MS = Math.max(90000, Number.parseInt(process.env.RAZOR_TEST_SPAWN_TIMEOUT_MS, 10) || 0);
 const INHERITED_HOST_ENV = /^(RAZOR_|CLAUDE_PLUGIN_|PLUGIN_DATA$)/;
 for (const key of Object.keys(process.env)) {
   if (INHERITED_HOST_ENV.test(key)) delete process.env[key];

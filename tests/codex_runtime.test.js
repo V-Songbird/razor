@@ -183,10 +183,10 @@ test('RAZOR_TEST_SPAWN_TIMEOUT_MS raises the suite spawn limit and never lowers 
     assert.equal(r.status, 0, r.stderr);
     return Number(r.stdout.trim());
   };
-  assert.equal(limit(''), 30000);
-  assert.equal(limit('1000'), 30000);
-  assert.equal(limit('not a number'), 30000);
-  assert.equal(limit('90000'), 90000);
+  assert.equal(limit(''), 90000);
+  assert.equal(limit('30000'), 90000);
+  assert.equal(limit('not a number'), 90000);
+  assert.equal(limit('120000'), 120000);
 });
 test('Codex never loops a Stop continuation when state writes fail', () => {
   const w = world();
