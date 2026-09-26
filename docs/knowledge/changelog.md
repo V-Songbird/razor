@@ -121,6 +121,11 @@ parent, so no check spoke; only a `cmd.exe` parent worked. The hook command
 now uses the Node.js on `PATH` and loads fnm only when Node.js is missing
 there. Before, it loaded fnm whenever fnm was installed.
 
+For contributors: the pre-commit hook now prints only the test suite's
+summary when the tests pass, and the summary with the failing tests when one
+fails. It still blocks the commit on a failure. Before, it printed the whole
+suite's output.
+
 ## 1.6.0 — 2026-09-15
 
 razor is now one package for Claude Code and Codex. Both get the same checks
