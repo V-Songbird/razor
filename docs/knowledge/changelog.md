@@ -14,14 +14,14 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## 1.7.0 — Unreleased
+## 1.7.0 — 2026-09-26
 
 The README now states that razor needs Claude Code 2.1.139 or later. Its hooks
 start each script directly, without a shell, which older Claude Code releases
 do not support.
 
 razor now runs on Antigravity from the same package, installed from a clone
-with `agy plugin install`. The checklist and the scope-drift note ride every
+of Foundry with `agy plugin install`. The checklist and the scope-drift note ride every
 model call, because a message injected there reaches only the call it rides;
 the note skips the calls that answer the build check. The
 install check reads `run_command`; the import, manifest and new-file checks
@@ -120,6 +120,23 @@ PowerShell. Before, every hook exited without running under a PowerShell
 parent, so no check spoke; only a `cmd.exe` parent worked. The hook command
 now uses the Node.js on `PATH` and loads fnm only when Node.js is missing
 there. Before, it loaded fnm whenever fnm was installed.
+
+A new variable, `RAZOR_GIT_TIMEOUT_MS`, raises the 2000 ms each of razor's
+`git` calls may take. Set it on a slow machine or in a very large repository,
+where a `git` call that runs out of time leaves the build check without its
+starting point. The default is unchanged, and a lower value is ignored.
+
+The documentation moved under `docs/knowledge/`: the changelog, how it works,
+settings, the Codex setup guide (now `codex-setup.md`) and the benchmark
+details. Links to the old `CHANGELOG.md` and `docs/` paths no longer work.
+
+Two published figures were corrected. The Claude Opus 5 run no longer names
+revision `623dd2c`, a later commit that cannot be the code it measured; its
+revision is not recorded. The 258 for 258 figure is now labelled as a total
+pooled from seven runs. The blind review is now stated as 66 pairs, each
+judged in both orders, not 132 judged pairs. The scope-drift note's "one in
+six" miss rate, which named no run, is gone; the docs now say only that the
+note can miss a drift.
 
 For contributors: the pre-commit hook now prints only the test suite's
 summary when the tests pass, and the summary with the failing tests when one

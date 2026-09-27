@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Reuse-first checks for Claude Code: reconsider dependencies, file growth and unnecessary code before adding more.",
   "license": "MIT",
   "author": {
