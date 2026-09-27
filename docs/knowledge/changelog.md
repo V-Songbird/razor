@@ -21,15 +21,15 @@ start each script directly, without a shell, which older Claude Code releases
 do not support.
 
 razor now runs on Antigravity from the same package, installed from a clone
-of Foundry with `agy plugin install`. The checklist and the scope-drift note ride every
-model call, because a message injected there reaches only the call it rides;
-the note skips the calls that answer the build check. The
-install check reads `run_command`; the import, manifest and new-file checks
-read `write_to_file` and `replace_file_content`; the build check speaks once
-per conversation through the stop hook. The
-new-file budget there counts one turn, from the first model call after each
-message you send; the model continuing after the build check stays in that
-turn. `/unused` gives the dependency report there.
+of Foundry with `agy plugin install`. The checklist and the scope-drift note
+ride every model call, because a message injected there reaches only the call
+it rides; the note skips the calls that answer the build check. The install
+check reads `run_command`; the import, manifest and new-file checks read
+`write_to_file` and `replace_file_content`; the build check speaks once per
+conversation through the stop hook. The new-file budget there counts one turn,
+from the first model call after each message you send; the model continuing
+after the build check stays in that turn. `/unused` gives the dependency
+report there.
 
 Antigravity has no prompt or subagent event, so `razor off` and `razor on` and
 the subagent checklist are not available there; `RAZOR_DISABLE=1` before the
@@ -130,7 +130,7 @@ The documentation moved under `docs/knowledge/`: the changelog, how it works,
 settings, the Codex setup guide (now `codex-setup.md`) and the benchmark
 details. Links to the old `CHANGELOG.md` and `docs/` paths no longer work.
 
-Two published figures were corrected. The Claude Opus 5 run no longer names
+Four published figures were corrected. The Claude Opus 5 run no longer names
 revision `623dd2c`, a later commit that cannot be the code it measured; its
 revision is not recorded. The 258 for 258 figure is now labelled as a total
 pooled from seven runs. The blind review is now stated as 66 pairs, each
