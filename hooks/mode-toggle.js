@@ -15,10 +15,8 @@ const {
 
 function parseToggle(prompt) {
   const p = String(prompt || '').trim().toLowerCase();
-  const m = p.match(/^\/?razor(?::razor)?\s+(on|off)\b/);
-  if (m) return m[1];
-  if (/^(stop razor|razor off)[.!]?$/.test(p)) return 'off';
-  return null;
+  const m = p.match(/^(?:\/?razor(?::razor)?\s+(on|off)|(stop razor))[.!]?$/);
+  return m ? (m[2] ? 'off' : m[1]) : null;
 }
 
 function main() {

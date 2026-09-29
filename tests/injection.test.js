@@ -53,6 +53,18 @@ describe('unit: parseToggle', () => {
     assert.strictEqual(parseToggle('razor off'), 'off');
     assert.strictEqual(parseToggle('stop razor'), 'off');
     assert.strictEqual(parseToggle('Stop Razor!'), 'off');
+    assert.strictEqual(parseToggle('razor on'), 'on');
+    assert.strictEqual(parseToggle('razor:razor on'), 'on');
+    assert.strictEqual(parseToggle('/razor:razor on.'), 'on');
+    assert.strictEqual(parseToggle('  RAZOR OFF!  '), 'off');
+    assert.strictEqual(parseToggle('stop razor.'), 'off');
+  });
+
+  test('a toggle followed by more text is not a toggle', () => {
+    assert.strictEqual(parseToggle('razor off-by-one bug in parser.js'), null);
+    assert.strictEqual(parseToggle('razor on windows fails'), null);
+    assert.strictEqual(parseToggle('razor off\n\nfix the build'), null);
+    assert.strictEqual(parseToggle('**razor off**'), null);
   });
 
   test('unrelated prompts are ignored', () => {
