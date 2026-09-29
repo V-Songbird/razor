@@ -62,10 +62,11 @@ declared-dependency and manifest checks, the file budget, `razor off` and
 Last desktop check: the Codex desktop app 26.924.6891.0 (bundled CLI
 0.158.0-alpha.2.1) on Windows 11, on 2026-09-29, with razor 1.8.0 installed
 from the Foundry marketplace. The run used the app's default permission mode.
-The app did not ask to trust the hooks, because trust from an earlier install
-still covered them. Every item in the list above passed, and all five hooks
-fired. The desktop app showed no coverage difference from the CLI. Two things
-look different there. The model's edits and commands arrive as scripts in one
+The app did not ask to trust the hooks. Trust entries from an earlier install
+were already in `config.toml`. Every item in the list above passed, and all
+five hooks fired. That check found no gap specific to the desktop app. The CLI
+has not yet been checked for the items its last check did not cover. Two things
+look different in the desktop app. The model's edits and commands arrive as scripts in one
 `exec` tool, and razor still checks each `apply_patch` inside them. A build note
 at the end of a turn appears as a **Hook feedback** message. That check did not
 cover a first install from the app's plugin list or a first hook review.
