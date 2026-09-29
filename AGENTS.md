@@ -34,7 +34,7 @@ razor submodule and ships from `main`.
 
 | Path | Content |
 | --- | --- |
-| `hooks/` | `pre-tool-use.js` runs `dep-guard.js`, `import-guard.js`, `manifest-guard.js` and `file-meter.js`; `build-ledger.js`, `mode-toggle.js`, `session-start.js` and `subagent-start.js` cover the other events; `codex-hook.js` and `antigravity-hook.js` translate those hosts' events; `razor-lib.js` and `lib/` hold the shared state and the three host adapters; `windows-launcher.ps1` is the source of each `commandWindows` in `codex-hooks.json` |
+| `hooks/` | `pre-tool-use.js` runs `dep-guard.js`, `import-guard.js`, `manifest-guard.js` and `file-meter.js`; `build-ledger.js`, `mode-toggle.js`, `session-start.js` and `subagent-start.js` cover the other events; `codex-hook.js` and `antigravity-hook.js` translate those hosts' events; `razor-lib.js` and `lib/` hold the shared state and the three host adapters; `windows-launcher.ps1` is the fnm fallback of each `commandWindows` in `codex-hooks.json` |
 | `scripts/unused-deps.js` | The scanner behind the `unused` skill; `scripts/build-windows-launchers.js` builds and checks the Windows launchers; `scripts/git-hooks/` holds the commit gates |
 | `skills/unused/` | The one skill |
 | `tests/` | The `node:test` suite and the `contract/` fixtures |

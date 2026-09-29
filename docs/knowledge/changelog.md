@@ -14,6 +14,14 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
+## Unreleased
+
+In Codex on Windows, each razor hook now starts Node.js from cmd instead of
+PowerShell. On the test machine, each hook now takes about 0.2 seconds less.
+When Node.js is not on `PATH`, the hooks still find it through fnm's default
+version. This changes the command of every razor hook, so trust razor's hooks
+again in Codex's `/hooks`. Until you do, Codex runs none of them.
+
 ## 1.7.0 — 2026-09-26
 
 The README now states that razor needs Claude Code 2.1.139 or later. Its hooks
