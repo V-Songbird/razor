@@ -14,6 +14,14 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
+## Unreleased
+
+razor has a new icon: a red blade hexagon with a trimmed block, from Foundry's
+hallmark-seal identity. The README banner, wordmark and Codex plugin icon use
+it. The Ember scene now ends with a stamp pressing that seal onto the answer,
+and each README graphic carries the seal in a corner. No recorded text, number
+or timing in the graphics changed.
+
 ## 1.7.0 — 2026-09-26
 
 The README now states that razor needs Claude Code 2.1.139 or later. Its hooks
