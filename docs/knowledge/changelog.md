@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.8.0 — 2026-09-29
 
 In Codex on Windows, each razor hook now starts Node.js from cmd instead of
 PowerShell. On the test machine, each hook now takes about 0.2 seconds less.
