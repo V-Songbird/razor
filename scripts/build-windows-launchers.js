@@ -13,19 +13,20 @@ const CONFIG = path.join(ROOT, 'hooks/codex-hooks.json');
 
 // Codex may start commandWindows from cmd or PowerShell, and a PowerShell
 // start costs about 200 ms per hook, so cmd starts Node itself. The set keeps
-// cmd from running a node.exe in the working directory. A command cmd cannot
-// find sets ERRORLEVEL 9009 only after `&`, never inside `||`; then the encoded
-// PowerShell launcher finds Node through fnm. 2>nul hides cmd's not-found text
-// on that path, and with it Node's stderr, which no hook writes. A false `if`
-// ends cmd with exit 0, so `else exit /b` keeps the exit code of a crashed hook.
+// cmd from running a node.exe in the working directory. cmd's `for` PATH search
+// finds node.exe before Node runs, so cmd never prints its not-found text and a
+// crashed hook's stderr and exit code reach Codex. Without node.exe on PATH, the
+// encoded PowerShell launcher finds Node through fnm. The search reads a copy of
+// PATH named .P, because a PowerShell parent would expand `$PATH` in the command.
 function build(source, event) {
   if (!/^[A-Za-z]+$/.test(event)) throw new Error('Invalid hook event: ' + event);
   const inline = `process.argv[2]='${event}';require(require('path').join(process.env.PLUGIN_ROOT,'hooks','codex-hook.js')).main()`;
-  // Unquoted inside cmd's quotes, the script must hold nothing cmd or PowerShell rewrites.
-  if (/[\s"$%`&|<>^]/.test(inline)) throw new Error('Inline hook script needs quoting');
+  // Unquoted inside cmd's quotes, with delayed expansion on, the script must
+  // hold nothing cmd or PowerShell rewrites.
+  if (/[\s"$%`&|<>^!]/.test(inline)) throw new Error('Inline hook script needs quoting');
   const script = source.replace(/\r\n/g, '\n').replaceAll('__RAZOR_EVENT__', event);
   const fallback = 'powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand ' + Buffer.from(script, 'utf16le').toString('base64');
-  return `cmd /d /s /c "set NoDefaultCurrentDirectoryInExePath=1&& node -e ${inline} 2>nul & if errorlevel 9009 (${fallback}) else exit /b"`;
+  return `cmd /d /s /v:on /c "set NoDefaultCurrentDirectoryInExePath=1&& set .N=&& set .P=!PATH!&& (for %i in (node.exe) do @set .N=%~$.P:i)& set .P=& if not defined .N (${fallback}) else node -e ${inline}"`;
 }
 
 function main(write = false) {
