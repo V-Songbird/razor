@@ -54,7 +54,9 @@ that `PATH`.
 | `RAZOR_DISABLE=1` | Turns everything off |
 
 In a session you can also send `razor off` and `razor on` as ordinary messages;
-`/razor off` and `/razor on` also work in Claude Code. Antigravity gives hooks
+`/razor off` and `/razor on` also work in Claude Code. Send the toggle as a
+message of its own, with nothing else and no formatting; a final period or
+exclamation mark is fine. Antigravity gives hooks
 no prompt, so only the variable works there. The switch is on or off
 by design. There are no levels.
 

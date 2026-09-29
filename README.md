@@ -45,7 +45,7 @@ A checklist asks whether the work is needed, already implemented or covered by t
 | Pause or resume the checks | Change the session toggle |
 | Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
-Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
+Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
 
 ## Install
 

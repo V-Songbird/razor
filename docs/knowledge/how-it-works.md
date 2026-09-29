@@ -205,7 +205,9 @@ the package.
 
 Send `razor off` for the session and `razor on` to bring it back. `/razor off`
 and `/razor on` also work in Claude Code; a Codex client may intercept slash
-commands before hooks receive them, so use the plain words there. Antigravity
+commands before hooks receive them, so use the plain words there. Send the
+toggle as a message of its own, with nothing else and no formatting; a final
+period or exclamation mark is fine. Antigravity
 gives hooks no prompt, so the toggle does not exist there. The switch is
 on or off by design — there are no levels. `RAZOR_DISABLE=1` turns everything
 off before the session starts, on every host.
