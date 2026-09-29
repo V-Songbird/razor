@@ -16,6 +16,12 @@ and `plugin.json`.
 
 ## Unreleased
 
+In Codex on Windows, each razor hook now starts Node.js from cmd instead of
+PowerShell. On the test machine, each hook now takes about 0.2 seconds less.
+When Node.js is not on `PATH`, the hooks still find it through fnm's default
+version. This changes the command of every razor hook, so trust razor's hooks
+again in Codex's `/hooks`. Until you do, Codex runs none of them.
+
 razor has a new icon: a red blade hexagon with a trimmed block, from Foundry's
 hallmark-seal identity. The README banner, wordmark and Codex plugin icon use
 it. The Ember scene now ends with a stamp pressing that seal onto the answer,
