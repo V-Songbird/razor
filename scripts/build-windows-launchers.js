@@ -17,7 +17,7 @@ const CONFIG = path.join(ROOT, 'hooks/codex-hooks.json');
 // find sets ERRORLEVEL 9009 only after `&`, never inside `||`; then the encoded
 // PowerShell launcher finds Node through fnm. 2>nul hides cmd's not-found text
 // on that path, and with it Node's stderr, which no hook writes. A false `if`
-// ends cmd with exit 0, so a hook that crashes fails open without a trace.
+// ends cmd with exit 0, so `else exit /b` keeps the exit code of a crashed hook.
 function build(source, event) {
   if (!/^[A-Za-z]+$/.test(event)) throw new Error('Invalid hook event: ' + event);
   const inline = `process.argv[2]='${event}';require(require('path').join(process.env.PLUGIN_ROOT,'hooks','codex-hook.js')).main()`;
@@ -25,7 +25,7 @@ function build(source, event) {
   if (/[\s"$%`&|<>^]/.test(inline)) throw new Error('Inline hook script needs quoting');
   const script = source.replace(/\r\n/g, '\n').replaceAll('__RAZOR_EVENT__', event);
   const fallback = 'powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand ' + Buffer.from(script, 'utf16le').toString('base64');
-  return `cmd /d /s /c "set NoDefaultCurrentDirectoryInExePath=1&& node -e ${inline} 2>nul & if errorlevel 9009 ${fallback}"`;
+  return `cmd /d /s /c "set NoDefaultCurrentDirectoryInExePath=1&& node -e ${inline} 2>nul & if errorlevel 9009 (${fallback}) else exit /b"`;
 }
 
 function main(write = false) {
