@@ -1,5 +1,5 @@
-# Source for each commandWindows in hooks/codex-hooks.json. Rebuild with
-# node scripts/build-windows-launchers.js --write.
+# Fallback of each commandWindows in hooks/codex-hooks.json, run when cmd finds
+# no Node on PATH. Rebuild with node scripts/build-windows-launchers.js --write.
 # EncodedCommand keeps this script intact whether cmd.exe or PowerShell runs
 # the hook command; an inline -Command string loses its $ variables and quotes
 # under a PowerShell parent. It changes no execution policy or hook trust.
