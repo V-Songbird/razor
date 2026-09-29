@@ -25,7 +25,7 @@ test('each Codex commandWindows is the encoded launcher source and changes no po
   main();
   const source = fs.readFileSync(path.join(ROOT, 'hooks/windows-launcher.ps1'), 'utf8');
   const command = build(source, 'Stop');
-  const decoded = Buffer.from(command.match(/-EncodedCommand ([^\s)]+)\) else exit \/b"$/)[1], 'base64').toString('utf16le');
+  const decoded = Buffer.from(command.match(/-EncodedCommand ([^\s)]+)\) else node /)[1], 'base64').toString('utf16le');
   assert.equal(decoded, source.replace(/\r\n/g, '\n').replaceAll('__RAZOR_EVENT__', 'Stop'));
   assert.doesNotMatch(command + decoded, /ExecutionPolicy/);
 });
@@ -93,9 +93,9 @@ test("a node.exe in the hook's working directory never runs", { skip: process.pl
   }
 });
 
-// A false `if errorlevel 9009` ends cmd with exit 0, so a hook that throws must
-// still hand Codex Node's exit code 1 rather than fail open.
-test('a Codex hook that throws keeps its exit code through its Windows launcher', { skip: process.platform !== 'win32' }, () => {
+// A hook that throws must hand Codex Node's exit code 1 and its stack rather
+// than fail open or silently.
+test('a Codex hook that throws keeps its exit code and stderr through its Windows launcher', { skip: process.platform !== 'win32' }, () => {
   const plugin = fs.mkdtempSync(path.join(temp, 'throwing-'));
   fs.mkdirSync(path.join(plugin, 'hooks'));
   fs.writeFileSync(path.join(plugin, 'hooks/codex-hook.js'), "exports.main = () => { throw new Error('hook crashed'); };\n");
@@ -106,6 +106,7 @@ test('a Codex hook that throws keeps its exit code through its Windows launcher'
   });
   assert.ifError(r.error);
   assert.equal(r.status, 1, r.stderr);
+  assert.match(r.stderr, /Error: hook crashed/);
 });
 
 test('the Windows launcher falls back to fnm when Node is not on PATH', { skip: process.platform !== 'win32' }, (t) => {
