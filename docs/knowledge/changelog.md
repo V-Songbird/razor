@@ -18,6 +18,8 @@ and `plugin.json`.
 
 The `razor on` and `razor off` toggle now works only when it is the whole message. A prompt that starts with those words, such as "razor off-by-one bug in parser.js", no longer pauses or resumes razor.
 
+The README and the benchmark page now show the 2026-10-09 Codex run on GPT-5.6 Sol, the first run measured with the checklist's current one-lookup-per-rung sentence. The 2026-09-08 run stays on the benchmark page as an earlier run.
+
 ## 1.8.0 — 2026-09-29
 
 In Codex on Windows, each razor hook now starts Node.js from cmd instead of

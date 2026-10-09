@@ -103,17 +103,17 @@ File checks see the edits made through the assistant's own editing tool: `apply_
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. Every recorded run used the checklist's earlier "One check is enough, anywhere in this task" wording; its current one-lookup-per-rung sentence has not been measured.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. Only the Codex run below measured the checklist's current one-lookup-per-rung sentence; the Claude Code runs used its earlier "One check is enough, anywhere in this task" wording.
 
 ### Codex results
 
-<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/knowledge/benchmarks.md","date":"2026-09-08"} -->
+<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/knowledge/benchmarks.md","date":"2026-10-09"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
-| GPT-5.6 Sol | No plugin | 19/26 | 19.2 |
-| GPT-5.6 Sol | razor | 26/26 | 9.6 |
+| GPT-5.6 Sol | No plugin | 19/26 | 18.7 |
+| GPT-5.6 Sol | razor | 26/26 | 10.4 |
 
-Controlled Codex run at high reasoning on Windows: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, elapsed time was 1.8% higher and input tokens 0.8% higher; those measures did not improve. This exploratory result does not compare Sol against Claude.
+Controlled Codex run at high reasoning on Windows: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, the median ratio of razor's coding lines to the no-plugin answer's was 0.500. Elapsed time was 15.1% higher and input tokens 5.1% higher; output tokens were 6.2% lower. This exploratory result does not compare Sol against Claude.
 
 ### Claude Code results
 

@@ -1,6 +1,6 @@
 ---
 type: knowledge
-summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, and the exploratory Codex run; read before changing a published number."
+summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, and the exploratory Codex runs; read before changing a published number."
 related_files:
   - README.md
 ---
@@ -36,14 +36,15 @@ not pooled.
 | held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
 | 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
-| [Codex](#codex) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
+| [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | 2026-10-09 | 38 cases per setup | `18d1d0a` |
+| [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
 
 The batch ran on a newer Claude Code than the corpus, so its figures are not
 comparable with the corpus tables.
 
-Every run on this page used the checklist's earlier "One check is enough,
-anywhere in this task" wording; the current one-lookup-per-rung sentence
-(`d7ad590`) has not been measured.
+The 2026-10-09 Codex run is the only run on this page that measured the
+checklist's current one-lookup-per-rung sentence (`d7ad590`). Every other run
+used the earlier "One check is enough, anywhere in this task" wording.
 
 ## Does it still work?
 
@@ -247,13 +248,33 @@ tied on the other two. ponytail also blocked every unnecessary package.
 
 | | |
 | --- | --- |
-| Host | Codex CLI 0.153.4 on Windows |
+| Host | Codex CLI 0.161.0 on Windows |
 | Model | GPT-5.6 Sol, high reasoning |
 | Setups | no plugin, razor |
 | n | 19 tasks, 2 repetitions each, per setup (38 cases); the full task group is 26 of them |
-| Date | 2026-09-08 |
-| Revision | razor `66a5b7f404c5d7f75d938354093d044287903fda` |
+| Date | 2026-10-09 |
+| Revision | razor `18d1d0a8ead3f559997d89f3e490cb243efce455`, with the current checklist wording |
 | Status | exploratory: two repetitions are not a stable estimate |
+
+| task group | setup | correct and safe | mean coding lines |
+| --- | --- | --- | --- |
+| full | no plugin | 19 / 26 | 18.7 |
+| full | **razor** | **26 / 26** | **10.4** |
+| all | no plugin | 29 / 38 | — |
+| all | **razor** | **38 / 38** | — |
+
+On the pairs both setups passed, razor's median ratio to no plugin was 0.500
+for coding lines (23 pairs). Over 29 pairs, elapsed time was 15.1% higher,
+input tokens 5.1% higher and output tokens 6.2% lower. Timings include the
+overhead of observing razor's hooks. This compares Sol with and without razor.
+It does not compare Sol against Claude.
+
+### Earlier Codex run
+
+The same 38 cases on Codex CLI 0.153.4 on Windows, GPT-5.6 Sol at high
+reasoning, on 2026-09-08, against razor
+`66a5b7f404c5d7f75d938354093d044287903fda`, which used the earlier checklist
+wording. It was exploratory for the same reason.
 
 | task group | setup | correct and safe | mean coding lines |
 | --- | --- | --- | --- |
@@ -263,8 +284,7 @@ tied on the other two. ponytail also blocked every unnecessary package.
 | all | **razor** | **38 / 38** | — |
 
 On the pairs both setups passed, elapsed time was 1.8% higher and input tokens
-0.8% higher with razor; neither improved. This compares Sol with and without
-razor. It does not compare Sol against Claude.
+0.8% higher with razor; neither improved.
 
 ## Reproducing this
 
