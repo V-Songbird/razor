@@ -59,6 +59,9 @@ function main() {
   }
   writeState(stateId, state);
 
+  // A reason that names its tool says `this Write` or `this Edit`: Codex's
+  // nativeReason() and the Antigravity adapter's emitDeny() rewrite exactly
+  // that phrase to the host's own tool, and any other wording stays as is.
   emitDeny('PreToolUse', nativePatch ? nativeReason(reason) : reason);
 }
 
