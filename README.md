@@ -126,17 +126,6 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 
 A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results.
 
-### Antigravity results
-
-<!-- foundry:evidence {"platform":"Antigravity","status":"pending","reason":"No Antigravity performance measurements are available."} -->
-| Model | Setup | Correct and safe | Mean coding lines |
-| --- | --- | --- | --- |
-| Not measured | Not measured | Not measured | Not measured |
-
-No Antigravity session has been measured yet.
-
-*Results can vary between runs.*
-
 <p align="center"><img src="assets/hero.svg" alt="The razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where razor's middle session landed on the same job: 193 lines above the edge never shipped with razor." width="700"></p>
 
 The Claude Opus 5 run in the Claude Code table above (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded): its 27 no-plugin sessions on the nine dependency jobs. These measurements describe the recorded Claude sessions, not Codex performance.
@@ -147,6 +136,17 @@ The Claude Opus 5 run in the Claude Code table above (razor revision not recorde
 <p align="center"><img src="assets/demo.svg" alt="The same ask side by side: implement parseQuery in query.js. Without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on Object.fromEntries and URLSearchParams. Across the run, 3 sessions each way averaged 18 and 4 lines." width="700"></p>
 
 </details>
+
+### Antigravity results
+
+<!-- foundry:evidence {"platform":"Antigravity","status":"pending","reason":"No Antigravity performance measurements are available."} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Not measured | Not measured | Not measured | Not measured |
+
+No Antigravity session has been measured yet.
+
+*Results can vary between runs.*
 
 ## Going deeper
 
