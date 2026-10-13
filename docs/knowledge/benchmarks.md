@@ -17,8 +17,11 @@ Every session is scored on the code it left behind, and correctness is checked
 by running that code. **A short answer that breaks the task scores as a
 failure, not a win.**
 
-The harness is kept outside this repository; each section below keeps its run's setup so the
+The harness is [Foundry's `benchmarks/razor`](https://github.com/V-Songbird/foundry/tree/main/benchmarks/razor), not part of this plugin; each section below keeps its run's setup so the
 figures can be judged.
+
+> [!IMPORTANT]
+> **The Claude Code runs never exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. The benchmark runner put every Claude Code run's workspaces in a temp folder: the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The 2026-10-09 Codex run is not affected; the earlier 2026-09-08 Codex run records no workspace path, so treat it the same way.
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -335,7 +338,8 @@ tokens (776 against 630, +146 ± 103).
 
 ## Reproducing this
 
-The harness that drove these sessions is kept outside this repository and is
-not distributed with the plugin. A rerun against the same fixed jobs costs real
+The harness that drove these sessions is Foundry's `benchmarks/razor`; it is not
+distributed with the plugin. The Claude Code runs ran in a temp folder, so they did
+not exercise razor's new-file check (see the note at the top of this page). A rerun against the same fixed jobs costs real
 money, and you will not reproduce these exact figures. If razor comes out leaner and no
 pricier with correctness intact, the claim holds.

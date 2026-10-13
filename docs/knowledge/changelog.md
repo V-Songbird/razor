@@ -14,6 +14,10 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
+## Unreleased
+
+The benchmark page and the README now say that the Claude Code runs they report ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only. No figure changed. They also name Foundry's `benchmarks/razor` as the harness.
+
 ## 1.8.1 — 2026-10-13
 
 The `razor on` and `razor off` toggle now works only when it is the whole message. A prompt that starts with those words, such as "razor off-by-one bug in parser.js", no longer pauses or resumes razor.

@@ -124,7 +124,7 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 | Claude Opus 5 | ponytail | 39/39 | 12.2 |
 | Claude Opus 5 | razor | 39/39 | 9.6 |
 
-A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results.
+A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. These Claude Code runs ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only.
 
 <p align="center"><img src="assets/hero.svg" alt="The razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where razor's middle session landed on the same job: 193 lines above the edge never shipped with razor." width="700"></p>
 
@@ -152,7 +152,7 @@ No Antigravity session has been measured yet.
 
 [How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Codex benchmark details](docs/knowledge/benchmarks.md#codex) · [Changelog](docs/knowledge/changelog.md)
 
-[Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The research records and both benchmark harnesses are kept outside this repository and are not distributed with the plugin.
+[Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
 
 ## License
 
