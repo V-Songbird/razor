@@ -18,6 +18,8 @@ and `plugin.json`.
 
 The benchmark page and the README now say that the Claude Code runs they report most likely ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only. No figure changed. They also name Foundry's `benchmarks/razor` as the harness.
 
+The benchmark page and the README now show the 2026-10-13 Claude Opus 5.5 run and its drift-note test, measured with razor checked out at `a6ecf5f`, whose plugin code is identical to 1.8.1. The comment above the scope-drift note in `hooks/razor-lib.js` now names the figures measured on the shipped wording. The note itself did not change.
+
 ## 1.8.1 — 2026-10-13
 
 The `razor on` and `razor off` toggle now works only when it is the whole message. A prompt that starts with those words, such as "razor off-by-one bug in parser.js", no longer pauses or resumes razor.

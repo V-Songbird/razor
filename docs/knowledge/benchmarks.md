@@ -22,7 +22,7 @@ The harness is [Foundry's `benchmarks/razor`](https://github.com/V-Songbird/foun
 figures can be judged.
 
 > [!IMPORTANT]
-> **Treat the Claude Code runs as not having exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. This page did not record where each run's workspaces sat, and the runner defaulted to the temp folder when no other location was set, so the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test are read as having run there. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The same exemption applies on Codex: the 2026-09-08 Codex run records no workspace path, so treat it the same way. The 2026-10-09 Codex run is not affected, and neither are the 2026-10-13 Claude Opus 5.5 runs, whose workspaces sat outside the temp folder.
+> **Treat the Claude Code runs before 2026-10-13 as not having exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. This page did not record where each run's workspaces sat, and the runner defaulted to the temp folder when no other location was set, so the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test are read as having run there. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The same exemption applies on Codex: the 2026-09-08 Codex run records no workspace path, so treat it the same way. The 2026-10-09 Codex run is not affected, and neither are the 2026-10-13 Claude Opus 5.5 runs, whose workspaces sat outside the temp folder.
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -39,8 +39,8 @@ not pooled.
 | corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
 | held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
 | 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
-| [Opus 5.5](#claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 26 sessions per setup | 1.8.1, `6174db6` |
-| [Opus 5.5 drift note](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 6 conversations per setup | 1.8.1, `6174db6` |
+| [Opus 5.5](#claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 26 sessions per setup | checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6`) |
+| [Opus 5.5 drift note](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 6 conversations per setup | checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6`) |
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | not recorded | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | high | 2026-10-09 | 38 cases per setup | `18d1d0a` |
 | [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | high | 2026-09-08 | 38 cases per setup | `66a5b7f` |
@@ -240,7 +240,7 @@ far, and less reliably.
 | Setups | no plugin, razor |
 | n | the 13 `--full` jobs, 2 repetitions each: 26 sessions per setup, none failed to run |
 | Date | 2026-10-13 (UTC) |
-| Revision | razor 1.8.1, `6174db6ff6c5241e1cce3de5b6bc8bfcb30d533e`, with the current checklist wording |
+| Revision | razor checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6ff6c5241e1cce3de5b6bc8bfcb30d533e`), with the current checklist wording |
 | Workspaces | outside the system temp folder, so razor's new-file check was active; it spoke in none of the 26 razor sessions |
 | Status | exploratory: two repetitions are not a stable estimate |
 
