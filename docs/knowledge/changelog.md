@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.8.2 — 2026-10-13
 
 The benchmark page and the README now say that the Claude Code runs they report most likely ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only. No figure changed. They also name Foundry's `benchmarks/razor` as the harness.
 
