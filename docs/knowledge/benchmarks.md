@@ -1,6 +1,6 @@
 ---
 type: knowledge
-summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, and the exploratory Codex runs; read before changing a published number."
+summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, the exploratory Codex runs and the Claude Sonnet test of a judgement-style checklist wording; read before changing a published number."
 related_files:
   - README.md
 ---
@@ -38,13 +38,15 @@ not pooled.
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | 2026-10-09 | 38 cases per setup | `18d1d0a` |
 | [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
+| [checklist wording](#a-judgement-style-checklist-wording) | Claude Code 2.1.296 | `claude-sonnet-5` | 2026-10-13 | 26 sessions per wording, razor only | `5acf656` |
 
 The batch ran on a newer Claude Code than the corpus, so its figures are not
 comparable with the corpus tables.
 
-The 2026-10-09 Codex run is the only run on this page that measured the
-checklist's current one-lookup-per-rung sentence (`d7ad590`). Every other run
-used the earlier "One check is enough, anywhere in this task" wording.
+The 2026-10-09 Codex run and the 2026-10-13 wording test are the only runs on
+this page that measured the checklist's current one-lookup-per-rung sentence
+(`d7ad590`). Every other run used the earlier "One check is enough, anywhere in
+this task" wording.
 
 ## Does it still work?
 
@@ -285,6 +287,46 @@ wording. It was exploratory for the same reason.
 
 On the pairs both setups passed, elapsed time was 1.8% higher and input tokens
 0.8% higher with razor; neither improved.
+
+## A judgement-style checklist wording
+
+Razor's session checklist is written as rules: "Never", "IS adding", "Never
+cut". This run tested a rewrite of the same checklist as judgement with
+reasons: the same seven rungs, the same one-lookup limit and the same list of
+things never cut. Only the session-start copy changed; the subagent copy and
+the copy that `razor on` sends kept the rules. **The rewrite did not win, so razor keeps
+the rule wording.**
+
+| | |
+| --- | --- |
+| Host | Claude Code 2.1.296 on Windows |
+| Model | `claude-sonnet-5`, read from the API responses; effort left at the CLI default |
+| Setups | razor with the rule wording, razor with the judgement wording; no no-plugin setup |
+| n | the 13 `--full` jobs, 2 repetitions each: 26 sessions per wording, none failed to run |
+| Date | 2026-10-13 (UTC) |
+| Revision | razor `5acf656d294b09488ebb0b3c4dafb5d33f299011`; the judgement wording was an uncommitted change to `hooks/session-start.js` on that revision |
+| Decision rule | adopt the rewrite only if its gain on the held-out jobs clears the noise |
+
+Seven of the 13 jobs were held out, drawn at random within each scoring axis
+before any result was read. Each ± is the 95% interval of the per-job paired
+difference.
+
+| held-out jobs, 14 sessions per wording | rules | judgement | difference |
+| --- | --- | --- | --- |
+| correct and safe | 14 / 14 | 14 / 14 | 0 |
+| mean session cost | $0.066 | $0.074 | +$0.008 ± $0.005 |
+| mean coding lines | 5.0 | 4.6 | −0.4 ± 0.6 |
+| mean tool calls | 3.0 | 3.9 | +0.9 ± 0.7 |
+| mean output tokens | 577 | 761 | +184 ± 176 |
+| mean seconds | 13.6 | 16.6 | +3.0 ± 3.4 |
+
+Both wordings passed every session, so the pass rate had no room to improve;
+with 14 sessions its noise alone is about ±27 points. On the held-out jobs the
+judgement wording cost more and made more tool calls, both beyond the noise,
+and its smaller code was inside the noise. Over all 13 jobs the costs were
+level ($0.072 against $0.075, −$0.002 ± $0.012), and the judgement wording
+still made more tool calls (3.9 against 3.2, +0.7 ± 0.4) and wrote more output
+tokens (776 against 630, +146 ± 103).
 
 ## Reproducing this
 
