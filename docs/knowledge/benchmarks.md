@@ -1,6 +1,6 @@
 ---
 type: knowledge
-summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5 run beside a rival plugin, the exploratory Codex runs and the Claude Sonnet test of a judgement-style checklist wording; read before changing a published number."
+summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5.5 run and its drift-note test, the Claude Opus 5 run beside a rival plugin, the exploratory Codex runs and the Claude Sonnet test of a judgement-style checklist wording; read before changing a published number."
 related_files:
   - README.md
 ---
@@ -9,7 +9,8 @@ related_files:
 
 Everything here comes from real sessions — full conversations, not canned
 replies. Most sections are Claude Code runs on Claude Sonnet and Claude Opus,
-once with no plugin and once with razor. The two runs the README's table shows,
+once with no plugin and once with razor. The three runs the README's tables show,
+[Claude Opus 5.5](#claude-opus-55),
 [Claude Opus 5 beside a rival plugin](#claude-opus-5-beside-a-rival-plugin) and
 [Codex](#codex), have their own sections at the end and are not pooled with the
 others. Cost and token counts come out of the API's own usage data.
@@ -21,7 +22,7 @@ The harness is [Foundry's `benchmarks/razor`](https://github.com/V-Songbird/foun
 figures can be judged.
 
 > [!IMPORTANT]
-> **Treat the Claude Code runs as not having exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. This page did not record where each run's workspaces sat, and the runner defaulted to the temp folder when no other location was set, so the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test are read as having run there. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The same exemption applies on Codex: the 2026-09-08 Codex run records no workspace path, so treat it the same way. The 2026-10-09 Codex run is not affected.
+> **Treat the Claude Code runs as not having exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. This page did not record where each run's workspaces sat, and the runner defaulted to the temp folder when no other location was set, so the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test are read as having run there. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The same exemption applies on Codex: the 2026-09-08 Codex run records no workspace path, so treat it the same way. The 2026-10-09 Codex run is not affected, and neither are the 2026-10-13 Claude Opus 5.5 runs, whose workspaces sat outside the temp folder.
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -33,22 +34,24 @@ figures can be judged.
 Each section below names the run it comes from. Runs in different rows are
 not pooled.
 
-| run | host | model | date | n | razor revision |
-| --- | --- | --- | --- | --- | --- |
-| corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
-| held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
-| 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
-| [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
-| [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | 2026-10-09 | 38 cases per setup | `18d1d0a` |
-| [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | 2026-09-08 | 38 cases per setup | `66a5b7f` |
-| [checklist wording](#a-judgement-style-checklist-wording) | Claude Code 2.1.296 | `claude-sonnet-5` | 2026-10-13 | 26 sessions per wording, razor only | `5acf656` |
+| run | host | model | effort | date | n | razor revision |
+| --- | --- | --- | --- | --- | --- | --- |
+| corpus | Claude Code 2.1.235 and 2.1.238 | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-19 and 2026-08-20 | two pooled runs, 78 sessions per setup per model | not recorded |
+| held-out tests | replay of corpus sessions | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-29 | 240 sessions, 102 test cases | not recorded |
+| 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
+| [Opus 5.5](#claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 26 sessions per setup | 1.8.1, `6174db6` |
+| [Opus 5.5 drift note](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 6 conversations per setup | 1.8.1, `6174db6` |
+| [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | not recorded | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
+| [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | high | 2026-10-09 | 38 cases per setup | `18d1d0a` |
+| [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | high | 2026-09-08 | 38 cases per setup | `66a5b7f` |
+| [checklist wording](#a-judgement-style-checklist-wording) | Claude Code 2.1.296 | `claude-sonnet-5` | CLI default | 2026-10-13 | 26 sessions per wording, razor only | `5acf656` |
 
 The batch ran on a newer Claude Code than the corpus, so its figures are not
 comparable with the corpus tables.
 
-The 2026-10-09 Codex run and the 2026-10-13 wording test are the only runs on
-this page that measured the checklist's current one-lookup-per-rung sentence
-(`d7ad590`). Every other run used the earlier "One check is enough, anywhere in
+The 2026-10-09 Codex run, the 2026-10-13 Opus 5.5 runs and the 2026-10-13
+wording test are the only runs on this page that measured the checklist's
+current one-lookup-per-rung sentence (`d7ad590`). Every other run used the earlier "One check is enough, anywhere in
 this task" wording.
 
 ## Does it still work?
@@ -228,6 +231,62 @@ Opus saving reproduces.
 numbers on this page are Opus numbers. Sonnet moves in the same direction, less
 far, and less reliably.
 
+## Claude Opus 5.5
+
+| | |
+| --- | --- |
+| Host | Claude Code 2.1.296 on Windows |
+| Model | `claude-opus-5-5`, read from the API responses; effort left at the CLI default, which the run does not record |
+| Setups | no plugin, razor |
+| n | the 13 `--full` jobs, 2 repetitions each: 26 sessions per setup, none failed to run |
+| Date | 2026-10-13 (UTC) |
+| Revision | razor 1.8.1, `6174db6ff6c5241e1cce3de5b6bc8bfcb30d533e`, with the current checklist wording |
+| Workspaces | outside the system temp folder, so razor's new-file check was active; it spoke in none of the 26 razor sessions |
+| Status | exploratory: two repetitions are not a stable estimate |
+
+| setup | clean sessions | mean coding lines | mean session cost |
+| --- | --- | --- | --- |
+| no plugin | 24 / 26 | 16.2 | $0.100 |
+| **razor** | **26 / 26** | **8.7** | **$0.086** |
+
+A clean session is correct and adds no package. Both no-plugin failures were
+the same job: told to use axios, it imported axios into a project that does not
+have it. The no-plugin setup also tried one package install; razor tried none.
+
+Lines are averaged over the eleven coding jobs, 22 sessions per setup. razor
+wrote fewer lines on ten of them and tied on the eleventh. Each ± below is the
+95% interval of the per-job paired difference.
+
+| per job, razor against no plugin | difference |
+| --- | --- |
+| coding lines, eleven coding jobs | −7.5 ± 5.1 |
+| session cost, all 13 jobs | −$0.014 ± $0.013 |
+| output tokens, all 13 jobs | −382 ± 227 |
+| seconds, all 13 jobs | −3.2 ± 5.9 |
+
+razor cost less on nine of the 13 jobs. It cost more on the two jobs with no
+code, by 17% on the question and 14% on the typo fix, and on two coding jobs.
+Its sessions took 4.1 turns against 5.0. The time saving is inside the noise.
+
+### The drift note on Claude Opus 5.5
+
+The same host, model, effort, date and revision as the run above, with the
+drift note razor ships. The `--note` suite runs two conversations. Both ask for
+the same small change first; the second request either moves to unrelated work
+or corrects the first request's own spec. Three repetitions of each: 6
+conversations per setup, none failed to run.
+
+| conversation | what should happen | no plugin | razor |
+| --- | --- | --- | --- |
+| second request is unrelated work | the work is done and one line says the session moved off its task | 0 / 3 | **3 / 3** |
+| second request corrects the first | the work is done and nothing is said | 3 / 3 | 3 / 3 |
+
+No conversation stopped to ask or refused, and none raised the note before the
+second request. The suite scores the message, not the code the second request
+asked for. A razor conversation cost $0.197 against $0.169 without a plugin,
+17% more. The conversations have two requests, so this run cannot show whether
+the note repeats on a later turn.
+
 ## Claude Opus 5 beside a rival plugin
 
 | | |
@@ -339,7 +398,7 @@ tokens (776 against 630, +146 ± 103).
 ## Reproducing this
 
 The harness that drove these sessions is Foundry's `benchmarks/razor`; it is not
-distributed with the plugin. The Claude Code runs most likely sat in a temp folder, so treat them as not having
+distributed with the plugin. The Claude Code runs before the Opus 5.5 runs most likely sat in a temp folder, so treat them as not having
 exercised razor's new-file check (see the note at the top of this page). A rerun against the same fixed jobs costs real
 money, and you will not reproduce these exact figures. If razor comes out leaner and no
 pricier with correctness intact, the claim holds.

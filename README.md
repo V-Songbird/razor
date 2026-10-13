@@ -103,7 +103,7 @@ File checks see the edits made through the assistant's own editing tool: `apply_
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. Only the Codex run below measured the checklist's current one-lookup-per-rung sentence; the Claude Code runs used its earlier "One check is enough, anywhere in this task" wording.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. The Codex run and the Claude Opus 5.5 run below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run used its earlier "One check is enough, anywhere in this task" wording.
 
 ### Codex results
 
@@ -113,9 +113,17 @@ Each result belongs to the named model and recorded run. Missing measurements re
 | GPT-5.6 Sol | No plugin | 19/26 | 18.7 |
 | GPT-5.6 Sol | razor | 26/26 | 10.4 |
 
-Controlled Codex run at high reasoning on Windows: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, the median ratio of razor's coding lines to the no-plugin answer's was 0.500. Elapsed time was 15.1% higher and input tokens 5.1% higher; output tokens were 6.2% lower. This exploratory result does not compare Sol against Claude.
+Controlled Codex run at high reasoning on Windows, on 2026-10-09 against razor `18d1d0a`: the table covers the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, the median ratio of razor's coding lines to the no-plugin answer's was 0.500. Elapsed time was 15.1% higher and input tokens 5.1% higher; output tokens were 6.2% lower. This exploratory result does not compare Sol against Claude.
 
 ### Claude Code results
+
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"source":"docs/knowledge/benchmarks.md","date":"2026-10-13"} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
+| Claude Opus 5.5 | razor | 26/26 | 8.7 |
+
+Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against razor [1.8.1](docs/knowledge/changelog.md#181--2026-10-13): the 13 jobs of the full suite, twice each per setup. Mean session cost was $0.086 with razor and $0.100 without a plugin; razor cost more on the two jobs with no code. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so razor's new-file check was active; it did not speak. In a two-request drift test on the same setup and date, razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections.
 
 <!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-09-23"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
@@ -124,11 +132,11 @@ Controlled Codex run at high reasoning on Windows: the table covers the full tas
 | Claude Opus 5 | ponytail | 39/39 | 12.2 |
 | Claude Opus 5 | razor | 39/39 | 9.6 |
 
-A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put these Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
+A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. The Claude Opus 5 run's CLI version and effort were not recorded. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put this run and the earlier Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
 
 <p align="center"><img src="assets/hero.svg" alt="The razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where razor's middle session landed on the same job: 193 lines above the edge never shipped with razor." width="700"></p>
 
-The Claude Opus 5 run in the Claude Code table above (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded): its 27 no-plugin sessions on the nine dependency jobs. These measurements describe the recorded Claude sessions, not Codex performance.
+The Claude Opus 5 run in the second Claude Code table above (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded): its 27 no-plugin sessions on the nine dependency jobs. These measurements describe the recorded Claude sessions, not Codex performance.
 
 <details>
 <summary>Watch the recorded Claude Code demo: one real session each on Claude Opus 5, replayed on the recorded clock, published September 4, 2026</summary>

@@ -44,9 +44,13 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 // from a single SessionStart injection, and the clause was provably present
 // on the turns that still missed. The trailing say-once sentence is load
 // bearing — without it the note repeats on every turn after a drift (4 of 14
-// against 1 of 16). The numbers describe the wording razor shipped from 1.5.0
-// through 1.6.0, which said "Never stop to ask, never refuse"; the current
-// wording is not measured.
+// against 1 of 16). Those numbers describe the wording razor shipped from 1.5.0
+// through 1.6.0, which said "Never stop to ask, never refuse". This wording,
+// measured on Claude Opus 5.5 with release 1.8.1 (2026-10-13, two-request
+// conversations, 3 each): the note appeared after unrelated work in 3 of 3
+// against 0 of 3 with no plugin, never after a same-job correction (0 of 3),
+// and no conversation stopped to ask. Recall by delivery route and the
+// say-once repeat are measured on the older wording only.
 const DRIFT_NOTE = `Stay on the task the first user prompt named. If a later request has left that task, do the work anyway, then add one line saying the session has moved off its original task and a fresh session would keep this one focused. Drift alone is no reason to stop, ask or decline, and never say it when the request is still the same job. Say it at most once in a session — if you have already said it, stay quiet.`;
 
 function safeId(id) {
