@@ -1,6 +1,6 @@
 ---
 type: knowledge
-summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5.5 run and its drift-note test, the Claude Opus 5 run beside a rival plugin, the exploratory Codex runs and the Claude Sonnet test of a judgement-style checklist wording; read before changing a published number."
+summary: "The benchmark results behind the README: the Claude Code runs on correctness, package-free sessions, code size, whole-session growth, real-repository behavior, speed, cost, spawned agents and where razor does not win, the Claude Opus 5.5 run and its drift-note tests, including whether the note repeats on a third request, the Claude Opus 5 run beside a rival plugin, the exploratory Codex runs and the Claude Sonnet test of a judgement-style checklist wording; read before changing a published number."
 related_files:
   - README.md
 ---
@@ -41,6 +41,7 @@ not pooled.
 | 2026-08-29 batch | Claude Code 2.1.251 | Claude Sonnet and Claude Opus, model version not recorded | not recorded | 2026-08-29 | 48, 24, 24 sessions and 66 judged pairs, per section | not recorded |
 | [Opus 5.5](#claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 26 sessions per setup | checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6`) |
 | [Opus 5.5 drift note](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 6 conversations per setup | checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6`) |
+| [Opus 5.5 drift note, three requests](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 9 conversations per setup | `9eb5215` (1.8.2); plugin code identical to 1.8.1 apart from one comment |
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | not recorded | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | high | 2026-10-09 | 38 cases per setup | `18d1d0a` |
 | [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | high | 2026-09-08 | 38 cases per setup | `66a5b7f` |
@@ -285,7 +286,33 @@ No conversation stopped to ask or refused, and none raised the note before the
 second request. The suite scores the message, not the code the second request
 asked for. A razor conversation cost $0.197 against $0.169 without a plugin,
 17% more. The conversations have two requests, so this run cannot show whether
-the note repeats on a later turn.
+the note repeats on a later turn; the run below does.
+
+#### Does the note repeat on a third request?
+
+A second run added a third, unrelated request, to test the drift note's
+say-once sentence. It used the same host, model and effort on the same date,
+with razor checked out at `9eb5215` (release 1.8.2), whose plugin code is
+identical to 1.8.1 apart from one comment. The workspaces sat outside the
+system temp folder. The run held three kinds of conversation, three of each per
+setup: 9 conversations per setup, none failed to run.
+
+| conversation | what should happen | no plugin | razor |
+| --- | --- | --- | --- |
+| second request is unrelated work | one line says the session moved off its task | 0 / 3 | **3 / 3** |
+| second request corrects the first | nothing is said | 3 / 3 | 3 / 3 |
+| second request, then a third, both unrelated | the note after the second request, nothing after the third | note after the second: 0 / 3 | note after the second: **3 / 3**; repeated after the third: **0 / 3** |
+
+The first two rows repeat the test above and agree with it. In the third row,
+razor said the note once in each conversation and stayed quiet on the next
+unrelated request. The no-plugin setup never said it, so it had nothing to
+repeat, and its third-request result says nothing about the sentence. No
+correction conversation raised a false note in either setup, 0 of 6. The suite
+flagged none of the 18 conversations as stopping to ask or as raising the note
+before the second request. A razor conversation with three requests cost $0.323
+against $0.288 without a plugin, 12% more. Three conversations of each kind are
+exploratory, not a stable estimate. The run's records are kept outside the
+repository.
 
 ## Claude Opus 5 beside a rival plugin
 
