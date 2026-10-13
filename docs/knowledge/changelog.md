@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.8.3 — 2026-10-13
 
 The benchmark page and the README now report that the drift note said its line once on Claude Opus 5.5. In three-request conversations on 1.8.2, razor noted the first unrelated request in 3 of 3 conversations and did not repeat it on the third request in any, against 0 of 3 notes without a plugin. No figure that was already published changed.
 
