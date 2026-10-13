@@ -16,7 +16,7 @@ and `plugin.json`.
 
 ## Unreleased
 
-The benchmark page and the README now say that the Claude Code runs they report ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only. No figure changed. They also name Foundry's `benchmarks/razor` as the harness.
+The benchmark page and the README now say that the Claude Code runs they report most likely ran in a temp folder, where razor's new-file check stays silent, so they measure its other checks only. No figure changed. They also name Foundry's `benchmarks/razor` as the harness.
 
 ## 1.8.1 — 2026-10-13
 

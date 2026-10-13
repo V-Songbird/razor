@@ -21,7 +21,7 @@ The harness is [Foundry's `benchmarks/razor`](https://github.com/V-Songbird/foun
 figures can be judged.
 
 > [!IMPORTANT]
-> **The Claude Code runs never exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. The benchmark runner put every Claude Code run's workspaces in a temp folder: the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The 2026-10-09 Codex run is not affected; the earlier 2026-09-08 Codex run records no workspace path, so treat it the same way.
+> **Treat the Claude Code runs as not having exercised razor's new-file check.** Razor treats files under the system temp folder as scratch, so its new-file check stays silent there. This page did not record where each run's workspaces sat, and the runner defaulted to the temp folder when no other location was set, so the corpus, the 2026-08-29 batch, the Opus 5 rival run and the checklist wording test are read as having run there. The held-out tests replay corpus sessions and share the gap. Those runs measure razor's other checks only, and no figure on this page says anything about the new-file check. The figures have not changed. The same exemption applies on Codex: the 2026-09-08 Codex run records no workspace path, so treat it the same way. The 2026-10-09 Codex run is not affected.
 
 > [!NOTE]
 > Numbers move between runs, sometimes by a lot. These are a few hundred
@@ -339,7 +339,7 @@ tokens (776 against 630, +146 ± 103).
 ## Reproducing this
 
 The harness that drove these sessions is Foundry's `benchmarks/razor`; it is not
-distributed with the plugin. The Claude Code runs ran in a temp folder, so they did
-not exercise razor's new-file check (see the note at the top of this page). A rerun against the same fixed jobs costs real
+distributed with the plugin. The Claude Code runs most likely sat in a temp folder, so treat them as not having
+exercised razor's new-file check (see the note at the top of this page). A rerun against the same fixed jobs costs real
 money, and you will not reproduce these exact figures. If razor comes out leaner and no
 pricier with correctness intact, the claim holds.
