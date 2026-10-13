@@ -16,7 +16,9 @@ and `plugin.json`.
 
 ## Unreleased
 
-The benchmark page and the README now report that the drift note said its line once on Claude Opus 5.5. In three-request conversations on 1.8.2, razor noted the first unrelated request in 3 of 3 conversations and did not repeat it after the second in any, against 0 of 3 notes without a plugin. No figure that was already published changed.
+The benchmark page and the README now report that the drift note said its line once on Claude Opus 5.5. In three-request conversations on 1.8.2, razor noted the first unrelated request in 3 of 3 conversations and did not repeat it on the third request in any, against 0 of 3 notes without a plugin. No figure that was already published changed.
+
+The benchmark page now reports a Claude Opus 5.5 run that compared two routes for the drift note on 1.8.2's plugin code: beside every request, as razor ships it, and in the session-start context. Each route noted the unrelated request in 20 of 20 conversations, repeated it on the third request in 0 of 10 and raised no false note in 10 same-job corrections. The harness resumes the session for each request, so the session-start route also received the note before every request. The comment above the note in `hooks/razor-lib.js` now carries these figures. The note itself did not change.
 
 ## 1.8.2 — 2026-10-13
 

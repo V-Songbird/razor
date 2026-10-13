@@ -39,23 +39,26 @@ Rules: no abstractions nobody asked for; no scaffolding for later; deletion over
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
-// Restated on every user prompt, because it only binds when it sits in the
-// turn's own context: measured recall is 84% delivered this way against 73%
-// from a single SessionStart injection, and the clause was provably present
-// on the turns that still missed. The trailing say-once sentence is load
-// bearing — without it the note repeats on every turn after a drift (4 of 14
-// against 1 of 16). Those numbers were measured on the earlier wording razor
-// shipped from 1.5.0 through 1.6.0, which said "Never stop to ask, never
-// refuse"; recall by delivery route is measured on that wording only. This
-// wording, measured on Claude Opus 5.5 with release 1.8.1 (2026-10-13,
-// two-request conversations, 3 each): the note appeared after unrelated work
-// in 3 of 3 against 0 of 3 with no plugin, never after a same-job correction
-// (0 of 3), and no conversation stopped to ask. Its say-once repeat, measured
-// on Claude Code 2.1.296 with claude-opus-5-5 and razor 9eb5215, release
-// 1.8.2 (2026-10-13, run 20261013-024128, three-request conversations,
-// 3 each): the note appeared after the first unrelated request in 3 of 3
-// against 0 of 3 with no plugin, was repeated after the second in 0 of 3,
-// and no conversation stopped to ask.
+// Restated on every user prompt, so it sits in the turn's own context. On the
+// earlier wording razor shipped from 1.5.0 through 1.6.0, which said "Never
+// stop to ask, never refuse", measured recall was 84% delivered this way
+// against 73% from a single SessionStart injection, the clause was provably
+// present on the turns that still missed, and the trailing say-once sentence
+// was load bearing: without it the note repeated on every turn after a drift
+// (4 of 14 against 1 of 16). This wording by delivery route, measured on
+// Claude Code 2.1.296 with claude-opus-5-5 and razor 15afc0a, plugin code
+// identical to release 1.8.2 apart from comments (2026-10-13, run
+// 20261013-085338, 10 conversations of each kind per route): the note
+// appeared after unrelated work in 20 of 20 both per prompt and from
+// SessionStart, was repeated on a third request in 0 of 10 by either route,
+// never followed a same-job correction (0 of 10 each), and no conversation
+// stopped to ask. Each request there is a resumed headless call, so
+// SessionStart fired again before every request: the run does not test a
+// single injection. Earlier runs of this wording on Claude Opus 5.5, per
+// prompt only, 3 conversations each: release 1.8.1, two requests, noted 3 of
+// 3 against 0 of 3 with no plugin and never after a correction; release 1.8.2
+// (run 20261013-024128), three requests, noted 3 of 3 against 0 of 3 and
+// repeated on the third request in 0 of 3.
 const DRIFT_NOTE = `Stay on the task the first user prompt named. If a later request has left that task, do the work anyway, then add one line saying the session has moved off its original task and a fresh session would keep this one focused. Drift alone is no reason to stop, ask or decline, and never say it when the request is still the same job. Say it at most once in a session — if you have already said it, stay quiet.`;
 
 function safeId(id) {
