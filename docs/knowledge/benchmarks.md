@@ -292,10 +292,15 @@ On the pairs both setups passed, elapsed time was 1.8% higher and input tokens
 
 Razor's session checklist is written as rules: "Never", "IS adding", "Never
 cut". This run tested a rewrite of the same checklist as judgement with
-reasons: the same seven rungs, the same one-lookup limit and the same list of
-things never cut. Only the session-start copy changed; the subagent copy and
-the copy that `razor on` sends kept the rules. **The rewrite did not win, so razor keeps
-the rule wording.**
+reasons: the same seven rungs and the same list of things never cut. The
+rewrite also softened the stopping and lookup limits: "stop at the first rung
+that holds ... without checking the rungs below" became "usually the right
+place to stop", "One search" became "A quick search", and "One lookup per rung
+is enough" became "usually enough". Only the session-start copy changed; the
+subagent copy and the copy that `razor on` sends kept the rules. **The rewrite
+did not win, so razor keeps the rule wording.** Because style and limits
+changed together, this run cannot attribute the differences below to the
+judgement style alone.
 
 | | |
 | --- | --- |
