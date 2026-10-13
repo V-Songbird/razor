@@ -14,6 +14,10 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
+## Unreleased
+
+The benchmark page now reports a Claude Opus 5.5 run on 1.8.3 that compared two routes for the drift note: beside every request, as razor ships it, and once per conversation at session start. Beside every request, the note followed unrelated work in 29 of 30 conversations; once at session start, in 24 of 30, and in 6 of 10 when the drift came three requests after the delivery, against 10 of 10. Neither route repeated the note or raised a false one. The comment above the note in `hooks/razor-lib.js` now carries these figures. The note itself did not change.
+
 ## 1.8.3 — 2026-10-13
 
 The benchmark page and the README now report that the drift note said its line once on Claude Opus 5.5. In three-request conversations on 1.8.2, razor noted the first unrelated request in 3 of 3 conversations and did not repeat it on the third request in any, against 0 of 3 notes without a plugin. No figure that was already published changed.

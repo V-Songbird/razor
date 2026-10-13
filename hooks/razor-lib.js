@@ -46,17 +46,20 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 // present on the turns that still missed, and the trailing say-once sentence
 // was load bearing: without it the note repeated on every turn after a drift
 // (4 of 14 against 1 of 16). This wording by delivery route, measured on
-// Claude Code 2.1.296 with claude-opus-5-5 and razor 15afc0a, plugin code
-// identical to release 1.8.2 apart from comments (2026-10-13, run
-// 20261013-085338, 10 conversations of each kind per route): the note
-// appeared after unrelated work in 20 of 20 both per prompt and from
-// SessionStart, was repeated on a third request in 0 of 10 by either route,
-// never followed a same-job correction (0 of 10 each), and no conversation
-// stopped to ask. Each request there is a resumed headless call, so
-// SessionStart fired again before every request: the run does not test a
-// single injection. Earlier runs of this wording on Claude Opus 5.5, per
-// prompt only, 3 conversations each: release 1.8.1, two requests, noted 3 of
-// 3 against 0 of 3 with no plugin and never after a correction; release 1.8.2
+// Claude Code 2.1.296 with claude-opus-5-5 and razor 527e900, release 1.8.3
+// (2026-10-13, run 20261013-100631, 10 conversations of each kind per route,
+// the SessionStart copy sending the note on source "startup" only, so once
+// per conversation): the note followed unrelated work in 29 of 30 per prompt
+// against 24 of 30 from a single SessionStart injection. The gap is the late
+// drift, a new program three requests after the first: 10 of 10 against 6 of
+// 10. Neither route repeated the note on a third request (0 of 9, 0 of 8),
+// followed a same-job correction (0 of 10 each), raised it before the drift,
+// or stopped to ask. An earlier run (razor 15afc0a, run 20261013-085338)
+// fired SessionStart again on every resumed request and saw 20 of 20 by both
+// routes, so it never tested a single injection. Earlier runs of this
+// wording on Claude Opus 5.5, per prompt only, 3 conversations each: release
+// 1.8.1, two requests, noted 3 of 3 against 0 of 3 with no plugin and never
+// after a correction; release 1.8.2
 // (run 20261013-024128), three requests, noted 3 of 3 against 0 of 3 and
 // repeated on the third request in 0 of 3.
 const DRIFT_NOTE = `Stay on the task the first user prompt named. If a later request has left that task, do the work anyway, then add one line saying the session has moved off its original task and a fresh session would keep this one focused. Drift alone is no reason to stop, ask or decline, and never say it when the request is still the same job. Say it at most once in a session — if you have already said it, stay quiet.`;

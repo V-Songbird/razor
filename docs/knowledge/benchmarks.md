@@ -43,6 +43,7 @@ not pooled.
 | [Opus 5.5 drift note](#the-drift-note-on-claude-opus-55) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 6 conversations per setup | checked out at `a6ecf5f`; plugin code identical to 1.8.1 (`6174db6`) |
 | [Opus 5.5 drift note, three requests](#does-the-note-repeat-on-a-third-request) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 9 conversations per setup | `9eb5215` (1.8.2); plugin code identical to 1.8.1 apart from one comment |
 | [Opus 5.5 drift note, delivery route](#does-it-matter-where-the-note-is-delivered) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 30 conversations per setup, two razor setups | `15afc0a`; plugin code identical to 1.8.2 apart from comments |
+| [Opus 5.5 drift note, one delivery at session start](#does-it-matter-where-the-note-is-delivered) | Claude Code 2.1.296 | `claude-opus-5-5` | CLI default | 2026-10-13 | 40 conversations per setup, two razor setups | `527e900` (1.8.3) |
 | [Opus 5 rival](#claude-opus-5-beside-a-rival-plugin) | Claude Code, CLI version not recorded | Claude Opus 5 | not recorded | date unknown | 39 sessions per setup | not recorded; published 2026-09-01 (`cbc92f3`) |
 | [Codex](#codex) | Codex CLI 0.161.0 | GPT-5.6 Sol | high | 2026-10-09 | 38 cases per setup | `18d1d0a` |
 | [earlier Codex](#earlier-codex-run) | Codex CLI 0.153.4 | GPT-5.6 Sol | high | 2026-09-08 | 38 cases per setup | `66a5b7f` |
@@ -317,34 +318,51 @@ repository.
 
 #### Does it matter where the note is delivered?
 
-razor adds the drift note beside every request. A third run tested whether the
-note works as well when it rides the session-start context with the checklist
-instead. It compared razor with a copy of razor changed only in that way, and
-had no no-plugin setup. It used the same host, model and effort on the same
-date, with razor checked out at `15afc0a`, whose plugin code is identical to
-1.8.2 apart from comments. The workspaces sat outside the system temp folder.
-The run held the same three kinds of conversation, ten of each per setup: 30
+razor adds the drift note beside every request. Two more runs tested whether
+the note works as well when it rides the session-start context with the
+checklist instead. Each compared razor with a copy of razor changed only in
+that way, and had no no-plugin setup. Both used the same host, model and effort
+on the same date, and their workspaces sat outside the system temp folder.
+
+The later run had razor checked out at `527e900` (release 1.8.3). Its
+session-start copy sent the note only when a session started, not when a later
+request resumed it, so each conversation received the note once, before the
+first request. The run added a fourth kind of conversation, where the drift
+comes late and quietly: two requests that finish the first job, then a request
+for a new program that only uses it. It held ten of each kind per setup: 40
 conversations per setup, none failed to run.
 
-| conversation | what should happen | note beside every request | note at session start |
+| conversation | what should happen | note beside every request | note once at session start |
 | --- | --- | --- | --- |
 | second request is unrelated work | one line says the session moved off its task | 10 / 10 | 10 / 10 |
 | second request corrects the first | nothing is said | 10 / 10 | 10 / 10 |
-| second request, then a third, both unrelated | the note after the second request, nothing after the third | note after the second: 10 / 10; repeated after the third: 0 / 10 | note after the second: 10 / 10; repeated after the third: 0 / 10 |
+| second request, then a third, both unrelated | the note after the second request, nothing after the third | note after the second: 9 / 10; repeated after the third: 0 / 9 | note after the second: 8 / 10; repeated after the third: 0 / 8 |
+| two more requests on the first job, then new work that uses it | the note after the fourth request only | **10 / 10** | **6 / 10** |
 
-Both setups noted the unrelated request in 20 of 20 conversations, and neither
-raised a false note or repeated the note. The suite flagged none of the 60
-conversations as stopping to ask or as raising the note before the second
-request. Mean conversation cost differed by less than 4% between the setups on
-each kind of conversation.
+Delivered beside every request, the note followed unrelated work in 29 of 30
+conversations. Delivered once at session start, it did so in 24 of 30. Most of
+that gap is in the late conversation, where the drift came three requests after
+the only delivery. In the three-request conversations, the one miss beside
+every request never gave the note, and the two misses at session start gave it
+after the third request instead of the second.
 
-The run cannot tell the two routes apart over a long session. The harness sends
-each request as a separate call that resumes the session, and Claude Code runs
-the session-start hook again on each resume. So the session-start setup also
-received the note before every request, in the session-start context rather
-than beside the request. The run does not show what one delivery at the start
-of a long interactive session does. Ten conversations of each kind are still
-exploratory. The run's records are kept outside the repository.
+Neither setup raised a false note on a correction, gave the note before the
+drift, or repeated it. The suite flagged none of the 80 conversations as
+stopping to ask. Mean conversation cost differed by at most 6% between the
+setups on each kind of conversation. Ten
+conversations of each kind are exploratory: a gap of 10 against 6 on ten
+conversations could still be chance. The run's records are kept outside the
+repository.
+
+The earlier run had razor checked out at `15afc0a`, whose plugin code is
+identical to 1.8.2 apart from comments. It held the first three kinds of
+conversation, ten of each per setup: 30 conversations per setup, none failed to
+run. Both setups noted the unrelated request in 20 of 20 conversations, and
+neither raised a false note or repeated the note. That run cannot tell the two
+routes apart. The harness sends each request as a separate call that resumes
+the session, and Claude Code runs the session-start hook again on each resume,
+so its session-start setup received the note before every request. The later
+run's session-start setup skips those resumes.
 
 ## Claude Opus 5 beside a rival plugin
 
