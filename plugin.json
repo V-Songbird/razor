@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "Reuse-first checks for Antigravity: reconsider dependencies, file growth and unnecessary code before adding more.",
   "author": {
     "name": "Victor Villegas",
