@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.8.6 — 2026-10-21
 
 The README nav check now treats a tab after a list marker as part of the item, so a paragraph indented under `-<tab>item` is no longer skipped as code and its links are still checked.
 
