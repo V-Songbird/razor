@@ -9,6 +9,7 @@
 // session to say so when a later request has left the task the first prompt
 // named. A note, never a gate — it has never once stopped a session.
 
+require('./select-host');
 const {
   RULESET, DRIFT_NOTE, readInput, emitContext, readState, writeState, killed, isActive, settingOff,
 } = require('./razor-lib');

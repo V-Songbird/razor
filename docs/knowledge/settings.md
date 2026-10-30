@@ -47,6 +47,12 @@ In **Antigravity**, the same environment variables apply, set before the CLI
 or the editor starts; its hook commands run plain `node`, so Node must be on
 that `PATH`.
 
+In **Grok Build**, set the same variables before `grok` starts. Grok does not
+read `userConfig` from a plugin manifest, so there is no settings panel for
+these. Node must be on the `PATH` the hook inherits. The hook timeout Grok
+uses when a command sets none is 5 seconds, and a timeout lets the action
+through; razor sets 10 seconds on the commands that run git.
+
 ## The switch
 
 | Variable | What it does |
@@ -123,16 +129,19 @@ them to read. Named roles must be available in Codex's own agent configuration;
 razor does not change that configuration.
 
 Antigravity has no subagent event, so these two variables do nothing there and
-its subagents receive no checklist.
+its subagents receive no checklist. Grok Build does run `SubagentStart`, and
+these variables apply, but Grok discards the checklist text that hook writes.
 
 ## Where razor keeps its state
 
 A small file in the plugin data directory the host provides:
-`CLAUDE_PLUGIN_DATA` in Claude Code, `PLUGIN_DATA` in Codex. The host sets it;
-you do not need to. Without one, razor uses your system temp directory, inside
-a `razor-codex` folder in Codex and a `razor-antigravity` folder in
-Antigravity. Old files clean themselves up. State stays outside the plugin
-cache. Nothing leaves your machine.
+`CLAUDE_PLUGIN_DATA` in Claude Code, `PLUGIN_DATA` in Codex, `GROK_PLUGIN_DATA`
+in Grok Build (the `CLAUDE_PLUGIN_DATA` alias is the fallback there). The host
+sets it; you do not need to. Without one, razor uses your system temp
+directory, inside a `razor-codex` folder in Codex, a `razor-antigravity` folder
+in Antigravity, and a `razor-grok` folder in Grok Build. Old files clean
+themselves up. State stays outside the plugin cache. Nothing leaves your
+machine.
 
 Each host keeps its own settings and state. The [setup guide](codex-setup.md) covers
 bringing Claude Code preferences to Codex.

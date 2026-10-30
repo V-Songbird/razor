@@ -8,6 +8,7 @@
 // ledger only ever charges the session for its own delta.
 // The emitter owns the wire shape; this file only decides what to say.
 
+require('./select-host');
 const { RULESET, readInput, emitContext, readState, writeState, isActive, settingOff, gcStateFiles, git } = require('./razor-lib');
 const { tally, isUncounted } = require('./build-ledger');
 

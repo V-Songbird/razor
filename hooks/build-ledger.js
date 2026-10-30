@@ -10,7 +10,8 @@
 // Silent while the session behaves; the thresholds are generous on purpose
 // so a legitimately large requested task never trips it.
 
-const { readInput, emitContext, readState, writeState, isActive, settingOff, settingNumber, git } = require('./razor-lib');
+require('./select-host');
+const { readInput, emitContext, readState, writeState, isActive, settingOff, settingNumber, git, stopObservesOnly } = require('./razor-lib');
 const { classify } = require('./file-meter');
 
 const LOC_BUDGET = (() => {
@@ -97,6 +98,9 @@ function diffStats(ledger, cwd) {
 function main() {
   if (settingOff('LEDGER')) return;
   const data = readInput();
+  // Grok also fires Stop when the session closes, and ignores that output.
+  // Consuming the once-per-session mark there would drop the question.
+  if (stopObservesOnly(data)) return;
   const state = readState(data.session_id);
   if (!isActive(state)) return;
 

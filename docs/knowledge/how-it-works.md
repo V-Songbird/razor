@@ -11,8 +11,8 @@ related_files:
 
 The short version lives in the [README](../../README.md). This page is the long
 one, for people who want to know exactly what runs and when. razor behaves the
-same in Claude Code, Codex and Antigravity; where the hosts differ, this page
-says so.
+same in Claude Code, Codex, Antigravity and the Grok Build CLI; where the
+hosts differ, this page says so.
 
 ## The idea in one line
 
@@ -60,8 +60,9 @@ most once, then gets out of the way — **the retry always goes through.**
 | Build check | at the end of a turn | whether the session grew a lot with almost no deletions |
 
 A file change is a `Write` or `Edit` call in Claude Code, an `apply_patch`
-change in Codex, and a `write_to_file` or `replace_file_content` call in
-Antigravity.
+change in Codex, a `write_to_file` or `replace_file_content` call in
+Antigravity, and a `search_replace`, `write` or `hashline_edit` call in Grok
+Build.
 
 The first three read your project's own manifests, so a package you already
 declared is never treated as new. That includes `optionalDependencies` and
@@ -149,6 +150,28 @@ calls that answer the build check leave the note out: beside that question,
 the model took the question for a new request. The next turn has the note again. Subagents receive
 no checklist. `razor on` and `razor off` do not exist there; `RAZOR_DISABLE=1`
 before the host starts is the switch.
+
+Grok Build reads the same `hooks/hooks.json` as Claude Code. Each command is
+one shell string, because Grok does not take `args`. The script sees Grok's
+tool names and translates them before the same checks run. [The Grok setup
+guide](grok-setup.md) has the table.
+
+| Event | What razor does on Grok |
+| --- | --- |
+| `SessionStart` | records the build-check snapshot; the checklist is written and Grok discards it |
+| `SubagentStart` | writes the checklist for agents that may write code; Grok discards it |
+| `PreToolUse` | the install check on `run_terminal_command`, and the import, manifest and new-file checks on `search_replace`, `write` and `hashline_edit` |
+| `Stop` | runs the build check once per session, on a stop whose reason is `end_turn` |
+| `UserPromptSubmit` | handles `razor on` and `razor off`; the drift note is written and Grok discards it |
+
+A turn is Grok's `promptId`. A subagent's `subagentId` keeps its own counters.
+An anchored `hashline_edit` of `package.json`, `requirements.txt` or
+`pyproject.toml` is not previewed, so that one shape does not ask; a
+`write` op that replaces the whole manifest does. The checklist does not
+reach the model. Put the short form from the setup guide in the project's
+`AGENTS.md` when the session should see it. Grok's own default hook timeout
+is 5 seconds and a timeout fails open; razor sets 10 seconds on the events
+that read git.
 
 ## The scope-drift note
 

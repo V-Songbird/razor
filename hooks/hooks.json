@@ -6,8 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/session-start.js"],
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.js\"",
             "timeout": 10
           }
         ]
@@ -18,8 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.js"],
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/subagent-start.js\"",
             "timeout": 5
           }
         ]
@@ -31,8 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.js"],
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use.js\"",
             "timeout": 10
           }
         ]
@@ -43,8 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/build-ledger.js"],
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/build-ledger.js\"",
             "timeout": 10
           }
         ]
@@ -55,8 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js"],
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/mode-toggle.js\"",
             "timeout": 5
           }
         ]

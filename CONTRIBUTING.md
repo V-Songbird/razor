@@ -13,7 +13,7 @@ This plugin is part of the [Foundry Collection](https://github.com/V-Songbird/fo
 
 ## Structure
 
-One package serves Claude Code, Codex and Antigravity.
+One package serves Claude Code, Codex, Antigravity and the Grok Build CLI.
 
 ```
 .claude-plugin/
@@ -32,7 +32,8 @@ skills/                 # skills read by every host
 │   ├── SKILL.md        # skill definition
 │   └── references/     # Reference files loaded by the skill
 hooks/
-├── hooks.json          # Claude Code event wiring
+├── hooks.json          # Claude Code event wiring; Grok Build reads this file too
+├── select-host.js      # selects the Grok adapter when GROK_HOOK_EVENT is set
 ├── codex-hooks.json    # Codex event wiring
 ├── codex-hook.js       # Codex event entrypoint
 ├── antigravity-hook.js # Antigravity event entrypoint
@@ -49,7 +50,7 @@ The README puts plain-language sections first and technical depth behind links, 
 
 **Skills are instruction files read by every host.** Changes to `SKILL.md` affect how Claude Code, Codex and Antigravity interpret a skill — be precise, and verify the affected skill in a real session of each host before release. Claude Code substitutes `${CLAUDE_PLUGIN_ROOT}` in skill text; Codex and Antigravity do not, so they need a path relative to the skill file.
 
-**Hooks run on matching tool calls and session events.** Keep them fast, keep network calls out, and test on Windows, Linux, and macOS. Shared checks belong outside the host adapters. A new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`; `hooks/antigravity-hook.js` maps that host's three events onto the shared checks.
+**Hooks run on matching tool calls and session events.** Keep them fast, keep network calls out, and test on Windows, Linux, and macOS. Shared checks belong outside the host adapters. A new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`; `hooks/antigravity-hook.js` maps that host's three events onto the shared checks. Grok Build reads `hooks/hooks.json` and ignores an `args` array, so each command there stays one shell string. The Grok wire format is translated in `hooks/lib/grok-harness.js`.
 
 ---
 

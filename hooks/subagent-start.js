@@ -12,6 +12,7 @@
 // Unknown agent types get the ruleset: most custom agents write code, and
 // the fail-safe direction is guarded, not lean.
 
+require('./select-host');
 const { RULESET, readInput, emitContext, readState, isActive } = require('./razor-lib');
 
 // Read-only / non-coding built-ins. Extend with RAZOR_AGENT_SKIP.

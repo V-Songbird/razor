@@ -1,6 +1,6 @@
 # razor
 
-razor is one plugin for Claude Code, Codex and Antigravity: a checklist before new code and a
+razor is one plugin for Claude Code, Codex, Antigravity and the Grok Build CLI: a checklist before new code and a
 few checks behind it, so a small task stays small. Its hooks and scripts are dependency-free Node.js and run
 with Node.js 22 or later and Git; there is no install or build step. This repository is Foundry's
 razor submodule and ships from `main`.
@@ -10,12 +10,13 @@ razor submodule and ships from `main`.
 - Before changing a check, read [how razor works](docs/knowledge/how-it-works.md); each check speaks at most once and the retry always goes through.
 - Before adding or renaming a setting, read [settings](docs/knowledge/settings.md).
 - Before touching Codex behavior, read [the Codex setup guide](docs/knowledge/codex-setup.md); patch guards only see previewable local `apply_patch` changes.
+- Before touching Grok Build behavior, read [the Grok setup guide](docs/knowledge/grok-setup.md); Grok reads `hooks/hooks.json` and does not deliver session or prompt output to the model.
 - Before touching a README number, read [the numbers](docs/knowledge/benchmarks.md).
 - Before a release, read [the changelog](docs/knowledge/changelog.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Rules that outrank everything
 
-- One package serves the three hosts. Shared checks live outside the host adapters, and a new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`.
+- One package serves Claude Code, Codex, Antigravity and Grok Build. Shared checks live outside the host adapters, and a new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`. Grok Build reads `hooks/hooks.json`, so that file's commands stay single shell strings: Grok's handler has no `args`.
 - The three manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` and `plugin.json`, carry the same version, changed together; the suite fails when they differ. Foundry's catalogs carry no version for razor and only move `source.sha`.
 - razor never edits code, manifests or lockfiles and never grants a permission; every check is a message to the assistant.
 
@@ -34,7 +35,7 @@ razor submodule and ships from `main`.
 
 | Path | Content |
 | --- | --- |
-| `hooks/` | `pre-tool-use.js` runs `dep-guard.js`, `import-guard.js`, `manifest-guard.js` and `file-meter.js`; `build-ledger.js`, `mode-toggle.js`, `session-start.js` and `subagent-start.js` cover the other events; `codex-hook.js` and `antigravity-hook.js` translate those hosts' events; `razor-lib.js` and `lib/` hold the shared state and the three host adapters; `windows-launcher.ps1` is the fnm fallback of each `commandWindows` in `codex-hooks.json` |
+| `hooks/` | `pre-tool-use.js` runs `dep-guard.js`, `import-guard.js`, `manifest-guard.js` and `file-meter.js`; `build-ledger.js`, `mode-toggle.js`, `session-start.js` and `subagent-start.js` cover the other events; `select-host.js` points those scripts at the Grok adapter when `GROK_HOOK_EVENT` is set; `codex-hook.js` and `antigravity-hook.js` translate those hosts' events; `razor-lib.js` and `lib/` hold the shared state and the host adapters; `windows-launcher.ps1` is the fnm fallback of each `commandWindows` in `codex-hooks.json` |
 | `scripts/unused-deps.js` | The scanner behind the `unused` skill; `scripts/build-windows-launchers.js` builds and checks the Windows launchers; `scripts/git-hooks/` holds the commit gates |
 | `skills/unused/` | The one skill |
 | `tests/` | The `node:test` suite and the `contract/` fixtures |
@@ -55,3 +56,4 @@ functional tests only. `CLAUDE.md` imports this file; keep shared contributor fa
 - **`tests/dispatcher.test.js` and `tests/contract.test.js` build workspaces inside the plugin root.** `disp-ws-*/` and `contract-ws-*/` residue from a failed run is ignored, never staged.
 - **Files written by a shell command skip the file checks in every host.** Only the assistant's own editing tool passes through them.
 - **Antigravity has no session, prompt or subagent event.** An injected message reaches only the model call it rides, so the ladder and the drift note ride every call, except that the calls answering the build check carry no drift note, the ledger baseline only the first call of a conversation, and the toggle and the subagent checklist do not exist there; a turn starts at the call whose `invocationNum` is 0, so a Stop continuation stays in its turn and a turn with no Stop still ends.
+- **Grok Build ignores hook stdout on SessionStart, SubagentStart and an allowing UserPromptSubmit.** The guards still deny, and Stop still asks the build question. Do not put `args` back on `hooks/hooks.json`: Grok drops them, the command does not start, and the guard fails open. Grok also loads a Claude Code install of this plugin, so that file is the one it runs.

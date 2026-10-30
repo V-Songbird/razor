@@ -13,11 +13,16 @@ const read = (file) => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8')
 const handlers = (file) => Object.values(read(file).hooks).flat().flatMap((group) => group.hooks);
 const CODEX = read('hooks/codex-hooks.json').hooks;
 
-test('Claude Code hooks run in exec form with no commandWindows', () => {
+test('Claude Code hooks are one shell command, with no args array and no commandWindows', () => {
+  // Grok Build's RawHandler has command, not args. It also loads this file
+  // from a Claude Code install, so a command that needs args never runs there
+  // and the guard fails open. One quoted command is what both hosts execute.
   for (const handler of handlers('hooks/hooks.json')) {
-    assert.equal(handler.command, 'node', JSON.stringify(handler));
-    assert.match(handler.args[0], /^\$\{CLAUDE_PLUGIN_ROOT\}\/hooks\/[\w-]+\.js$/);
+    assert.equal(handler.args, undefined, JSON.stringify(handler));
+    assert.match(handler.command, /^node "\$\{CLAUDE_PLUGIN_ROOT\}\/hooks\/[\w-]+\.js"$/);
     assert.equal(handler.commandWindows, undefined, JSON.stringify(handler));
+    assert.equal(typeof handler.timeout, 'number');
+    assert.ok(handler.timeout >= 5, JSON.stringify(handler));
   }
 });
 

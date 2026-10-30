@@ -45,11 +45,11 @@ A checklist asks whether the work is needed, already implemented or covered by t
 | Pause or resume the checks | Change the session toggle |
 | Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
-Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
+Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. Grok Build accepts the same message and drops the confirmation line. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
 
 ## Install
 
-razor is one package for Claude Code, Codex and Antigravity. Install it in the one you use.
+razor is one package for Claude Code, Codex, Antigravity and the Grok Build CLI. Install it in the one you use. Grok has no host card on this page; the brand kit does not have one yet.
 
 ### Codex
 
@@ -95,11 +95,21 @@ git -C <path-to-clone> submodule update --init
 agy plugin install <path-to-clone>/razor
 ```
 
+### Grok
+
+Requirements: Node.js 22 or later, Git and the Grok Build CLI. Install razor and trust it. Without `--trust`, Grok stops before the hooks load:
+
+```text
+grok plugin install V-Songbird/razor --trust
+```
+
+Start a new session. Grok also loads a plugin already installed for Claude Code, so that install is enough once it is this release and the plugin is trusted. The guards see `run_terminal_command`, `search_replace`, `write` and `hashline_edit`. The checklist, the drift note and the subagent checklist do not reach the model. The build check still asks once, at the end of a turn. Settings are the `RAZOR_*` variables. The steps and the limit are in [Grok setup](docs/knowledge/grok-setup.md).
+
 ## Good to know
 
 Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code, `write_to_file` and `replace_file_content` in Antigravity. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. See [setup and coverage](docs/knowledge/codex-setup.md) and [how razor works](docs/knowledge/how-it-works.md).
+File checks see the edits made through the assistant's own editing tool: `apply_patch` in Codex, `Write` and `Edit` in Claude Code, `write_to_file` and `replace_file_content` in Antigravity, and `search_replace`, `write` and `hashline_edit` in Grok Build. Files written by a shell command skip them, and so do unsupported or ambiguous patches in Codex. An anchored `hashline_edit` of a manifest is not previewed. See [setup and coverage](docs/knowledge/codex-setup.md), [Grok setup](docs/knowledge/grok-setup.md) and [how razor works](docs/knowledge/how-it-works.md).
 
 ## The numbers
 
@@ -154,11 +164,20 @@ The Claude Opus 5 run in the second Claude Code table above (razor revision not 
 
 No Antigravity session has been measured yet.
 
+### Grok results
+
+<!-- foundry:evidence {"platform":"Grok","status":"pending","reason":"No Grok Build performance measurements are available."} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Not measured | Not measured | Not measured | Not measured |
+
+No Grok Build session has been measured yet.
+
 *Results can vary between runs.*
 
 ## Going deeper
 
-[How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Codex benchmark details](docs/knowledge/benchmarks.md#codex) · [Changelog](docs/knowledge/changelog.md)
+[How it works](docs/knowledge/how-it-works.md) · [Settings](docs/knowledge/settings.md) · [Codex setup](docs/knowledge/codex-setup.md) · [Grok setup](docs/knowledge/grok-setup.md) · [Claude Code benchmark details](docs/knowledge/benchmarks.md) · [Codex benchmark details](docs/knowledge/benchmarks.md#codex) · [Changelog](docs/knowledge/changelog.md)
 
 [Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
 

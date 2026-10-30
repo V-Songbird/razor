@@ -9,7 +9,11 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { safeWriteFileSync } = require('./lib/safe-write');
-const HARNESSES = { codex: './lib/codex-harness', antigravity: './lib/antigravity-harness' };
+const HARNESSES = {
+  codex: './lib/codex-harness',
+  antigravity: './lib/antigravity-harness',
+  grok: './lib/grok-harness',
+};
 const harness = require(HARNESSES[process.env.RAZOR_HOST] || './lib/harness');
 
 // Kept compact on purpose: 2,070 characters, about 590 tokens per injection
@@ -172,4 +176,7 @@ module.exports = {
   isRealUserPrompt: harness.isRealUserPrompt,
   turnKey: harness.turnKey,
   gateStateId: harness.gateStateId,
+  // False on every host except Grok, whose session-end Stop is observe-only.
+  stopObservesOnly: (data) =>
+    typeof harness.stopObservesOnly === 'function' ? harness.stopObservesOnly(data) : false,
 };
