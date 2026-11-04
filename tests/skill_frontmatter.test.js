@@ -55,7 +55,9 @@ describe("skill frontmatter", () => {
     assert.match(readme, /\$razor:unused/);
     assert.match(how, /\$razor:unused/);
     const bare = (text) => text.match(/\$unused/g) || [];
-    assert.ok(bare(readme).length <= 1, "README.md uses a bare $unused more than once");
+    const warning = "but not for a bare `$unused`";
+    assert.ok(readme.includes(warning), "README.md lost the bare-form warning");
+    assert.deepEqual(bare(readme.replace(warning, "")), [], "README.md uses a bare $unused as an instruction");
     assert.deepEqual(bare(how), [], "how-it-works.md uses a bare $unused");
   });
 
