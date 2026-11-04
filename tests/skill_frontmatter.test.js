@@ -36,6 +36,16 @@ describe("skill frontmatter", () => {
     });
   }
 
+  // Codex attaches a plugin skill only for its <plugin>:<skill> mention.
+  test("unused names itself with the plugin prefix for Codex", () => {
+    const dir = path.join(SKILLS, "unused");
+    const yaml = fs.readFileSync(path.join(dir, "agents", "openai.yaml"), "utf-8");
+    const skill = fs.readFileSync(path.join(dir, "SKILL.md"), "utf-8");
+    assert.match(yaml, /\$razor:unused/);
+    assert.match(skill, /\$razor:unused/);
+    assert.doesNotMatch(yaml + skill, /\$unused/);
+  });
+
   // The skill is report-only, and section 3 expects cleanup-phrased requests
   // to reach it so it reports instead of uninstalling.
   test("unused does not tell the host to skip removal requests", () => {
