@@ -1,7 +1,7 @@
 ---
 name: unused
-description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes /razor:unused, $unused or /unused. Report-only; never edits files or uninstalls packages.
-when_to_use: Trigger when the user wants to find unused dependencies, says "find unused deps", "audit dependencies", "what deps aren't used", "check for dead dependencies", or invokes /razor:unused, $unused or /unused.
+description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes /razor:unused, $unused or /unused. Report-only; never edits files or uninstalls packages. Not for removing packages, security audits or outdated-version checks.
+compatibility: Requires Node 22 or later.
 argument-hint: "[project directory, defaults to cwd]"
 allowed-tools: Bash, PowerShell, Read
 ---

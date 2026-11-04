@@ -1,5 +1,6 @@
 interface:
   display_name: "Razor Unused"
   short_description: "Find declared dependencies no source file imports"
+  default_prompt: "Use $unused to find dependencies no source file imports."
   icon_small: "./assets/icon.svg"
   icon_large: "./assets/icon.png"
