@@ -51,7 +51,7 @@ that `PATH`.
 
 | Variable | What it does |
 | --- | --- |
-| `RAZOR_DISABLE=1` | Turns everything off |
+| `RAZOR_DISABLE` set to `1` | Turns everything off. Set it before the host starts: `export RAZOR_DISABLE=1` in bash, `$env:RAZOR_DISABLE = '1'` in PowerShell |
 
 In a session you can also send `razor off` and `razor on` as ordinary messages;
 `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a
