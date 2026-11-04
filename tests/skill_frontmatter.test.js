@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 
 const SKILLS = path.join(__dirname, "..", "skills");
-const ALLOWED_KEYS = ["name", "description", "argument-hint", "allowed-tools"];
+const ALLOWED_KEYS = ["name", "description", "when_to_use", "argument-hint", "allowed-tools"];
 
 describe("skill frontmatter", () => {
   for (const name of fs.readdirSync(SKILLS)) {

@@ -1,6 +1,6 @@
 ---
 name: unused
-description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes /razor:unused, $unused or /unused. Report-only; never edits files or uninstalls packages, so a request to remove or clean up unused dependencies gets the report and no removal. Not for security audits or outdated-version checks.
+description: Audit a project's declared dependencies for packages no source file imports. Use when the user asks to find unused dependencies, audit dependencies, check for dead packages, or invokes /razor:unused, $unused or /unused. Report-only; never edits files or uninstalls packages. Not for security audits or outdated-version checks.
 argument-hint: "[project directory, defaults to cwd]"
 allowed-tools: Bash, PowerShell, Read
 ---
