@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.9.0 — 2026-11-04
 
 The `unused` skill's description now ends with "Not for security audits or outdated-version checks", so the skill is not picked for those requests. Its separate `when_to_use` line is gone. The Codex card for the skill (`agents/openai.yaml`) now has a default prompt, "Use $razor:unused to find dependencies no source file imports." Codex attaches a skill's instructions only for the plugin-prefixed mention, so the README, the how-it-works notes and the skill's description name `$razor:unused`; a bare `$unused` is left to the model to match. The skill still only reports and never edits files or removes packages.
 

@@ -18,7 +18,7 @@
     "dependency-guard",
     "lazy"
   ],
-  "version": "1.8.6",
+  "version": "1.9.0",
   "skills": "./skills/",
   "hooks": "./hooks/codex-hooks.json",
   "interface": {
