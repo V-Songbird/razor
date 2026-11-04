@@ -45,11 +45,11 @@ A checklist asks whether the work is needed, already implemented or covered by t
 | Pause or resume the checks | Change the session toggle |
 | Find unused dependencies | Receive a report with confirmed, likely and unknown findings |
 
-Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. Antigravity has no prompt event, so the toggle does not exist there; start it with `RAZOR_DISABLE=1` set to keep razor out of a session. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
+Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. Antigravity has no prompt event, so the toggle does not exist there; set the environment variable `RAZOR_DISABLE` to `1` before the session starts to keep razor out of it. For a dependency report, use `/razor:unused` in Claude Code, `$unused` in Codex, or `/unused` in Antigravity.
 
 ## Install
 
-razor is one package for Claude Code, Codex and Antigravity. Install it in the one you use.
+Razor is one package for Claude Code, Codex and Antigravity. Install it in the one you use.
 
 ### Codex
 
@@ -85,7 +85,7 @@ agy plugin install <path-to-clone>/razor
 agy plugin list
 ```
 
-The list should name `razor`. Start a new conversation to load it. The checklist and the drift note ride every model call, because a message injected there reaches only the call it rides, and the build check speaks through the stop hook; the calls that answer it carry no drift note. Antigravity has no subagent event, so subagents there receive no checklist.
+The list should name `razor`. Start a new conversation to load it. The checklist and the drift note are added to every model call, because a message injected there reaches only the call it is attached to, and the build check speaks through the stop hook; the calls that answer it carry no drift note. Antigravity has no subagent event, so subagents there receive no checklist.
 
 The install is a copy, so it stays at that commit. To take a new release, update the clone, install again and start a new conversation:
 
@@ -123,7 +123,7 @@ Controlled Codex run at high reasoning on Windows, on 2026-10-09 against razor `
 | Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
 | Claude Opus 5.5 | razor | 26/26 | 8.7 |
 
-Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against razor checked out at `a6ecf5f`, whose plugin code is identical to [1.8.1](docs/knowledge/changelog.md#181--2026-10-13) (`6174db6`): the 13 jobs of the full suite, twice each per setup. Mean session cost was $0.086 with razor and $0.100 without a plugin; razor cost more on four jobs: the two with no code and two coding jobs. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so razor's new-file check was active; it did not speak. In a two-request drift test on the same setup and date, razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. In a run on 1.8.2 (`9eb5215`) with 3 three-request conversations per setup, razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any.
+Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against razor checked out at `a6ecf5f`, whose plugin code is identical to [1.8.1](docs/knowledge/changelog.md#181--2026-10-13) (`6174db6`): the 13 jobs of the full suite, twice each per setup. Mean session cost was $0.086 with razor and $0.100 without a plugin; razor cost more on four jobs: the two with no code and two coding jobs. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so razor's new-file check was active; it did not speak. In a two-request drift test on the same setup and date, razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. In a run on [1.8.2](docs/knowledge/changelog.md#182--2026-10-13) (`9eb5215`) with 3 three-request conversations per setup, razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any.
 
 <!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-09-23"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
@@ -132,7 +132,7 @@ Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, o
 | Claude Opus 5 | ponytail | 39/39 | 12.2 |
 | Claude Opus 5 | razor | 39/39 | 9.6 |
 
-A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. The Claude Opus 5 run's CLI version and effort were not recorded. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put this run and the earlier Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
+A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with [ponytail](https://github.com/DietrichGebert/ponytail), another plugin that tells Claude to write less. The Claude Opus 5 run's CLI version and effort were not recorded. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put this run and the earlier Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
 
 <p align="center"><img src="assets/hero.svg" alt="The razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where razor's middle session landed on the same job: 193 lines above the edge never shipped with razor." width="700"></p>
 
