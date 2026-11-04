@@ -18,7 +18,7 @@ and `plugin.json`.
 
 The `unused` skill's description now ends with "Not for security audits or outdated-version checks", so the skill is not picked for those requests. Its separate `when_to_use` line is gone. The Codex card for the skill (`agents/openai.yaml`) now has a default prompt, "Use $razor:unused to find dependencies no source file imports." Codex attaches a skill's instructions only for the plugin-prefixed mention, so the README, the how-it-works notes and the skill's description name `$razor:unused`; a bare `$unused` is left to the model to match. The skill still only reports and never edits files or removes packages.
 
-The README, the settings page and the how-it-works notes now give the bash form of `RAZOR_DISABLE` as `export RAZOR_DISABLE=1`. Without `export`, bash keeps the variable to itself, so a host started later from that shell did not see it and razor stayed on. The PowerShell form, `$env:RAZOR_DISABLE = '1'`, is unchanged. Set it in the shell that starts the host, before the host starts.
+The README, the settings page and the how-it-works notes now give the exported bash form of `RAZOR_DISABLE`, `export RAZOR_DISABLE=1`, and a PowerShell form, `$env:RAZOR_DISABLE = '1'`. Without `export`, bash keeps the variable to itself, so a host started later from that shell did not see it and razor stayed on. Set it in the shell that starts the host, before the host starts.
 
 ## 1.8.6 — 2026-10-21
 
