@@ -149,7 +149,7 @@ calls that answer the build check leave the note out: beside that question,
 the model took the question for a new request. The next turn has the note again. Subagents receive
 no checklist. `razor on` and `razor off` do not exist there. To switch razor off,
 set `RAZOR_DISABLE` to `1` in the shell that launches Antigravity, before the host
-starts (`RAZOR_DISABLE=1` in bash, `$env:RAZOR_DISABLE = '1'` in PowerShell).
+starts (`export RAZOR_DISABLE=1` in bash, `$env:RAZOR_DISABLE = '1'` in PowerShell).
 
 ## The scope-drift note
 
@@ -211,7 +211,7 @@ toggle as a message of its own, with nothing else and no formatting; a final
 period or exclamation mark is fine. Antigravity
 gives hooks no prompt, so the toggle does not exist there. The switch is
 on or off by design — there are no levels. Setting `RAZOR_DISABLE` to `1` turns
-everything off before the session starts, on every host (`RAZOR_DISABLE=1` in
+everything off before the session starts, on every host (`export RAZOR_DISABLE=1` in
 bash, `$env:RAZOR_DISABLE = '1'` in PowerShell).
 
 Per-check switches are in [Settings](settings.md).
