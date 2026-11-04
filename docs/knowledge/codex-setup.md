@@ -56,8 +56,8 @@ hooks for each prompt and for the end of a turn ran, and a patch that imported
 an undeclared package was denied. That check did not cover the checklist after
 compaction, the writing subagent, the retry after a denial, the
 declared-dependency and manifest checks, the file budget, `razor off` and
-`razor on`, or a build-note continuation. An earlier check at b4ca2db showed
-`$razor:unused` reporting without changing files.
+`razor on`, or a build-note continuation. An earlier check at b4ca2db showed the unused
+skill reporting without changing files.
 
 Last desktop check: the Codex desktop app 26.924.51851 (package
 26.924.6891.0, bundled CLI 0.158.0-alpha.2.1) on Windows 11, on 2026-09-29,

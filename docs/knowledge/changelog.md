@@ -16,7 +16,7 @@ and `plugin.json`.
 
 ## Unreleased
 
-The `unused` skill's description now ends with "Not for security audits or outdated-version checks", so the skill is not picked for those requests. Its separate `when_to_use` line is gone. The Codex card for the skill (`agents/openai.yaml`) now has a default prompt, "Use $razor:unused to find dependencies no source file imports." Codex attaches a skill's instructions only for the plugin-prefixed mention, so the README, the Codex setup notes and the skill's description name `$razor:unused`; a bare `$unused` is left to the model to match. The skill still only reports and never edits files or removes packages.
+The `unused` skill's description now ends with "Not for security audits or outdated-version checks", so the skill is not picked for those requests. Its separate `when_to_use` line is gone. The Codex card for the skill (`agents/openai.yaml`) now has a default prompt, "Use $razor:unused to find dependencies no source file imports." Codex attaches a skill's instructions only for the plugin-prefixed mention, so the README, the how-it-works notes and the skill's description name `$razor:unused`; a bare `$unused` is left to the model to match. The skill still only reports and never edits files or removes packages.
 
 ## 1.8.6 — 2026-10-21
 
