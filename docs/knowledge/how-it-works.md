@@ -163,8 +163,10 @@ Turn it off with `RAZOR_DRIFT_NOTE=off`.
 ## Finding dead packages
 
 The `unused` skill is the reverse question: `/razor:unused` in Claude Code,
-`$razor:unused` in Codex, `/unused` in Antigravity. The checks above stop **new** dependencies; this finds ones
-already in your manifest that no file imports.
+`$razor:unused` in Codex, `/unused` in Antigravity. In Codex, keep the plugin
+prefix: it attaches the skill's instructions for `$razor:unused` only. The
+checks above stop **new** dependencies; this finds ones already in your
+manifest that no file imports.
 
 It sorts what it finds into three piles:
 

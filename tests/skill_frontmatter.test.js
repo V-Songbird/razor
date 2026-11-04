@@ -46,6 +46,19 @@ describe("skill frontmatter", () => {
     assert.doesNotMatch(yaml + skill, /\$unused/);
   });
 
+  // The README may explain the bare form once, as the thing to avoid; no other
+  // doc, and no other place in the README, may use it as an instruction.
+  test("docs name the unused skill with the plugin prefix", () => {
+    const root = path.join(__dirname, "..");
+    const readme = fs.readFileSync(path.join(root, "README.md"), "utf-8");
+    const how = fs.readFileSync(path.join(root, "docs", "knowledge", "how-it-works.md"), "utf-8");
+    assert.match(readme, /\$razor:unused/);
+    assert.match(how, /\$razor:unused/);
+    const bare = (text) => text.match(/\$unused/g) || [];
+    assert.ok(bare(readme).length <= 1, "README.md uses a bare $unused more than once");
+    assert.deepEqual(bare(how), [], "how-it-works.md uses a bare $unused");
+  });
+
   // The skill is report-only, and section 3 expects cleanup-phrased requests
   // to reach it so it reports instead of uninstalling.
   test("unused does not tell the host to skip removal requests", () => {
