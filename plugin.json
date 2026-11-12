@@ -9,6 +9,7 @@
   "homepage": "https://github.com/V-Songbird/razor",
   "repository": "https://github.com/V-Songbird/razor",
   "license": "MIT",
+  "logo": "assets/icon-on-light.png",
   "keywords": [
     "yagni",
     "token-optimization",
