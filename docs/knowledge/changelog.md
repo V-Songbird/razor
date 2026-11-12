@@ -14,7 +14,7 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
-## Unreleased
+## 1.9.1 — 2026-11-12
 
 The root `plugin.json` now names `assets/icon-on-light.png` as its `logo`, so Antigravity shows razor's icon instead of a generic one.
 
