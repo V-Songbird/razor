@@ -186,7 +186,7 @@ The build check and its two numbers measure the whole working tree, so another s
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. These are a few hundred sessions against a live model, not a powered experiment, and numbers move between runs: read the direction, not the decimals. The Codex run and the Claude Opus 5.5 runs below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run and the earlier Claude Code runs used its earlier "One check is enough, anywhere in this task" wording. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin; the benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. These are a few hundred sessions against a live model, not a powered experiment, and numbers move between runs: read the direction, not the decimals. The Codex run and the Claude Opus 5.5 runs below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run and the earlier Claude Code runs used its earlier "One check is enough, anywhere in this task" wording. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin; the benchmark harness and the raw records behind these figures are kept outside this repository and are not distributed with the plugin.
 
 ### Claude Code results
 
