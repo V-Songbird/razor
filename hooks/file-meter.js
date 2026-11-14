@@ -110,13 +110,14 @@ function stepTurn(turn, key, budget, kind = 'production', countAll = false) {
 // ignored; exit 1, no git, no repository, an outside-the-repository path or a
 // timeout all return null, and the file is counted as before.
 function isGitIgnored(filePath) {
-  let dir = path.dirname(path.resolve(filePath));
+  const file = path.resolve(filePath);
+  let dir = path.dirname(file);
   while (!fs.existsSync(dir)) {
     const up = path.dirname(dir);
     if (up === dir) return false;
     dir = up;
   }
-  return git(['check-ignore', '-q', '--', filePath], dir) !== null;
+  return git(['check-ignore', '-q', '--', file], dir) !== null;
 }
 
 // "Already in this codebase?" is rung 2, and whether the directory exists is
