@@ -108,7 +108,9 @@ function stepTurn(turn, key, budget, kind = 'production', countAll = false) {
 // A file Git ignores is not production code. One `git check-ignore -q` run from
 // the nearest existing folder above the file: exit 0 (git() returns '') means
 // ignored; exit 1, no git, no repository, an outside-the-repository path or a
-// timeout all return null, and the file is counted as before.
+// timeout all return null, and the file is counted as before. The path goes to
+// Git relative to that folder, so a folder reached through a symlink or a
+// junction is not judged against its other spelling.
 function isGitIgnored(filePath) {
   const file = path.resolve(filePath);
   let dir = path.dirname(file);
@@ -117,7 +119,7 @@ function isGitIgnored(filePath) {
     if (up === dir) return false;
     dir = up;
   }
-  return git(['check-ignore', '-q', '--', file], dir) !== null;
+  return git(['check-ignore', '-q', '--', path.relative(dir, file)], dir) !== null;
 }
 
 // "Already in this codebase?" is rung 2, and whether the directory exists is

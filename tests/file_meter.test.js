@@ -263,6 +263,20 @@ describe('integration: files Git ignores', () => {
     }
   });
 
+  test('a repository reached through a link still ignores a nested folder that does not exist yet', () => {
+    const dir = makeRepo();
+    const link = dir + '-link';
+    try {
+      fs.symlinkSync(dir, link, 'junction');
+      assert.strictEqual(fifth(link, path.join('scratch', 'deep', 'er')), null);
+      const denied = fifth(link, 'src');
+      assert.strictEqual(denied.hookSpecificOutput.permissionDecision, 'deny');
+    } finally {
+      fs.rmSync(link, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test('where Git cannot answer, the file is counted as before', () => {
     const dir = makeRepo();
     try {
