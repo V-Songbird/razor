@@ -10,6 +10,8 @@ Please include:
 - Steps to reproduce it
 - The version affected, if known
 
+The [releases page](https://github.com/V-Songbird/razor/releases) lists every version with its release notes.
+
 You can expect an acknowledgement within 7 days.
 
 > [!NOTE]
