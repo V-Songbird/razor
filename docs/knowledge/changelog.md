@@ -14,6 +14,10 @@ All notable changes to razor are documented here. The version number lives in
 the plugin manifests, `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`.
 
+## Unreleased
+
+The new-file check no longer counts a new file that Git ignores, such as a scratch script under a folder your `.gitignore` lists. It asks Git once, only for a file it would otherwise count. Without Git, outside a repository, or when Git fails or times out, the file is counted as before.
+
 ## 1.9.1 — 2026-11-12
 
 The root `plugin.json` now names `assets/icon-on-light.png` as its `logo`, so Antigravity shows razor's icon instead of a generic one.

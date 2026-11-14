@@ -107,6 +107,9 @@ test('Codex ignores Claude install options and writes only native state', () => 
 
 test('Codex native turn id and agent id isolate budgets without transcript parsing', () => {
   const w = world();
+  // The workspace folder is ignored by the plugin's own .gitignore, and the
+  // file meter skips ignored files, so the fixture is its own repository.
+  git(w, 'init', '-q');
   const write = (turn, agent, n) => run(w, 'PreToolUse', {
     turn_id: turn, prompt_id: 'legacy-id-does-not-control-codex',
     agent_id: agent, tool_name: 'Write',

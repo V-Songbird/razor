@@ -16,7 +16,7 @@
 // reason naming the shape; the retry and everything after it in the same turn
 // pass. One forced reconsideration per turn, self-clearing. Existing files
 // are never gated (edits and overwrites aren't sprawl), and temp and
-// scratchpad files are exempt.
+// scratchpad files are exempt, and so is a file Git reports as ignored.
 //
 // Known limit: files created via Bash heredocs bypass the Write tool and
 // this meter with them.
@@ -24,7 +24,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { turnKey, settingNumber, settingGiven } = require('./razor-lib');
+const { turnKey, settingNumber, settingGiven, git } = require('./razor-lib');
 const { PROVENANCE } = require('./dep-guard');
 
 const BUDGET = settingNumber('FILE_BUDGET', 4);
@@ -105,6 +105,20 @@ function stepTurn(turn, key, budget, kind = 'production', countAll = false) {
   return { next, deny };
 }
 
+// A file Git ignores is not production code. One `git check-ignore -q` run from
+// the nearest existing folder above the file: exit 0 (git() returns '') means
+// ignored; exit 1, no git, no repository, an outside-the-repository path or a
+// timeout all return null, and the file is counted as before.
+function isGitIgnored(filePath) {
+  let dir = path.dirname(path.resolve(filePath));
+  while (!fs.existsSync(dir)) {
+    const up = path.dirname(dir);
+    if (up === dir) return false;
+    dir = up;
+  }
+  return git(['check-ignore', '-q', '--', filePath], dir) !== null;
+}
+
 // "Already in this codebase?" is rung 2, and whether the directory exists is
 // the cheapest honest evidence of it.
 function placement(filePath) {
@@ -132,6 +146,8 @@ function check(data, state) {
   if (fs.existsSync(filePath)) return null; // overwrite/edit, not a new file
 
   const kind = classify(filePath);
+  // Ask Git only about a file that would be charged.
+  if ((RAW_CEILING || kind === 'production') && isGitIgnored(filePath)) return null;
   const { next, deny } = stepTurn(state.turn, turnKey(data), BUDGET, kind, RAW_CEILING);
   state.turn = next;
 

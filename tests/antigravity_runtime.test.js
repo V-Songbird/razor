@@ -277,6 +277,9 @@ test('a code edit that sets AllowMultiple on a repeated target is still checked 
 test('the new-file budget counts one user turn: a Stop continuation stays in it, and a turn without a Stop still ends', () => {
   const w = world();
   nodeProject(w);
+  // The workspace folder is ignored by the plugin's own .gitignore, and the
+  // file meter skips ignored files, so the fixture is its own repository.
+  git(w, 'init', '-q');
   const write = (n) => run(w, 'PreToolUse', call('write_to_file', {
     TargetFile: path.join(w.cwd, 'src', `new-${n}.js`), CodeContent: 'export const x = 1;\n',
   }), { RAZOR_FILE_BUDGET: '1' });

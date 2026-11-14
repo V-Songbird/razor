@@ -111,6 +111,9 @@ function quietWorld() {
 // the fifth — the one the budget denies — without needing four prior runs.
 function fourFilesInWorld() {
   const world = nodeProjectWorld();
+  // The workspace folder is ignored by the plugin's own .gitignore, and the
+  // file meter skips ignored files, so the fixture is its own repository.
+  git(world.cwd, 'init', '-q');
   world.state = { turn: { turnKey: 'fixed-turn', count: 4, fired: false, kinds: { production: 4 } } };
   return world;
 }
