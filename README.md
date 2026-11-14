@@ -104,7 +104,7 @@ Most people never touch these. In Claude Code, the plugin's settings panel asks 
 
 By default the new-file budget counts production files only. Once you choose a number, it becomes a plain ceiling on every new file. `RAZOR_FILE_BUDGET` always counts as a choice; in Claude Code the panel's value counts only when it differs from 4, because a stored 4 looks like the default, so for a plain ceiling of 4 set `RAZOR_FILE_BUDGET=4`. Temp and `scratchpad` paths and Git-ignored files are skipped whatever number you set.
 
-`RAZOR_LEDGER_LOC` and `RAZOR_LEDGER_FILES` are measured across the whole working tree, so files another session writes in the same checkout count toward them, and edits inside parts of a file that were already changed at session start are only approximated. `RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository, but the whole hook must still finish inside its host's timeout of 5 to 10 seconds, so a much larger value does not help.
+`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository, but the whole hook must still finish inside its host's timeout of 5 to 10 seconds, so a much larger value does not help.
 
 Agent names in the two agent lists match without regard to case, with or without a plugin namespace. In Codex, the skip list matches the role Codex reports: children reported as `default` receive the checklist even when their prompt only asks them to read, and named roles must exist in Codex's own agent configuration, which razor does not change. Antigravity has no subagent event, so these two variables do nothing there and its subagents receive no checklist.
 
@@ -136,7 +136,7 @@ codex plugin add razor@foundry
 
 Review and trust the exact hooks through your client's review flow, then start a new Codex session. Installing or enabling the plugin alone does not mean its hooks run, and the CLI and the desktop app each need their own review if you use both. The Windows hook command runs the Node.js on `PATH` and, when Node.js is not there, loads fnm's default version first; on other platforms, initialize your version manager before launching Codex so Node is on its `PATH`.
 
-To see that razor is active, use a disposable project: the checklist should appear at startup and after compaction, an unnecessary dependency should get one denial whose retry follows normal permissions, and `razor off` and `razor on` should change the session's behavior. Watch the hooks fire; a plugin listing does not prove that an installation is active.
+To see that razor is active, use a disposable project: the checklist should appear at startup and after compaction, an unnecessary dependency should get one denial whose retry follows normal permissions, and `razor off` and `razor on` should change the session's behavior. Watch the hooks fire; a plugin listing does not prove that an installation is active. In the Codex desktop app, the model's edits and commands arrive as scripts in one `exec` tool, and razor still checks each `apply_patch` inside them; a build note appears as a **Hook feedback** message.
 
 ### Antigravity
 
@@ -148,7 +148,7 @@ agy plugin install <path-to-clone>/razor
 agy plugin list
 ```
 
-The list should name `razor`. Start a new conversation to load it. Its hook commands run plain `node`, so Node must be on the `PATH` Antigravity starts with. Antigravity has no subagent event, so subagents there receive no checklist.
+The list should name `razor`. Start a new conversation to load it. Its hook commands run plain `node`, so Node must be on the `PATH` Antigravity starts with.
 
 ### Update
 
@@ -178,13 +178,13 @@ agy plugin install <path-to-clone>/razor
 
 Input validation, security and error handling that protects your work remain necessary. Explicitly requested scope stays yours to choose. These checks are advisory, not a security boundary.
 
-File checks see the edits made through the assistant's own editing tool: `Write` and `Edit` in Claude Code, `apply_patch` in Codex, `write_to_file` and `replace_file_content` in Antigravity. Files written by a shell command skip them on every host; shell commands are still checked for dependency installs, and the build check can still notice the growth. In Codex, razor stays silent on a patch that needs fuzzy matching, has ambiguous context or colliding paths, or targets remote, unreadable or binary content, and `write_stdin` gets no new check.
+File checks see only the edits made through the assistant's own editing tool. Files written by a shell command skip them on every host; shell commands are still checked for dependency installs, and the build check can still notice the growth. In Codex, razor stays silent on a patch that needs fuzzy matching, has ambiguous context or colliding paths, or targets remote, unreadable or binary content, and `write_stdin` gets no new check.
 
-The build check compares the whole working tree, so another session or tool writing in the same checkout can make it fire. It never runs outside a Git repository.
+The build check and its two numbers measure the whole working tree, so another session or tool writing in the same checkout can make it fire, and edits inside parts of a file that were already changed at session start are only approximated.
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. The Codex run and the Claude Opus 5.5 run below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run used its earlier "One check is enough, anywhere in this task" wording.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. The Codex run and the Claude Opus 5.5 run below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run used its earlier "One check is enough, anywhere in this task" wording. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin; the benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
 
 ### Claude Code results
 
@@ -205,7 +205,7 @@ Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, o
 
 A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with [ponytail](https://github.com/DietrichGebert/ponytail), another plugin that tells Claude to write less. The run had 39 sessions per setup; its CLI version and effort were not recorded. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put this run and the earlier Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
 
-In the same Claude Opus 5 run (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded), the 27 no-plugin sessions on the nine dependency jobs added 193 lines above where razor's middle session landed on the same job; those lines never shipped with razor. A recorded Claude Code demo on Claude Opus 5, published September 4, 2026, gave the same ask, implement `parseQuery` in `query.js`, to one session each: without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on `Object.fromEntries` and `URLSearchParams`. Across the run, 3 sessions each way averaged 18 and 4 lines. These measurements describe the recorded Claude sessions, not Codex performance.
+In the same Claude Opus 5 run (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded), the 27 no-plugin sessions on the nine dependency jobs added 193 lines above where razor's middle session landed on the same job; those lines never shipped with razor. A recorded Claude Code demo on Claude Opus 5, published September 4, 2026, gave the same ask, implement `parseQuery` in `query.js`, to one session each: without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on `Object.fromEntries` and `URLSearchParams`. Across the demo's run, 3 sessions each way averaged 18 and 4 lines. These measurements describe the recorded Claude sessions, not Codex performance.
 
 ### Codex results
 
@@ -227,8 +227,6 @@ Controlled run on Codex CLI 0.161.0 at high reasoning on Windows, on 2026-10-09 
 No Antigravity session has been measured yet.
 
 *Results can vary between runs.*
-
-[Foundry](https://github.com/V-Songbird/foundry) lists this plugin. The benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
 
 ## What changed
 
