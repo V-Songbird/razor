@@ -114,7 +114,7 @@ Razor is one package for Claude Code, Codex and Antigravity. Install it in the o
 
 ### Claude Code
 
-Requirements: Node.js 22 or later, Git and Claude Code 2.1.139 or later.
+Requirements: Node.js 22 or later, Git and Claude Code 2.1.323 or later.
 
 Inside Claude Code:
 
