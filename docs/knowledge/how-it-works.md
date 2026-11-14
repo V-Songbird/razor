@@ -72,6 +72,12 @@ migrations, docs, config and generated output are recognised and never charged
 against the budget, so a feature that ships with its tests is not sprawl. Set a
 number yourself and it becomes a plain ceiling on every new file instead.
 
+A new file that Git reports as ignored, such as a scratch script under a folder
+your `.gitignore` lists, is not counted either. The check is one
+`git check-ignore` call for a file that would otherwise be charged. Without Git,
+outside a repository, or when the call fails or times out, the file is counted
+as before.
+
 Anything under your system temp directory, or anywhere inside a folder named
 `scratchpad` in any letter case, is treated as scratch and skipped. This
 includes a real project that sits inside a folder named `scratchpad`: its new

@@ -221,3 +221,57 @@ describe('integration: per-turn budget', () => {
     assert.match(third.hookSpecificOutput.permissionDecisionReason, /razor: new file #3/);
   });
 });
+
+describe('integration: files Git ignores', () => {
+  const fs = require('fs');
+  const { spawnSync } = require('child_process');
+  const input = (sessionId, transcript, filePath) => ({
+    session_id: sessionId,
+    transcript_path: transcript,
+    hook_event_name: 'PreToolUse',
+    tool_name: 'Write',
+    tool_input: { file_path: filePath },
+  });
+  // The workspace sits in the plugin root (system temp is exempt) and is its
+  // own repository, so the plugin's .gitignore does not decide its answers.
+  const makeRepo = () => {
+    const dir = fs.mkdtempSync(path.join(REPO, 'contract-ws-meter-'));
+    spawnSync('git', ['init', '-q'], { cwd: dir });
+    fs.writeFileSync(path.join(dir, '.gitignore'), 'scratch/\n');
+    return dir;
+  };
+  // Five new production files in one turn: the fifth is the one the budget denies.
+  const fifth = (dir, sub, env) => {
+    const session = freshSession();
+    const t = writeTranscript('turn-uuid-' + sub + (env ? '-env' : ''));
+    let last = null;
+    for (let i = 1; i <= 5; i++) {
+      last = hookOutput(runHook('pre-tool-use.js', input(session, t, path.join(dir, sub, `f${i}.js`)), env));
+    }
+    return last;
+  };
+
+  test('new files in an ignored folder are not counted; in a tracked folder they are', () => {
+    const dir = makeRepo();
+    try {
+      assert.strictEqual(fifth(dir, 'scratch'), null);
+      const denied = fifth(dir, 'src');
+      assert.strictEqual(denied.hookSpecificOutput.permissionDecision, 'deny');
+      assert.match(denied.hookSpecificOutput.permissionDecisionReason, /razor: new production file #5/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test('where Git cannot answer, the file is counted as before', () => {
+    const dir = makeRepo();
+    try {
+      // GIT_DIR names a repository that does not exist: check-ignore errors.
+      const env = { GIT_DIR: path.join(dir, 'no-such-git-dir') };
+      const denied = fifth(dir, 'scratch', env);
+      assert.strictEqual(denied.hookSpecificOutput.permissionDecision, 'deny');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
