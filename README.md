@@ -45,17 +45,17 @@ Behind the checklist sit five checks. Each speaks at most once, as a message to 
 
 The first three read your project's own manifests, `optionalDependencies` and `peerDependencies` and the Python equivalent included, so a package you already declared is never treated as new. Each new dependency gets its own reconsideration, so a command with several installs can get another nudge for a different package on a later retry.
 
-The new-file check counts production files only: tests, fixtures, migrations, docs, config and generated output are never charged, so a feature that ships with its tests is not sprawl. A file Git reports as ignored is not counted; razor asks Git once, only for a file it would otherwise count, and without Git, outside a repository, or when that call fails or times out, the file is counted. Anything under your system temp directory, or inside a folder named `scratchpad` in any letter case, is scratch and skipped, even a real project that sits in such a folder.
+The new-file check counts production files only: tests, fixtures, migrations, docs, config and generated output are never charged, so a feature that ships with its tests is not sprawl. A file Git reports as ignored is not counted; without Git, outside a repository, or when Git fails or times out, the file is counted. Anything under your system temp directory, or inside a folder named `scratchpad` in any letter case, is scratch and skipped, even a real project that sits in such a folder.
 
 The build check needs a Git repository. At the end of a turn it compares the working tree with where the session started, leaving out Markdown, anything under a `docs/` folder and lockfiles, and if the session grew a lot with almost nothing deleted it asks once whether all of it is needed. The assistant answers in one short extra reply; nothing waits for you, and the check stays quiet for the rest of the session.
 
 A scope-drift note adds one line, at most once a session, when a later request has clearly left the task the session started on, to say a fresh session would keep things focused. It never blocks or asks, stays quiet while you correct the original job, and can miss a drift.
 
-Razor never edits your code, manifests or lockfiles, never asks you anything and makes no network calls. It runs a few read-only `git` commands in your working directory (`rev-parse`, `diff --numstat`, `diff --diff-filter=A`, `ls-files --others`) so the build check knows what the session added. It keeps a small state file in the plugin data directory the host provides, `CLAUDE_PLUGIN_DATA` in Claude Code and `PLUGIN_DATA` in Codex; without one it uses your system temp directory, in a `razor-codex` folder in Codex and a `razor-antigravity` folder in Antigravity. Old files clean themselves up, and the plugin cache stays read-only.
+Razor never edits your code, manifests or lockfiles, never asks you anything and makes no network calls. It runs a few read-only `git` commands in your working directory so the build check knows what the session added, and keeps a small state file in the plugin data directory the host provides, or in your system temp directory when there is none. Old files clean themselves up, and the plugin cache stays read-only.
 
-**On each host.** Claude Code runs the checks from five hook events: `SessionStart` (the checklist and a snapshot of your working tree, also on resume, clear, compact and fork; compaction keeps the original baseline), `SubagentStart` (the checklist for agents that may write code), `PreToolUse` (the install check on shell commands, the other checks on `Write` and `Edit`), `Stop` (the build check) and `UserPromptSubmit` (the toggle and the drift note). Codex uses the same five events through a small translator, and its file checks preview local `apply_patch` changes without editing your files. Antigravity has only `PreInvocation`, `PreToolUse` and `Stop`, so the checklist and the drift note ride on every model call, about 2,500 characters per call, and the snapshot is taken on the first call of a conversation; the install check watches `run_command`, the file checks watch `write_to_file` and `replace_file_content`, and a turn starts at the model call Antigravity numbers 0. When the build check fires at `Stop`, the model continues within the same turn. The calls that answer the build check carry no drift note, because beside that question the model took the note for a new request.
+**In Claude Code and Codex**, the checklist arrives when a session starts, resumes, is cleared or is compacted, or, in Claude Code, forked, and a compacted session keeps its original starting point for the build check. In Codex, the file checks preview local `apply_patch` changes without editing your files. Read-only exploration and planning agents skip the checklist; writing agents and unknown custom agent types receive it, each with its own new-file budget.
 
-Read-only exploration and planning agents skip the checklist; writing agents and unknown custom agent types receive it, each with its own counters under the parent session.
+**In Antigravity**, which has no session, prompt or subagent event, the checklist and the drift note go with every model call, about 2,500 characters per call, and the build check's starting point is taken on the first call of a conversation. When the build check fires, the model answers within the same turn, without the drift note. Subagents there receive no checklist.
 
 ## What you can do
 
@@ -69,7 +69,7 @@ Read-only exploration and planning agents skip the checklist; writing agents and
 
 Send `razor off` or `razor on` to pause or resume the checks for the session; `/razor off` and `/razor on` also work in Claude Code. A Codex client may intercept slash commands before the hooks see them, so use the plain words there. Send the toggle as a message of its own, with nothing else and no formatting; a final period or exclamation mark is fine. The switch is on or off by design; there are no levels.
 
-Antigravity has no prompt event, so the toggle does not exist there. To keep razor out of an Antigravity session, set the environment variable `RAZOR_DISABLE` to `1` in the shell that launches Antigravity, before Antigravity starts (`export RAZOR_DISABLE=1` in bash, `$env:RAZOR_DISABLE = '1'` in PowerShell). An Antigravity that is already running does not pick up the change.
+Antigravity has no prompt event, so the toggle does not exist there. To keep razor out of an Antigravity session, set `RAZOR_DISABLE` to `1` as [Settings](#settings) describes.
 
 ### Find unused dependencies
 
@@ -85,11 +85,13 @@ It never edits your manifest and never uninstalls anything. Static scanning cann
 
 ### Settings
 
-Most people never touch these. In Claude Code, the plugin's settings panel asks about the per-check switches and the new-file budget when you enable razor; the environment variables do the same thing and win when both are set. Codex has no settings panel: set the variables before starting the Codex host, whose hooks inherit its environment (`$env:RAZOR_FILE_BUDGET = '6'; codex` in PowerShell, `RAZOR_FILE_BUDGET=6 codex` in a POSIX shell). In Antigravity, set them before the CLI or the editor starts. A desktop app that is already running does not inherit changes made in a new shell; restart it. Each host keeps its own settings and state; to bring Claude Code preferences to Codex, set the matching variables.
+Most people never touch these. In Claude Code, the plugin's settings panel asks about the per-check switches and the new-file budget when you enable razor; the environment variables do the same thing and win when both are set. Each host keeps its own settings and state; to bring Claude Code preferences to Codex, set the matching variables.
+
+Codex has no settings panel: set the variables before starting the Codex host, whose hooks inherit its environment (`$env:RAZOR_FILE_BUDGET = '6'; codex` in PowerShell, `RAZOR_FILE_BUDGET=6 codex` in a POSIX shell). In Antigravity, set them in the shell that launches the CLI or the editor (`export RAZOR_DISABLE=1` in bash, `$env:RAZOR_DISABLE = '1'` in PowerShell). A host that is already running, a desktop app included, does not pick up changes made in a new shell; restart it.
 
 | Setting | Values | Effect |
 | --- | --- | --- |
-| `RAZOR_DISABLE` | `1` | Turns everything off, on every host. Set it before the host starts |
+| `RAZOR_DISABLE` | `1` | Turns everything off, on every host |
 | `RAZOR_DEP_GUARD`, panel: Dependency guard (installs) | `off` / on (default) | The nudge before a command installs a package |
 | `RAZOR_IMPORT_GUARD`, panel: Dependency guard (imports) | `off` / on (default) | The nudge before code imports a package that is not in your manifest |
 | `RAZOR_MANIFEST_GUARD`, panel: Dependency guard (manifest edits) | `off` / on (default) | The nudge before a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
@@ -102,11 +104,11 @@ Most people never touch these. In Claude Code, the plugin's settings panel asks 
 | `RAZOR_AGENT_SKIP` | comma-separated agent types | Agent types that skip the checklist |
 | `RAZOR_AGENT_INJECT` | comma-separated agent types | Agent types that receive it, overriding the skip list |
 
-By default the new-file budget counts production files only. Once you choose a number, it becomes a plain ceiling on every new file. `RAZOR_FILE_BUDGET` always counts as a choice; in Claude Code the panel's value counts only when it differs from 4, because a stored 4 looks like the default, so for a plain ceiling of 4 set `RAZOR_FILE_BUDGET=4`. Temp and `scratchpad` paths and Git-ignored files are skipped whatever number you set.
+By default the new-file budget counts production files only. Once you choose a number, it becomes a plain ceiling on every new file. `RAZOR_FILE_BUDGET` always counts as a choice; in Claude Code the panel's value counts only when it differs from 4, because a stored 4 looks like the default, so for a plain ceiling of 4 set `RAZOR_FILE_BUDGET=4`. The scratch and Git-ignored skips still apply.
 
-`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository, but the whole hook must still finish inside its host's timeout of 5 to 10 seconds, so a much larger value does not help.
+`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository, where a `git` call that runs out of time at session start leaves the build check without its starting point. The whole hook must still finish inside its host's timeout of 5 to 10 seconds, so a much larger value does not help.
 
-Agent names in the two agent lists match without regard to case, with or without a plugin namespace. In Codex, the skip list matches the role Codex reports: children reported as `default` receive the checklist even when their prompt only asks them to read, and named roles must exist in Codex's own agent configuration, which razor does not change. Antigravity has no subagent event, so these two variables do nothing there and its subagents receive no checklist.
+Agent names in the two agent lists match without regard to case, with or without a plugin namespace. In Codex, the skip list matches the role Codex reports: children reported as `default` receive the checklist even when their prompt only asks them to read, and named roles must exist in Codex's own agent configuration, which razor does not change. In Antigravity these two variables do nothing.
 
 ## Install
 
@@ -184,7 +186,7 @@ The build check and its two numbers measure the whole working tree, so another s
 
 ## The numbers
 
-Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. The Codex run and the Claude Opus 5.5 run below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run used its earlier "One check is enough, anywhere in this task" wording. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin; the benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
+Each result belongs to the named model and recorded run. Missing measurements remain marked as unmeasured. The Codex run and the Claude Opus 5.5 run below measured the checklist's current one-lookup-per-rung sentence; the Claude Opus 5 run and the earlier Claude Code runs used its earlier "One check is enough, anywhere in this task" wording. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin; the benchmark harnesses live in Foundry's `benchmarks/` folder and are not distributed with the plugin.
 
 ### Claude Code results
 
@@ -194,7 +196,15 @@ Each result belongs to the named model and recorded run. Missing measurements re
 | Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
 | Claude Opus 5.5 | razor | 26/26 | 8.7 |
 
-Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against razor checked out at `a6ecf5f`, whose plugin code is identical to release 1.8.1 (`6174db6`): the 13 jobs of the full suite, twice each per setup, 26 sessions per setup. Mean session cost was $0.086 with razor and $0.100 without a plugin; razor cost more on four jobs: the two with no code and two coding jobs. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so razor's new-file check was active; it did not speak. In a two-request drift test on the same setup and date, razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. In a run on release 1.8.2 (`9eb5215`) with 3 three-request conversations per setup, razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any.
+Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against razor checked out at `a6ecf5f`, whose plugin code is identical to release 1.8.1 (`6174db6`): the 13 jobs of the full suite, twice each per setup, 26 sessions per setup, none failed to run. Both no-plugin failures were the same job: told to use axios, it imported axios into a project that does not have it. Lines are averaged over the eleven coding jobs, 22 sessions per setup; razor wrote fewer lines on ten of them and tied on the eleventh.
+
+Mean session cost was $0.086 with razor and $0.100 without a plugin. Razor cost more on four of the 13 jobs: the two with no code, by 17% on the question and 14% on the typo fix, and two coding jobs. Its time saving, 3.2 ± 5.9 seconds per job, is inside the noise. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so razor's new-file check was active; it did not speak.
+
+The drift note was tested on the same host, model, effort, date and revision, in 6 two-request conversations per setup: razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. The suite scores the message, not the code the second request asked for. A razor conversation cost $0.197 against $0.169 without a plugin, 17% more.
+
+A run on release 1.8.2 (`9eb5215`), same host, model, effort and date, 9 conversations per setup, added a third unrelated request: razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any. A razor conversation with three requests cost $0.323 against $0.288 without a plugin, 12% more. Three conversations of each kind are exploratory, not a stable estimate.
+
+A larger run on release 1.8.3 (`527e900`), same host, model, effort and date, compared razor with a copy that delivers the note once at session start, with no no-plugin setup: four kinds of conversation, ten of each, 40 conversations per setup. The note, delivered beside every request as razor ships it, followed unrelated work in 29 of 30 conversations on the three kinds that drift; in the three-request conversations it came after the second request in 9 of 10 and was repeated after the third in 0 of 9. It never fired on a correction. Ten conversations of each kind are also exploratory.
 
 <!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-14"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
@@ -203,9 +213,13 @@ Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, o
 | Claude Opus 5 | ponytail | 39/39 | 12.2 |
 | Claude Opus 5 | razor | 39/39 | 9.6 |
 
-A clean session completed the job without adding a package. Lines are averaged across the coding jobs. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with [ponytail](https://github.com/DietrichGebert/ponytail), another plugin that tells Claude to write less. The run had 39 sessions per setup; its CLI version and effort were not recorded. Blind comparisons did not establish better readability, and Sonnet cost savings did not reproduce reliably. These are recorded Claude results. The runner put this run and the earlier Claude Code runs in a temp folder by default, where razor's new-file check stays silent, so treat them as measuring its other checks only.
+Claude Code with its CLI version and effort not recorded, Claude Opus 5, 39 sessions per setup in one run; the run date and the razor revision are not recorded, and the result was published on 2026-09-01 in `cbc92f3`. A clean session completed the job without adding a package. Lines are averaged over the eleven coding jobs; razor wrote fewer lines than [ponytail](https://github.com/DietrichGebert/ponytail), another plugin that tells Claude to write less, on nine of them and tied on the other two, and ponytail also blocked every unnecessary package. Mean session cost was $0.121 with razor, $0.155 without a plugin and $0.151 with ponytail. The runner put this run in a temp folder by default, where razor's new-file check stays silent, so treat it as measuring razor's other checks only.
 
-In the same Claude Opus 5 run (razor revision not recorded; published 2026-09-01 in cbc92f3; run date not recorded), the 27 no-plugin sessions on the nine dependency jobs added 193 lines above where razor's middle session landed on the same job; those lines never shipped with razor. A recorded Claude Code demo on Claude Opus 5, published September 4, 2026, gave the same ask, implement `parseQuery` in `query.js`, to one session each: without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on `Object.fromEntries` and `URLSearchParams`. Across the demo's run, 3 sessions each way averaged 18 and 4 lines. These measurements describe the recorded Claude sessions, not Codex performance.
+A recorded Claude Code demo on Claude Opus 5, published September 4, 2026 (run date not recorded), gave one session each the same ask, implement `parseQuery` in `query.js`: without razor, Claude wrote it in 18 lines; with razor, in 4 lines built on `Object.fromEntries` and `URLSearchParams`. Across the run, 3 sessions each way averaged 18 and 4 lines.
+
+**Where razor does not win.** These results come from earlier Claude Code runs on Claude Sonnet and Claude Opus, with model versions, effort and razor revisions not recorded. In a batch on Claude Code 2.1.251 on 2026-08-29, a blind reviewer judged 66 pairs of answers to the same job in both orders, 132 judge calls; 27 pairs got the same verdict both ways, and razor's answer was preferred in 11 of those 27 (41%), against a 60% bar set beforehand. Its code is not measurably flatter or less branchy per line either.
+
+The cost saving on Sonnet is not settled: two runs of the same jobs, on Claude Code 2.1.235 and 2.1.238 on 2026-08-19 and 2026-08-20, 78 sessions per setup per model when pooled, disagree, one finding razor 9% cheaper and the other level. Only the Opus saving reproduced. Across the earlier Claude Code runs, the gains were smaller on Sonnet across the board: the same direction, less far and less reliably. The Claude tables above are Opus results only. These earlier runs are read as having put their workspaces in the temp folder, where razor's new-file check stays silent, so they measure its other checks only.
 
 ### Codex results
 
@@ -215,7 +229,7 @@ In the same Claude Opus 5 run (razor revision not recorded; published 2026-09-01
 | GPT-5.6 Sol | No plugin | 19/26 | 18.7 |
 | GPT-5.6 Sol | razor | 26/26 | 10.4 |
 
-Controlled run on Codex CLI 0.161.0 at high reasoning on Windows, on 2026-10-09 against razor `18d1d0a`: 19 tasks, twice each per setup, 38 cases, of which the table covers the 26 in the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On jointly passing pairs, the median ratio of razor's coding lines to the no-plugin answer's was 0.500. Elapsed time was 15.1% higher and input tokens 5.1% higher; output tokens were 6.2% lower. Two repetitions are exploratory. This result does not compare Sol against Claude.
+Controlled run on Codex CLI 0.161.0 at high reasoning on Windows, on 2026-10-09 against razor `18d1d0a`: 19 tasks, twice each per setup, 38 cases, of which the table covers the 26 in the full task group. Across all groups, razor passed 38/38 cases versus 29/38 without it. On the pairs both setups passed, razor's median ratio to no plugin was 0.500 for coding lines (23 pairs). Over 29 pairs, elapsed time was 15.1% higher, input tokens 5.1% higher and output tokens 6.2% lower; timings include the overhead of observing razor's hooks. Two repetitions are exploratory, not a stable estimate. This result does not compare Sol against Claude.
 
 ### Antigravity results
 
