@@ -22,11 +22,8 @@ One package serves Claude Code, Codex and Antigravity.
 └── plugin.json        # Codex metadata and version; points Codex at its hook file
 plugin.json             # Antigravity metadata and the same version
 hooks.json              # Antigravity event wiring, keyed by the plugin name
-AGENTS.md               # contributor rules for every host; CLAUDE.md imports them
 LICENSE                 # MIT
-README.md               # plain-language intro first, technical depth after
-docs/knowledge/         # how it works, settings, Codex setup, benchmark details
-                        # and the changelog, dated entries newest first
+README.md               # the user guide: how it works, settings, install, results
 skills/                 # skills read by every host
 ├── skill-name/
 │   ├── SKILL.md        # skill definition
@@ -41,7 +38,7 @@ scripts/                # helper CLIs
 tests/                  # Node tests and hook contract fixtures
 ```
 
-The README puts plain-language sections first and technical depth behind links, and names the host beside every host-specific instruction and result; [`AGENTS.md`](AGENTS.md) holds those rules.
+The README is text only and names the host beside every host-specific instruction and result. Each result identifies its host, model, date and sample size; keep losses and limits, show `Not measured` where evidence is absent, and never present a Claude Code result as a Codex result.
 
 ---
 
@@ -84,12 +81,12 @@ Exporting another value does not reach the suite.
 Include regression coverage for changed script behavior. Hook contract tests
 check messages, counters, and file effects in isolated fixtures. They do not
 establish that a particular Claude Code, Codex or Antigravity installation has
-enabled or trusted the hooks. For Codex, follow [the setup guide](docs/knowledge/codex-setup.md)
+enabled or trusted the hooks. For Codex, follow [the README's Codex steps](README.md#codex)
 for that live check; for Antigravity, `agy plugin validate .` checks the package
 shape and a disposable project shows whether the hooks fire.
 
-The recorded Claude Code benchmark data and artwork stay as recorded. Codex
-results come from their own runs.
+The recorded Claude Code benchmark figures stay as recorded. Codex results
+come from their own runs.
 
 ---
 
@@ -109,10 +106,11 @@ This enables the following commit checks:
 
 ---
 
-## Changelog
+## Release notes
 
-Add a dated entry at the top of [`docs/knowledge/changelog.md`](docs/knowledge/changelog.md) for every user-visible change.
-The version lives in `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
+Release notes live on the [releases page](https://github.com/V-Songbird/razor/releases).
+Describe every user-visible change in your pull request so it can go into the
+next release's notes. The version lives in `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`
 and `plugin.json`. Change them together; the test suite fails when they differ.
 
 Installation, marketplace changes, and migration are separate from source

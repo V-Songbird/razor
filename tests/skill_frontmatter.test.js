@@ -47,18 +47,15 @@ describe("skill frontmatter", () => {
   });
 
   // The README may explain the bare form once, as the thing to avoid; no other
-  // doc, and no other place in the README, may use it as an instruction.
-  test("docs name the unused skill with the plugin prefix", () => {
+  // place in it may use it as an instruction.
+  test("the README names the unused skill with the plugin prefix", () => {
     const root = path.join(__dirname, "..");
     const readme = fs.readFileSync(path.join(root, "README.md"), "utf-8");
-    const how = fs.readFileSync(path.join(root, "docs", "knowledge", "how-it-works.md"), "utf-8");
     assert.match(readme, /\$razor:unused/);
-    assert.match(how, /\$razor:unused/);
     const bare = (text) => text.match(/\$unused/g) || [];
     const warning = "but not for a bare `$unused`";
     assert.ok(readme.includes(warning), "README.md lost the bare-form warning");
     assert.deepEqual(bare(readme.replace(warning, "")), [], "README.md uses a bare $unused as an instruction");
-    assert.deepEqual(bare(how), [], "how-it-works.md uses a bare $unused");
   });
 
   // The skill is report-only, and section 3 expects cleanup-phrased requests
