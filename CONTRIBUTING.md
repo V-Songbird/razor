@@ -23,7 +23,9 @@ One package serves Claude Code, Codex and Antigravity.
 plugin.json             # Antigravity metadata and the same version
 hooks.json              # Antigravity event wiring, keyed by the plugin name
 LICENSE                 # MIT
-README.md               # the user guide: how it works, settings, install, results
+README.md               # the front page: what it is, install, results
+assets/                 # README art and the icons the manifests name
+docs/knowledge/         # how it works, settings and benchmarks pages
 skills/                 # skills read by every host
 ├── skill-name/
 │   ├── SKILL.md        # skill definition
@@ -38,7 +40,7 @@ scripts/                # helper CLIs
 tests/                  # Node tests and hook contract fixtures
 ```
 
-The README is text only and names the host beside every host-specific instruction and result. Each result identifies its host, model, date and sample size; keep losses and limits, show `Not measured` where evidence is absent, and never present a Claude Code result as a Codex result.
+The README and the pages under `docs/knowledge/` name the host beside every host-specific instruction and result. Images come from the brand kit and live in `assets/`. Each result identifies its host, model, date and sample size; keep losses and limits, show `Not measured` where evidence is absent, and never present a Claude Code result as a Codex result.
 
 ---
 
