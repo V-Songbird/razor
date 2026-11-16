@@ -161,6 +161,32 @@ test('file tools translate: a new import is caught in a write and in a multi-chu
   assert.deepEqual(run(w, 'PreToolUse', call('view_file', { AbsolutePath: path.join(w.cwd, 'src', 'app.js') })), { decision: 'allow' });
 });
 
+// Current Antigravity sends write_file (Path, Content, Overwrite) and edit_file
+// (Path, Target, Replacement); the registration must watch both names.
+test('write_file and edit_file translate: a new import and a manifest edit are caught under the current tool names', () => {
+  const w = world();
+  nodeProject(w);
+  const matcher = new RegExp(require('../hooks.json').razor.PreToolUse[0].matcher);
+  for (const tool of ['write_file', 'edit_file']) assert.match(tool, matcher);
+  const pad = call('write_file', {
+    Path: path.join(w.cwd, 'src', 'pad.js'), Content: "const pad = require('left-pad');\n", Overwrite: true,
+  });
+  const write = run(w, 'PreToolUse', pad);
+  assert.equal(write.decision, 'deny');
+  assert.match(write.reason, /left-pad/);
+  assertToolNamed(write.reason, 'write_file');
+  assert.deepEqual(run(w, 'PreToolUse', pad), { decision: 'allow' });
+  const manifest = run(w, 'PreToolUse', call('edit_file', {
+    Path: path.join(w.cwd, 'package.json'),
+    Target: '"express": "^4.19.2"',
+    Replacement: '"express": "^4.19.2",\n    "lodash": "^4.17.21"',
+  }));
+  assert.equal(manifest.decision, 'deny');
+  assert.match(manifest.reason, /lodash/);
+  assert.match(manifest.reason, /this edit_file to package\.json/);
+  assertToolNamed(manifest.reason, 'edit_file');
+});
+
 test('a manifest edit in chunks is judged by the whole file it would produce: denied once, allowed on the identical retry', () => {
   const w = world();
   nodeProject(w);

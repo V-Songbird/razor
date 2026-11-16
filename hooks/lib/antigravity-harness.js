@@ -47,9 +47,10 @@ function applyChunks(text, chunks) {
   return text;
 }
 
-// The host types TargetFile as a string. Any other value is left out, so no
+// The host types its path argument as a string: TargetFile on the three older
+// tools, Path on write_file and edit_file. Any other value is left out, so no
 // gate reads it as a path.
-const targetFile = (args) => (typeof args.TargetFile === 'string' ? args.TargetFile : undefined);
+const targetFile = (args) => [args.TargetFile, args.Path].find((value) => typeof value === 'string');
 
 // Antigravity's tool names and arguments, read into the shape the gates
 // already speak. AllowMultiple, which lets the host replace every match of a
@@ -62,6 +63,22 @@ const targetFile = (args) => (typeof args.TargetFile === 'string' ? args.TargetF
 // through unchanged and matches no gate.
 const TOOLS = {
   run_command: (args) => ({ tool_name: 'Bash', tool_input: { command: args.CommandLine || '' } }),
+  // The names current Antigravity sends: write_file (Path, Content, Overwrite)
+  // and edit_file (Path, Target, Replacement). The three below are the older
+  // names and stay for older releases.
+  write_file: (args) => ({
+    tool_name: 'Write',
+    tool_input: { file_path: targetFile(args), content: args.Content || '' },
+  }),
+  edit_file: (args) => ({
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: targetFile(args),
+      old_string: args.Target || '',
+      new_string: args.Replacement || '',
+      replace_all: args.AllowMultiple === true,
+    },
+  }),
   write_to_file: (args) => ({
     tool_name: 'Write',
     tool_input: { file_path: targetFile(args), content: args.CodeContent || '' },
