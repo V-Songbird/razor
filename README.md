@@ -1,9 +1,9 @@
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png" />
-    <img src="assets/banner-light.png" alt="razor" width="900" />
+    <img src="assets/banner-light.png" alt="Razor" width="900" />
   </picture>
-  <h1>razor</h1>
+  <h1>Razor</h1>
   <p><strong>Before adding code, ask whether the project already has what it needs.</strong></p>
 </div>
 
@@ -20,24 +20,29 @@
 
 ## What is this?
 
+Razor is a plugin for Claude Code, an AI coding assistant. It also runs on Codex and Antigravity, two other coding assistants. It keeps a small change small.
+
 You ask for a small query parser. The assistant reaches for a package, adds helper files, and leaves you more code to maintain.
 
-Razor puts a short checklist before new code. It asks whether the language or your project already has what the task needs. Targeted checks prompt a second look at unneeded additions.
-
+Razor puts a short checklist before new code. It asks whether the language or your project already has what the task needs.
 <p align="center"><img src="assets/mascot.svg" alt="Ember considers additions, learns the Razor checklist and gets to work." width="700"></p>
 
-One recorded session on Claude Opus 5 asked for `parseQuery` in `query.js`. Without razor, Claude wrote 18 lines. With razor, it wrote 4 lines built on `Object.fromEntries` and `URLSearchParams`.
+*Ember is the mascot of the Foundry plugins. The scene is an illustration, not a measurement.*
+
+**You ask:** implement `parseQuery` in `query.js`.
+
+**You get:** 4 lines built on `Object.fromEntries` and `URLSearchParams`, against 18 without Razor. One recorded session each, on Claude Opus 5.
 
 ## Why you'd want it
 
-- Reuse what the project already has.
-- Reconsider unneeded dependencies before installing them.
-- Notice file growth early.
-- Find declared dependencies that no source file uses.
+- **Less new code.** The assistant reuses what the project already has.
+- **Fewer packages.** It reconsiders a dependency before installing it.
+- **Growth noticed early.** It speaks up when one turn creates many files.
+- **Dead packages found.** An audit lists dependencies no source file uses.
 
 ## How it works
 
-At the start of every session, razor hands the assistant a checklist. The assistant stops at the first line that applies:
+At the start of every session, Razor hands the assistant a checklist. The assistant stops at the first line that applies:
 
 | Step | Question | If yes |
 | --- | --- | --- |
@@ -49,9 +54,9 @@ At the start of every session, razor hands the assistant a checklist. The assist
 | 6 | Fits in one line? | One line. |
 | 7 | Only then | The least code that works. |
 
-Usually one of the first five lines says yes, so nothing new gets written. The checklist never cuts validation, error handling, security or accessibility.
+Usually one of the first five says yes, so nothing new gets written. The checklist never cuts validation, error handling, security or accessibility.
 
-Five checks sit behind it. Each speaks once, and the retry always goes through.
+Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment. Each speaks once, and the retry always goes through.
 
 | Check | When it runs |
 | --- | --- |
@@ -61,7 +66,7 @@ Five checks sit behind it. Each speaks once, and the retry always goes through.
 | New-file check | Before a new file, after the turn already created several |
 | Build check | At the end of a turn, when the session grew a lot with almost no deletions |
 
-Razor never edits your code, manifests or lockfiles, and makes no network calls. [How razor works](docs/knowledge/how-it-works.md) covers each check.
+Razor never edits your code, manifests or lockfiles, and makes no network calls. [How Razor works](docs/knowledge/how-it-works.md) covers each check.
 
 ## What you can do
 
@@ -69,8 +74,12 @@ Razor never edits your code, manifests or lockfiles, and makes no network calls.
 | --- | --- |
 | Keep a small task small | The checklist and checks run on their own |
 | Pause or resume the checks | Send `razor off` or `razor on` |
-| Find unused dependencies | Run `/razor:unused` in Claude Code, `$razor:unused` in Codex or `/unused` in Antigravity |
-| Turn razor off | Set `RAZOR_DISABLE=1` |
+| Find unused dependencies | A report from the audit command below |
+| Turn Razor off | Set `RAZOR_DISABLE=1` |
+
+| Claude Code | Codex | Antigravity |
+| --- | --- | --- |
+| `/razor:unused` | `$razor:unused` | `/unused` |
 
 Send the toggle as a message of its own, with no formatting. `/razor off` also works in Claude Code; Codex may intercept it. Antigravity has no toggle.
 
@@ -80,11 +89,11 @@ The audit sorts findings into confirmed, likely and unknown. It never edits or u
 
 Most people never change a setting. An environment variable wins over the settings panel.
 
-| Setting | Values | Effect |
+| Setting | Values | What it does |
 | --- | --- | --- |
 | `RAZOR_DISABLE` | `1` | Turns everything off, on every host |
 | `RAZOR_DEP_GUARD` | `off`, or on by default | The nudge before a command installs a package |
-| `RAZOR_FILE_BUDGET` | A number, default 4; `0` switches the check off | New files allowed in one turn before razor speaks up |
+| `RAZOR_FILE_BUDGET` | A number, default 4; `0` switches the check off | New files allowed in one turn before Razor speaks up |
 
 [Razor settings](docs/knowledge/settings.md) lists all twelve.
 
@@ -94,18 +103,24 @@ All three hosts need Node.js 22 or later and Git.
 
 ### Claude Code
 
-You need Claude Code 2.1.323 or later. Inside Claude Code, run:
+You need Claude Code 2.1.323 or later.
+
+Inside Claude Code, run:
 
 ```text
 /plugin marketplace add V-Songbird/foundry
 /plugin install razor@foundry
 ```
 
-Then start a new session. To check that it loaded, type `/razor:unused`: the command is listed.
+Then start a new session.
+
+To check that it worked, run `claude plugin list` in a terminal. The list names `razor`.
 
 ### Codex
 
-You need a Codex host with plugin support. Run:
+You need a Codex host with plugin support.
+
+In a terminal, run:
 
 ```text
 codex plugin marketplace add V-Songbird/foundry
@@ -116,7 +131,9 @@ Trust the exact hooks through your client's review flow, then start a new Codex 
 
 ### Antigravity
 
-You need the Antigravity CLI. It has no third-party marketplace, so install from a clone of Foundry, which checks razor out at the pinned commit. Replace `<path-to-clone>` with the directory to clone into:
+You need the Antigravity CLI. It has no marketplace for third-party plugins, so you install from a copy of the Foundry repository. Replace `<path-to-clone>` with a folder of your choice.
+
+In a terminal, run:
 
 ```shell
 git clone --recurse-submodules https://github.com/V-Songbird/foundry.git <path-to-clone>
@@ -124,25 +141,26 @@ agy plugin install <path-to-clone>/razor
 agy plugin list
 ```
 
-The list should name `razor`. Start a new conversation to load it.
+Then start a new conversation. The list names `razor` when it worked.
 
 ### Update
 
-In Claude Code, run these, then start a new session:
+In Claude Code, run these. Then start a new session:
 
 ```text
 /plugin marketplace update foundry
 /plugin update razor@foundry
 ```
 
-In Codex, run these, then start a new session:
+In Codex, run these. Then start a new session:
 
 ```text
 codex plugin marketplace upgrade
+codex plugin remove razor@foundry
 codex plugin add razor@foundry
 ```
 
-An Antigravity install is a copy. Update the clone, install again and start a new conversation:
+In Antigravity, run these. Then start a new conversation:
 
 ```shell
 git -C <path-to-clone> pull
@@ -167,7 +185,9 @@ agy plugin install <path-to-clone>/razor
 
 ## The numbers
 
-These are a few hundred live sessions, not a powered experiment. Read the direction, not the decimals. Only the Codex run and the Claude Opus 5.5 run measured the checklist's current wording.
+Each figure comes from recorded test sessions. The figures describe those runs, not yours, and results vary between runs.
+
+These are a few hundred live sessions, not a powered experiment. Only the Codex run and the Claude Opus 5.5 run measured the checklist's current wording.
 
 ### Claude Code results
 
@@ -177,22 +197,27 @@ These are a few hundred live sessions, not a powered experiment. Read the direct
 | Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
 | Claude Opus 5.5 | razor | 26/26 | 8.7 |
 
-The run used Claude Code 2.1.296 on Windows on 2026-10-13, against razor `a6ecf5f`, identical to release [1.8.1](https://github.com/V-Songbird/razor/releases/tag/v1.8.1). It ran 13 jobs twice per setup: 26 sessions each.
+The run used Claude Code 2.1.296 on Windows on 2026-10-13, against Razor `a6ecf5f`, identical to release [1.8.1](https://github.com/V-Songbird/razor/releases/tag/v1.8.1). It ran 13 jobs twice per setup: 26 sessions each.
 
 **Razor cost more on four of the 13 jobs,** including the two with no code. Two repetitions are exploratory.
 
-The graphics below show an earlier Claude Opus 5 run, published 2026-09-01.
+The graphics show an earlier Claude Opus 5 run, published 2026-09-01:
+
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Claude Opus 5 | No plugin | 35/39 | 18.3 |
+| Claude Opus 5 | razor | 39/39 | 9.6 |
 
 <p align="center"><img src="assets/hero.svg" alt="Each of 27 columns is one Claude Opus 5 session without a plugin. 193 lines above razor's edge never shipped with razor." width="700"></p>
 
 <details>
-<summary>Watch the recorded demo: one real session each on Claude Opus 5, published September 4, 2026, replayed on the recorded clock</summary>
+<summary>Watch the recorded demo: the same request with and without Razor, on Claude Opus 5</summary>
 
 <p align="center"><img src="assets/demo.svg" alt="The same parseQuery ask side by side: 18 lines without razor, 4 lines with razor, built on Object.fromEntries and URLSearchParams." width="700"></p>
 
 </details>
 
-**Razor does not win everywhere.** [Razor benchmarks](docs/knowledge/benchmarks.md) has every batch and where razor loses.
+[Razor benchmarks](docs/knowledge/benchmarks.md) has every batch and where Razor loses.
 
 ### Codex results
 
@@ -202,7 +227,7 @@ The graphics below show an earlier Claude Opus 5 run, published 2026-09-01.
 | GPT-5.6 Sol | No plugin | 19/26 | 18.7 |
 | GPT-5.6 Sol | razor | 26/26 | 10.4 |
 
-The run used Codex CLI 0.161.0 at high reasoning on Windows on 2026-10-09, against razor `18d1d0a`. The table covers 26 of 38 cases; razor passed 38/38 against 29/38.
+The run used Codex CLI 0.161.0 at high reasoning on Windows on 2026-10-09, against Razor `18d1d0a`. The table covers 26 of 38 cases; Razor passed 38/38 against 29/38.
 
 **Razor was slower:** elapsed time rose 15.1%, input tokens 5.1%.
 
@@ -215,13 +240,13 @@ The run used Codex CLI 0.161.0 at high reasoning on Windows on 2026-10-09, again
 
 No Antigravity session has been measured yet.
 
-*Results can vary between runs.*
-
 ## Going deeper
 
-[How razor works](docs/knowledge/how-it-works.md) · [Razor settings](docs/knowledge/settings.md) · [Razor benchmarks](docs/knowledge/benchmarks.md)
+[How Razor works](docs/knowledge/how-it-works.md) · [Razor settings](docs/knowledge/settings.md) · [Razor benchmarks](docs/knowledge/benchmarks.md)
 
-Release notes are on the [razor releases page](https://github.com/V-Songbird/razor/releases). [Foundry](https://github.com/V-Songbird/foundry) lists the whole family.
+Release notes are on the [Razor releases page](https://github.com/V-Songbird/razor/releases). [Foundry](https://github.com/V-Songbird/foundry) lists the whole family.
+
+Report a bug or ask a question on [Razor's issue tracker](https://github.com/V-Songbird/razor/issues). Report a vulnerability as [SECURITY.md](SECURITY.md) says. To change Razor, read [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

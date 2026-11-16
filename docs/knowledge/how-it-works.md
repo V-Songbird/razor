@@ -8,9 +8,9 @@ related_files:
   - skills/unused/SKILL.md
 ---
 
-# How razor works
+# How Razor works
 
-This page says what razor does to a session, part by part. It is for a user who wants to predict what razor will do. The short form is in the README, under [How it works](../../README.md#how-it-works).
+This page says what Razor does to a session, part by part. It is for a user who wants to predict what Razor will do. The short form is in the README, under [How it works](../../README.md#how-it-works).
 
 ## Contents
 
@@ -19,7 +19,7 @@ This page says what razor does to a session, part by part. It is for a user who 
 - [The new-file check](#the-new-file-check)
 - [The build check](#the-build-check)
 - [The scope-drift note](#the-scope-drift-note)
-- [What razor touches](#what-razor-touches)
+- [What Razor touches](#what-razor-touches)
 - [Claude Code and Codex](#claude-code-and-codex)
 - [Antigravity](#antigravity)
 - [Checking a Codex install](#checking-a-codex-install)
@@ -28,7 +28,7 @@ This page says what razor does to a session, part by part. It is for a user who 
 
 ## The checklist
 
-At the start of every session razor hands the assistant a short checklist to run before it writes anything. The assistant stops at the first line that applies and acts on it:
+At the start of every session Razor hands the assistant a short checklist to run before it writes anything. The assistant stops at the first line that applies and acts on it:
 
 1. Not genuinely needed? Skip it, say so in one line.
 2. Already in this codebase? One search. Reuse a hit, or move on.
@@ -38,7 +38,7 @@ At the start of every session razor hands the assistant a short checklist to run
 6. Fits in one line? One line.
 7. Only then: the least code that works.
 
-Most of the time one of the first five lines says yes, so nothing new gets written. In the recorded Claude Code runs, that is where nearly all of razor's measured effect came from.
+Most of the time one of the first five lines says yes, so nothing new gets written. In the recorded Claude Code runs, that is where nearly all of Razor's measured effect came from.
 
 The checklist never cuts input validation at a trust boundary, error handling that would lose data, security or accessibility. If you ask for the full version anyway, you get it without an argument.
 
@@ -76,7 +76,7 @@ Without Git, outside a repository, or when Git fails or times out, the file is c
 
 The build check needs a Git repository. At the end of a turn it compares the working tree with where the session started. It leaves out Markdown, anything under a `docs/` folder and lockfiles.
 
-If the session grew a lot with almost nothing deleted, razor asks once whether all of it is needed. The assistant answers in one short extra reply. Nothing waits for you, and the check stays quiet for the rest of the session.
+If the session grew a lot with almost nothing deleted, Razor asks once whether all of it is needed. The assistant answers in one short extra reply. Nothing waits for you, and the check stays quiet for the rest of the session.
 
 The check and its two numbers measure the whole working tree. Another session or tool writing in the same checkout can make it fire. Edits inside parts of a file that were already changed at session start are only approximated. The two numbers are set by `RAZOR_LEDGER_LOC` and `RAZOR_LEDGER_FILES`, in [Razor settings](settings.md).
 
@@ -86,7 +86,7 @@ The scope-drift note adds one line, at most once a session. It appears when a la
 
 It never blocks or asks. It stays quiet while you correct the original job. It can miss a drift.
 
-## What razor touches
+## What Razor touches
 
 Razor never edits your code, manifests or lockfiles. It never asks you anything and makes no network calls.
 
@@ -108,7 +108,7 @@ The build check's starting point is taken on the first call of a conversation. W
 
 Its hook commands run plain `node`, so Node must be on the `PATH` that Antigravity starts with.
 
-Antigravity has no toggle. To keep razor out of an Antigravity session, set `RAZOR_DISABLE` to `1`. [Razor settings](settings.md#how-each-host-reads-settings) shows how.
+Antigravity has no toggle. To keep Razor out of an Antigravity session, set `RAZOR_DISABLE` to `1`. [Razor settings](settings.md#how-each-host-reads-settings) shows how.
 
 ## Checking a Codex install
 

@@ -57,7 +57,7 @@ A host that is already running, a desktop app included, does not pick up changes
 | `RAZOR_MANIFEST_GUARD`, panel: Dependency guard (manifest edits) | `off` / on (default) | The nudge before a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
 | `RAZOR_LEDGER`, panel: Once-per-session build check | `off` / on (default) | The once-a-session "is all of this needed?" question |
 | `RAZOR_DRIFT_NOTE`, panel: Scope-drift note | `off` / on (default) | The line that says the session has wandered off its original task |
-| `RAZOR_FILE_BUDGET`, panel: New-file budget per turn | a number, default 4; `0` | New code files allowed in one turn before razor speaks up; `0` switches the new-file check off |
+| `RAZOR_FILE_BUDGET`, panel: New-file budget per turn | a number, default 4; `0` | New code files allowed in one turn before Razor speaks up; `0` switches the new-file check off |
 | `RAZOR_LEDGER_LOC` | a number, default 500 | Net lines a session can add before the build check asks |
 | `RAZOR_LEDGER_FILES` | a number, default 8 | New files a session can add before the build check asks |
 | `RAZOR_GIT_TIMEOUT_MS` | milliseconds, default 2000 | How long each read-only `git` call may take; a lower value is ignored |
@@ -80,6 +80,6 @@ The whole hook must still finish inside its host's timeout of 5 to 10 seconds. S
 
 Agent names in the two agent lists match without regard to case, with or without a plugin namespace.
 
-In Codex, the skip list matches the role Codex reports. Children reported as `default` receive the checklist even when their prompt only asks them to read. Named roles must exist in Codex's own agent configuration, which razor does not change.
+In Codex, the skip list matches the role Codex reports. Children reported as `default` receive the checklist even when their prompt only asks them to read. Named roles must exist in Codex's own agent configuration, which Razor does not change.
 
 In Antigravity these two variables do nothing.
