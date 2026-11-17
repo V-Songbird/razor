@@ -4,7 +4,7 @@ const { test, describe } = require('node:test');
 const assert = require('node:assert');
 const { runHook, hookOutput, freshSession } = require('./helpers');
 const { shouldInject } = require('../hooks/subagent-start');
-const { RULESET, DRIFT_NOTE, writeState } = require('../hooks/razor-lib');
+const { RULESET, SUBAGENT_RULESET, DRIFT_NOTE, writeState } = require('../hooks/razor-lib');
 const { parseToggle } = require('../hooks/mode-toggle');
 
 describe('unit: shouldInject', () => {
@@ -92,7 +92,7 @@ describe('integration: injection lifecycle', () => {
     assert.strictEqual(r.stdout.trim(), '');
   });
 
-  test('subagent-start wraps the ladder in the SubagentStart JSON envelope', () => {
+  test('subagent-start wraps the short ladder in the SubagentStart JSON envelope', () => {
     const out = hookOutput(
       runHook('subagent-start.js', {
         session_id: freshSession(),
@@ -101,7 +101,7 @@ describe('integration: injection lifecycle', () => {
       })
     );
     assert.strictEqual(out.hookSpecificOutput.hookEventName, 'SubagentStart');
-    assert.strictEqual(out.hookSpecificOutput.additionalContext, RULESET);
+    assert.strictEqual(out.hookSpecificOutput.additionalContext, SUBAGENT_RULESET);
   });
 
   test('subagent-start is silent for skipped agent types', () => {
@@ -170,29 +170,34 @@ describe('integration: injection lifecycle', () => {
 // from. These pin the content itself, with literals, so a drift fails here.
 // The published benchmark numbers predate the one-lookup-per-rung sentence;
 // they were measured with the earlier "One check is enough" wording.
+const RUNG_OPENINGS = [
+  '1. Not genuinely needed?',
+  '2. Already in this codebase?',
+  '3. Stdlib does it?',
+  '4. Native platform feature does it?',
+  '5. An already-installed dependency does it?',
+  '6. Fits in one line?',
+  '7. Only then: the minimum code that works',
+];
+
+function assertSevenRungs(ladder) {
+  let at = -1;
+  for (const opening of RUNG_OPENINGS) {
+    const next = ladder.indexOf(opening);
+    assert.notStrictEqual(next, -1, `missing rung: ${opening}`);
+    assert.ok(next > at, `out of order: ${opening}`);
+    at = next;
+  }
+  assert.strictEqual(ladder.match(/^\d\. /gm).length, 7);
+}
+
 describe('the frozen ladder', () => {
   test('opens with the marker the harness matches on', () => {
     assert.ok(RULESET.startsWith('RAZOR ACTIVE\n'), RULESET.slice(0, 40));
   });
 
   test('carries exactly seven rungs, in order, each with its own first words', () => {
-    const openings = [
-      '1. Not genuinely needed?',
-      '2. Already in this codebase?',
-      '3. Stdlib does it?',
-      '4. Native platform feature does it?',
-      '5. An already-installed dependency does it?',
-      '6. Fits in one line?',
-      '7. Only then: the minimum code that works',
-    ];
-    let at = -1;
-    for (const opening of openings) {
-      const next = RULESET.indexOf(opening);
-      assert.notStrictEqual(next, -1, `missing rung: ${opening}`);
-      assert.ok(next > at, `out of order: ${opening}`);
-      at = next;
-    }
-    assert.strictEqual(RULESET.match(/^\d\. /gm).length, 7);
+    assertSevenRungs(RULESET);
   });
 
   test('keeps the no-narration, one-lookup-per-rung and never-cut clauses', () => {
@@ -203,6 +208,28 @@ describe('the frozen ladder', () => {
 
   test('gives no order about the model\'s own reasoning', () => {
     assert.doesNotMatch(RULESET, /thinking|reasoning/i);
+  });
+});
+
+// A subagent's copy rides every request of that subagent, so it gets a short
+// form of the same ladder. It must stay a short form: the same seven rungs, the
+// one-lookup and no-narration limits and the never-cut list, in under half the text.
+describe('the subagent ladder', () => {
+  test('opens with the same marker and carries the same seven rungs', () => {
+    assert.ok(SUBAGENT_RULESET.startsWith('RAZOR ACTIVE\n'), SUBAGENT_RULESET.slice(0, 40));
+    assertSevenRungs(SUBAGENT_RULESET);
+  });
+
+  test('keeps the one-lookup, no-narration, new-dependency and never-cut clauses', () => {
+    assert.match(SUBAGENT_RULESET, /One lookup per rung/);
+    assert.match(SUBAGENT_RULESET, /never narrate the rungs in your output/);
+    assert.match(SUBAGENT_RULESET, /Never add a new one for what a few lines cover/);
+    assert.match(SUBAGENT_RULESET, /Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested\./);
+  });
+
+  test('is under half the session ladder and gives no order about reasoning', () => {
+    assert.ok(SUBAGENT_RULESET.length * 2 < RULESET.length, `${SUBAGENT_RULESET.length} of ${RULESET.length}`);
+    assert.doesNotMatch(SUBAGENT_RULESET, /thinking|reasoning/i);
   });
 });
 
@@ -221,20 +248,25 @@ describe('the ladder does not depend on git finishing', () => {
 describe('the drift note', () => {
   test('an ordinary prompt carries the note, and nothing else', () => {
     const r = runHook('mode-toggle.js', { session_id: freshSession(), prompt: 'fix the login bug' });
-    assert.match(r.stdout, /Stay on the task the first user prompt named/);
+    assert.match(r.stdout, /If a later request has left the first prompt's task/);
     assert.doesNotMatch(r.stdout, /RAZOR ACTIVE/);
     // UserPromptSubmit takes raw text; wrapping it injects nothing, silently.
     assert.doesNotMatch(r.stdout, /hookSpecificOutput/);
   });
 
   test('the say-once sentence is present — without it the note repeats after a drift', () => {
-    assert.match(DRIFT_NOTE, /Say it at most once in a session/);
+    assert.match(DRIFT_NOTE, /Say it at most once in a session\./);
   });
 
   test('it is a note, not a gate: drift alone never stops, asks or declines', () => {
-    assert.match(DRIFT_NOTE, /do the work anyway/);
+    assert.match(DRIFT_NOTE, /do the work anyway, then add one line/);
     assert.match(DRIFT_NOTE, /Drift alone is no reason to stop, ask or decline/);
-    assert.match(DRIFT_NOTE, /never say it when the request is still the same job/);
+    assert.match(DRIFT_NOTE, /stay quiet on the same job/);
+  });
+
+  // It rides every prompt, so its size is paid on every later request.
+  test('stays short: under 300 characters', () => {
+    assert.ok(DRIFT_NOTE.length < 300, String(DRIFT_NOTE.length));
   });
 
   test('it gives no standing order against asking or refusing for other reasons', () => {
@@ -244,11 +276,11 @@ describe('the drift note', () => {
   test('a toggle prompt answers the toggle instead', () => {
     const off = runHook('mode-toggle.js', { session_id: freshSession(), prompt: '/razor off' });
     assert.match(off.stdout, /RAZOR OFF/);
-    assert.doesNotMatch(off.stdout, /Stay on the task/);
+    assert.doesNotMatch(off.stdout, /Drift alone/);
 
     const on = runHook('mode-toggle.js', { session_id: freshSession(), prompt: '/razor on' });
     assert.match(on.stdout, /RAZOR ACTIVE/);
-    assert.doesNotMatch(on.stdout, /Stay on the task/);
+    assert.doesNotMatch(on.stdout, /Drift alone/);
   });
 
   test('"/razor off" silences it for the rest of the session', () => {

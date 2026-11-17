@@ -96,7 +96,7 @@ test('every model call carries the ladder and the drift note, and only the first
   const both = (answer) => {
     assert.equal(answer.injectSteps.length, 2);
     assert.equal(answer.injectSteps[0].ephemeralMessage, ladder);
-    assert.match(answer.injectSteps[1].ephemeralMessage, /^Stay on the task/);
+    assert.match(answer.injectSteps[1].ephemeralMessage, /^If a later request has left the first prompt's task/);
   };
   both(run(w, 'PreInvocation', { invocationNum: 0 }));
   const baseline = state(w).ledger;
@@ -320,7 +320,7 @@ test('the new-file budget counts one user turn: a Stop continuation stays in it,
   assert.deepEqual(write(3), { decision: 'allow' });
   assert.equal(state(w).turn.turnKey, '1');
   const next = run(w, 'PreInvocation', { invocationNum: 0 });
-  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^Stay on the task/);
+  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^If a later request has left the first prompt's task/);
   assert.deepEqual(write(4), { decision: 'allow' });
   assert.equal(write(5).decision, 'deny');
   assert.equal(state(w).turn.turnKey, '2');
@@ -352,7 +352,7 @@ test('the build check asks for one more turn once per conversation', () => {
   assert.deepEqual(run(w, 'Stop', { executionNum: 2, fullyIdle: true }), {});
   assert.equal(state(w).antigravityTurn, 2);
   const next = run(w, 'PreInvocation', { invocationNum: 0 });
-  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^Stay on the task/);
+  assert.match(next.injectSteps.at(-1).ephemeralMessage, /^If a later request has left the first prompt's task/);
 });
 
 test('the build check stays quiet when its once-per-session mark cannot be saved', () => {

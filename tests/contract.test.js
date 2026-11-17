@@ -133,8 +133,10 @@ const SCENARIOS = [
     name: 'subagent-start-general',
     hook: 'subagent-start.js',
     world: emptyWorld,
-    // Raw stdout is dropped for this event — the envelope is mandatory.
-    must: ['"hookEventName":"SubagentStart"', '"additionalContext":"RAZOR ACTIVE'],
+    // Raw stdout is dropped for this event — the envelope is mandatory. A
+    // subagent gets the short ladder: the rungs, without the session ladder's prose.
+    must: ['"hookEventName":"SubagentStart"', '"additionalContext":"RAZOR ACTIVE', '1. Not genuinely needed? Skip it, say so in one line.'],
+    mustNot: ['The ladder is a reflex', 'You are a senior developer'],
   },
   {
     name: 'subagent-start-explore',
