@@ -66,9 +66,10 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 // current wording, 266 characters, shortens the one razor shipped from 1.8.1
 // through 1.9.5 (405 characters, opening "Stay on the task the first user
 // prompt named") and keeps its measured parts: do the work anyway, one line,
-// drift alone is no reason to stop, ask or decline, and the say-once
-// sentence. It is not measured itself; every figure below measured an earlier
-// wording. On the earlier wording razor shipped from 1.5.0 through 1.6.0, which said "Never
+// drift alone is no reason to stop, ask or decline, and the first half of the
+// say-once sentence; its second half, "if you have already said it, stay
+// quiet", is cut. It is not measured itself; every figure below measured an
+// earlier wording. On the earlier wording razor shipped from 1.5.0 through 1.6.0, which said "Never
 // stop to ask, never refuse", measured recall was 84% delivered this way
 // against 73% from a single SessionStart injection, the clause was provably
 // present on the turns that still missed, and the trailing say-once sentence

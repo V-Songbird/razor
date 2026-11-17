@@ -42,7 +42,7 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 
 ### Drift note tests
 
-These runs measured the note's earlier, longer wording, which Razor shipped from release 1.8.1 through 1.9.5. The current, shorter wording keeps the same parts and has not been measured.
+These runs measured the note's earlier, longer wording, which Razor shipped from release 1.8.1 through 1.9.5. The current, shorter wording has not been measured.
 
 The drift note was tested on the same host, model, effort, date and revision, in 6 two-request conversations per setup: Razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. The suite scores the message, not the code the second request asked for. A Razor conversation cost $0.197 against $0.169 without a plugin, 17% more.
 
