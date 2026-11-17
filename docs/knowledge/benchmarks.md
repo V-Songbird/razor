@@ -1,6 +1,6 @@
 ---
 type: knowledge
-summary: "Every published razor measurement: the Claude Opus 5.5 run with its drift tests, the Claude Opus 5 run with the ponytail comparison, the earlier Claude runs and where razor does not win, and the Codex run on GPT-5.6 Sol; read before changing a published number."
+summary: "Every published razor measurement: the Claude Opus 5.5 run, the Claude Opus 5 run behind the graphics, the Codex run on GPT-5.6 Sol, where razor does not win and what is not measured; read before changing a published number."
 related_files:
   - README.md
   - assets/hero.svg
@@ -17,20 +17,22 @@ Each result belongs to the named model and recorded run. Missing measurements st
 
 - [How to read these results](#how-to-read-these-results)
 - [Claude Code: Claude Opus 5.5](#claude-code-claude-opus-55)
+- [Claude Code: three setups](#claude-code-three-setups)
 - [Claude Code: Claude Opus 5](#claude-code-claude-opus-5)
-- [Claude Code: where Razor does not win](#claude-code-where-razor-does-not-win)
 - [Codex: GPT-5.6 Sol](#codex-gpt-56-sol)
 - [Antigravity](#antigravity)
+- [Where Razor does not win](#where-razor-does-not-win)
+- [What is not measured](#what-is-not-measured)
 
 ## How to read these results
 
-The Codex run and the Claude Opus 5.5 runs measured the checklist's current one-lookup-per-rung sentence. The Claude Opus 5 run and the earlier Claude Code runs used its earlier "One check is enough, anywhere in this task" wording.
+The checklist's wording in the Codex run and the Claude Opus 5.5 run is the wording Razor sends today. The Razor revision of the Claude Opus 5 run is not recorded.
 
 The benchmark harness and the raw records behind these figures are kept outside this repository. They are not distributed with the plugin. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin.
 
 ## Claude Code: Claude Opus 5.5
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"date":"2026-10-13","reviewedAt":"2026-11-14"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"date":"2026-10-13","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
@@ -40,48 +42,49 @@ Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, o
 
 Mean session cost was $0.086 with Razor and $0.100 without a plugin, a difference of $0.014 ± $0.013 per job. Razor cost more on four of the 13 jobs: the two with no code, by 17% on the question and 14% on the typo fix, and two coding jobs. Its time saving, 3.2 ± 5.9 seconds per job, is inside the noise. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so Razor's new-file check was active; it did not speak.
 
-### Drift note tests
+## Claude Code: three setups
 
-These runs measured the note's earlier, longer wording, which Razor shipped from release 1.8.1 through 1.9.5. The current, shorter wording has not been measured.
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"date":"2026-11-17","reviewedAt":"2026-11-17"} -->
+| Model | Setup | Correct and safe | Mean coding lines | Mean cost per session |
+| --- | --- | --- | --- | --- |
+| Claude Opus 5.5 | No plugin | 36/39 | 15.5 | $0.070 |
+| Claude Opus 5.5 | razor | 39/39 | 8.4 | $0.060 |
+| Claude Opus 5.5 | chisle | 39/39 | 9.7 | $0.066 |
+| Claude Sonnet 5 | No plugin | 36/39 | 13.9 | $0.050 |
+| Claude Sonnet 5 | razor | 38/39 | 10.5 | $0.048 |
+| Claude Sonnet 5 | chisle | 36/39 | 10.6 | $0.050 |
 
-The drift note was tested on the same host, model, effort, date and revision, in 6 two-request conversations per setup: Razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. The suite scores the message, not the code the second request asked for. A Razor conversation cost $0.197 against $0.169 without a plugin, 17% more.
+Run on 2026-11-17 through the Claude Agent SDK 0.3.303, `claude-opus-5-5` and `claude-sonnet-5` at the default effort, against Razor [1.9.6](https://github.com/V-Songbird/razor/releases/tag/v1.9.6) and [Chisle](https://github.com/JayPokale/Chisle) at commit `cf0b24f` (3.12.1 plus 14 commits), loaded as a local plugin the same way as Razor. The 13 jobs of the full suite ran three times per setup and model: 39 sessions per cell, 234 in all, none failed to run. Lines are averaged over the eleven coding jobs, 33 sessions per cell. The whole run cost $13.38.
 
-A run on release [1.8.2](https://github.com/V-Songbird/razor/releases/tag/v1.8.2) (`9eb5215`), same host, model, effort and date, 9 conversations per setup, added a third unrelated request: Razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any. A Razor conversation with three requests cost $0.323 against $0.288 without a plugin, 12% more. Three conversations of each kind are exploratory, not a stable estimate.
+What it shows:
 
-A larger run on release [1.8.3](https://github.com/V-Songbird/razor/releases/tag/v1.8.3) (`527e900`), same host, model, effort and date, compared Razor with a copy that delivers the note once at session start, with no no-plugin setup: four kinds of conversation, ten of each, 40 conversations per setup. The note, delivered beside every request as Razor ships it, followed unrelated work in 29 of 30 conversations on the three kinds that drift, against 24 of 30 for the copy delivered once at session start. In the three-request conversations it came after the second request in 9 of 10 and was repeated after the third in 0 of 9. It never fired on a correction. Ten conversations of each kind are also exploratory.
+- **Against no plugin.** Razor wrote fewer lines on both models and passed 77 of 78 sessions against 72 of 78.
+- **Against Chisle on Opus 5.5.** Razor cost $0.0057 ± $0.0046 less per job. It wrote 1.3 ± 1.5 fewer lines per coding job, which is inside the noise.
+- **Against Chisle on Sonnet 5.** No difference: $0.0011 ± $0.0031 per job and 0.1 ± 0.7 lines.
+- **New dependencies.** Told to use a library the project does not have, Razor never imported it in six sessions. Chisle imported it in all three Sonnet 5 sessions and none of the three on Opus 5.5. The setup with no plugin imported it in all six.
+- **Razor's one failure.** On Sonnet 5, one of three sessions of the retry-library job delivered code whose `retryCall` was not a function.
+
+The two models disagree on lines and cost against Chisle, so the run does not settle either. Three repetitions are exploratory, not a stable estimate. That Chisle's hooks ran in these sessions is inferred from its results differing from the no-plugin setup; it was not checked directly.
 
 ## Claude Code: Claude Opus 5
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-14"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5 | No plugin | 35/39 | 18.3 |
-| Claude Opus 5 | ponytail | 39/39 | 12.2 |
 | Claude Opus 5 | razor | 39/39 | 9.6 |
 
-Claude Code with its CLI version and effort not recorded, Claude Opus 5, 39 sessions per setup in one run; the run date and the Razor revision are not recorded, and the result was published on 2026-09-01 in `cbc92f3`. A clean session completed the job without adding a package. Lines are averaged over the eleven coding jobs; Razor wrote fewer lines than [ponytail](https://github.com/DietrichGebert/ponytail), another plugin that tells Claude to write less, on nine of them and tied on the other two, and ponytail also blocked every unnecessary package. Mean session cost was $0.121 with Razor, $0.155 without a plugin and $0.151 with ponytail. The runner put this run in a temp folder by default, where Razor's new-file check stays silent, so treat it as measuring Razor's other checks only.
+Claude Code with its CLI version and effort not recorded, Claude Opus 5, 39 sessions per setup in one run; the run date and the Razor revision are not recorded, and the result was published on 2026-09-01 in `cbc92f3`. A clean session completed the job without adding a package. Lines are averaged over the eleven coding jobs. Mean session cost was $0.121 with Razor and $0.155 without a plugin. The runner put this run in a temp folder by default, where Razor's new-file check stays silent, so treat it as measuring Razor's other checks only.
 
 The README shows two graphics from this run. The first covers the 27 no-plugin sessions on the nine dependency jobs: 193 lines above Razor's edge never shipped with razor.
 
 ![The Razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where Razor's middle session landed on the same job: 193 lines above the edge never shipped with razor.](../../assets/hero.svg)
 
-A recorded Claude Code demo on Claude Opus 5, published September 4, 2026 (run date not recorded), gave one session each the same ask, implement `parseQuery` in `query.js`: without Razor, Claude wrote it in 18 lines; with Razor, in 4 lines built on `Object.fromEntries` and `URLSearchParams`. The averages over 3 sessions each way were the same.
-
-## Claude Code: where Razor does not win
-
-These results come from earlier Claude Code runs on Claude Sonnet and Claude Opus, with model versions, effort and Razor revisions not recorded.
-
-In a batch on Claude Code 2.1.251 on 2026-08-29, a blind reviewer judged 66 pairs of answers to the same job in both orders, 132 judge calls. 27 pairs got the same verdict both ways, and Razor's answer was preferred in 11 of those 27 (41%), against a 60% bar set beforehand.
-
-In the same batch, 24 sessions where Claude split the work across five helper agents, each of which received the full checklist, Razor cost about 2% more: $0.221 against $0.216 on Sonnet and $0.474 against $0.464 on Opus, for 13–31% less code. Its code is not measurably flatter or less branchy per line either. Helper agents now receive a short form of the checklist, which has not been measured.
-
-The cost saving on Sonnet is not settled. Two runs of the same jobs, on Claude Code 2.1.235 and 2.1.238 on 2026-08-19 and 2026-08-20, 78 sessions per setup per model when pooled, disagree: one found Razor 9% cheaper and the other level. Only the Opus saving reproduced. Across the earlier Claude Code runs, the gains were smaller on Sonnet across the board: the same direction, less far and less reliably.
-
-The Claude tables above are Opus results only. These earlier runs are read as having put their workspaces in the temp folder, where Razor's new-file check stays silent, so they measure its other checks only.
+The second is a recorded Claude Code demo on Claude Opus 5, published September 4, 2026 (run date not recorded). One session each got the same ask, implement `parseQuery` in `query.js`. Without Razor, Claude wrote it in 18 lines. With Razor, it wrote 4 lines built on `Object.fromEntries` and `URLSearchParams`. The averages over 3 sessions each way were the same.
 
 ## Codex: GPT-5.6 Sol
 
-<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"date":"2026-10-09","reviewedAt":"2026-11-14"} -->
+<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"date":"2026-10-09","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | GPT-5.6 Sol | No plugin | 19/26 | 18.7 |
@@ -97,5 +100,25 @@ Controlled run on Codex CLI 0.161.0 at high reasoning on Windows, on 2026-10-09 
 | Not measured | Not measured | Not measured | Not measured |
 
 No Antigravity session has been measured yet.
+
+## Where Razor does not win
+
+- **Cost on small jobs.** In the Claude Opus 5.5 run, Razor cost more on four of 13 jobs, including the two with no code.
+- **Time on Codex.** In the Codex run, elapsed time was 15.1% higher and input tokens 5.1% higher.
+- **Saving inside the noise.** In the Claude Opus 5.5 run, the time saving of 3.2 ± 5.9 seconds per job is smaller than its spread.
+- **One failed job on Sonnet 5.** In the three-setup run, one of 39 Razor sessions on Claude Sonnet 5 delivered code that did not work.
+- **No measured edge over Chisle on Sonnet 5.** In the same run, lines and cost were level.
+- **A blind reviewer did not prefer Razor's answers.** In a batch on Claude Code 2.1.251 on 2026-08-29, a blind reviewer judged 66 pairs of answers to the same job in both orders, 132 judge calls. 27 pairs got the same verdict both ways, and Razor's answer was preferred in 11 of those 27 (41%), against a 60% bar set beforehand. The Razor revision is not recorded, and no later run repeats this test.
+- **Cost when the work is split across helpers.** In the same batch, in 24 sessions where Claude split the work across five helper agents that each received the full checklist, Razor cost about 2% more: $0.221 against $0.216 on Sonnet and $0.474 against $0.464 on Opus, for 13–31% less code. Its code is not measurably flatter or less branchy per line either.
+
+## What is not measured
+
+No published result covers these with the current release:
+
+- The scope-drift note.
+- The short checklist that subagents receive.
+- Claude Sonnet 5.5 and Claude Haiku.
+- Whether answers written with Razor are better or worse when a person judges them.
+- Any Antigravity session.
 
 *Results can vary between runs.*

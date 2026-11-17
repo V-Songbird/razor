@@ -58,8 +58,8 @@ A host that is already running, a desktop app included, does not pick up changes
 | `RAZOR_LEDGER`, panel: Once-per-session build check | `off` / on (default) | The once-a-session "is all of this needed?" question |
 | `RAZOR_DRIFT_NOTE`, panel: Scope-drift note | `off` / on (default) | The line that says the session has wandered off its original task |
 | `RAZOR_FILE_BUDGET`, panel: New-file budget per turn | a number, default 4; `0` | New code files allowed in one turn before Razor speaks up; `0` switches the new-file check off |
-| `RAZOR_LEDGER_LOC` | a number, default 500 | Net lines a session can add before the build check asks |
-| `RAZOR_LEDGER_FILES` | a number, default 8 | New files a session can add before the build check asks |
+| `RAZOR_LEDGER_LOC` | a number, default 500 | Net lines a session can add, with almost no deletions, before the build check asks; zero or less keeps 500 |
+| `RAZOR_LEDGER_FILES` | a number, default 8 | New files a session can add before the build check asks; zero or less keeps 8 |
 | `RAZOR_GIT_TIMEOUT_MS` | milliseconds, default 2000 | How long each read-only `git` call may take; a lower value is ignored |
 | `RAZOR_AGENT_SKIP` | comma-separated agent types | Agent types that skip the checklist |
 | `RAZOR_AGENT_INJECT` | comma-separated agent types | Agent types that receive it, overriding the skip list |
@@ -72,7 +72,7 @@ By default the new-file budget counts production files only. Once you choose a n
 
 ## The Git timeout
 
-`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository. There, a `git` call that runs out of time at session start leaves the build check without its starting point.
+`RAZOR_GIT_TIMEOUT_MS` helps on a slow machine or a very large repository. There, a `git` call that runs out of time at session start leaves the build check without its starting point. The default is 2000, which is also the lowest value Razor uses.
 
 The whole hook must still finish inside its host's timeout of 5 to 10 seconds. So a much larger value does not help.
 
