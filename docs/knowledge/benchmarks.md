@@ -42,6 +42,8 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 
 ### Drift note tests
 
+These runs measured the note's earlier, longer wording, which Razor shipped from release 1.8.1 through 1.9.5. The current, shorter wording keeps the same parts and has not been measured.
+
 The drift note was tested on the same host, model, effort, date and revision, in 6 two-request conversations per setup: Razor noted unrelated second requests in 3 of 3 conversations, against 0 of 3 without a plugin, and stayed quiet on 3 of 3 same-job corrections. The suite scores the message, not the code the second request asked for. A Razor conversation cost $0.197 against $0.169 without a plugin, 17% more.
 
 A run on release [1.8.2](https://github.com/V-Songbird/razor/releases/tag/v1.8.2) (`9eb5215`), same host, model, effort and date, 9 conversations per setup, added a third unrelated request: Razor noted the first unrelated request in 3 of 3 conversations and did not repeat the note on the third request in any. A Razor conversation with three requests cost $0.323 against $0.288 without a plugin, 12% more. Three conversations of each kind are exploratory, not a stable estimate.
@@ -71,7 +73,7 @@ These results come from earlier Claude Code runs on Claude Sonnet and Claude Opu
 
 In a batch on Claude Code 2.1.251 on 2026-08-29, a blind reviewer judged 66 pairs of answers to the same job in both orders, 132 judge calls. 27 pairs got the same verdict both ways, and Razor's answer was preferred in 11 of those 27 (41%), against a 60% bar set beforehand.
 
-In the same batch, 24 sessions where Claude split the work across five helper agents, each of which receives the checklist, Razor cost about 2% more: $0.221 against $0.216 on Sonnet and $0.474 against $0.464 on Opus, for 13–31% less code. Its code is not measurably flatter or less branchy per line either.
+In the same batch, 24 sessions where Claude split the work across five helper agents, each of which received the full checklist, Razor cost about 2% more: $0.221 against $0.216 on Sonnet and $0.474 against $0.464 on Opus, for 13–31% less code. Its code is not measurably flatter or less branchy per line either. Helper agents now receive a short form of the checklist, which has not been measured.
 
 The cost saving on Sonnet is not settled. Two runs of the same jobs, on Claude Code 2.1.235 and 2.1.238 on 2026-08-19 and 2026-08-20, 78 sessions per setup per model when pooled, disagree: one found Razor 9% cheaper and the other level. Only the Opus saving reproduced. Across the earlier Claude Code runs, the gains were smaller on Sonnet across the board: the same direction, less far and less reliably.
 

@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 'use strict';
 
-// SubagentStart — inject the ladder into code-writing subagents only.
+// SubagentStart — inject the short ladder into code-writing subagents only.
 //
 // SessionStart context never reaches subagents, so without this every
-// Task-spawned agent runs razor-unaware. Rather than injecting into every
-// spawn, razor gates by agent type — read-only exploration/planning agents
-// never write code, so for them the ladder is pure injection tax (N× in a
-// fan-out).
+// Task-spawned agent runs razor-unaware. Each copy rides every request of its
+// subagent, so they get SUBAGENT_RULESET, the same rungs in under half the
+// text. Rather than injecting into every spawn, razor gates by agent type —
+// read-only exploration/planning agents never write code, so for them the
+// ladder is pure injection tax (N× in a fan-out).
 //
 // Unknown agent types get the ruleset: most custom agents write code, and
 // the fail-safe direction is guarded, not lean.
 
-const { RULESET, readInput, emitContext, readState, isActive } = require('./razor-lib');
+const { SUBAGENT_RULESET, readInput, emitContext, readState, isActive } = require('./razor-lib');
 
 // Read-only / non-coding built-ins. Extend with RAZOR_AGENT_SKIP.
 const DEFAULT_SKIP = [
@@ -49,7 +50,7 @@ function main() {
   const data = readInput();
   if (!isActive(readState(data.session_id))) return;
   if (!shouldInject(data.agent_type, process.env)) return;
-  emitContext('SubagentStart', RULESET);
+  emitContext('SubagentStart', SUBAGENT_RULESET);
 }
 
 if (require.main === module) main();

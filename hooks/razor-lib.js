@@ -14,7 +14,7 @@ const harness = require(HARNESSES[process.env.RAZOR_HOST] || './lib/harness');
 
 // Kept compact on purpose: 2,070 characters, about 590 tokens per injection
 // by Anthropic's documented estimate of 3.5 characters per token (an
-// estimate, not a tokenizer count; DRIFT_NOTE adds about 115). The no-narration
+// estimate, not a tokenizer count; DRIFT_NOTE adds about 75). The no-narration
 // line covers the output only: the Claude Opus 5.5 system card (6.6.4.4)
 // measures the model's control over its own reasoning text as low and
 // rates low control as better for monitoring, so the ladder leaves
@@ -39,13 +39,41 @@ Rules: no abstractions nobody asked for; no scaffolding for later; deletion over
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
-// Restated on every user prompt, so it sits in the turn's own context. On the
-// earlier wording razor shipped from 1.5.0 through 1.6.0, which said "Never
+// The ladder a code-writing subagent receives: the same seven rungs and
+// never-cut list, in 805 characters instead of 2,070. A subagent's copy rides
+// every request of that subagent, and a parent can start many: over 14 days of
+// the maintainer's interactive sessions (2026-11-02 to 2026-11-16), the full copy
+// went to 2,267 subagents and cost as much input as the per-prompt drift note.
+// Its value apart from the main session's ladder was never measured; the
+// 2026-08-29 fan-out run measured razor with the full copy against no plugin.
+const SUBAGENT_RULESET = `RAZOR ACTIVE
+
+Cut before adding. Read the code the change touches, then act on the first rung that holds:
+
+1. Not genuinely needed? Skip it, say so in one line.
+2. Already in this codebase? One search: reuse a hit, or move on.
+3. Stdlib does it? Use the stdlib.
+4. Native platform feature does it? Use the platform.
+5. An already-installed dependency does it? Use it. Never add a new one for what a few lines cover.
+6. Fits in one line? One line.
+7. Only then: the minimum code that works.
+
+One lookup per rung; never narrate the rungs in your output. No abstractions or scaffolding nobody asked for; shortest working diff in the right place; fix the root cause.
+
+Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested.`;
+
+// Restated on every user prompt, so it sits in the turn's own context. The
+// current wording, 266 characters, shortens the one razor shipped from 1.8.1
+// through 1.9.5 (405 characters, opening "Stay on the task the first user
+// prompt named") and keeps its measured parts: do the work anyway, one line,
+// drift alone is no reason to stop, ask or decline, and the say-once
+// sentence. It is not measured itself; every figure below measured an earlier
+// wording. On the earlier wording razor shipped from 1.5.0 through 1.6.0, which said "Never
 // stop to ask, never refuse", measured recall was 84% delivered this way
 // against 73% from a single SessionStart injection, the clause was provably
 // present on the turns that still missed, and the trailing say-once sentence
 // was load bearing: without it the note repeated on every turn after a drift
-// (4 of 14 against 1 of 16). This wording by delivery route, measured on
+// (4 of 14 against 1 of 16). The 1.8.1-1.9.5 wording by delivery route, measured on
 // Claude Code 2.1.296 with claude-opus-5-5 and razor 527e900, release 1.8.3
 // (2026-10-13, run 20261013-100631, 10 conversations of each kind per route,
 // the SessionStart copy sending the note on source "startup" only, so once
@@ -56,13 +84,13 @@ Never cut: validation at trust boundaries, error handling that prevents data los
 // followed a same-job correction (0 of 10 each), raised it before the drift,
 // or stopped to ask. An earlier run (razor 15afc0a, run 20261013-085338)
 // fired SessionStart again on every resumed request and saw 20 of 20 by both
-// routes, so it never tested a single injection. Earlier runs of this
+// routes, so it never tested a single injection. Earlier runs of that
 // wording on Claude Opus 5.5, per prompt only, 3 conversations each: release
 // 1.8.1, two requests, noted 3 of 3 against 0 of 3 with no plugin and never
 // after a correction; release 1.8.2
 // (run 20261013-024128), three requests, noted 3 of 3 against 0 of 3 and
 // repeated on the third request in 0 of 3.
-const DRIFT_NOTE = `Stay on the task the first user prompt named. If a later request has left that task, do the work anyway, then add one line saying the session has moved off its original task and a fresh session would keep this one focused. Drift alone is no reason to stop, ask or decline, and never say it when the request is still the same job. Say it at most once in a session — if you have already said it, stay quiet.`;
+const DRIFT_NOTE = `If a later request has left the first prompt's task, do the work anyway, then add one line: the session has drifted and a fresh one would keep it focused. Drift alone is no reason to stop, ask or decline; stay quiet on the same job. Say it at most once in a session.`;
 
 function safeId(id) {
   return String(id || 'unknown').replace(/[^a-zA-Z0-9-]/g, '_');
@@ -154,6 +182,7 @@ function git(args, cwd) {
 
 module.exports = {
   RULESET,
+  SUBAGENT_RULESET,
   DRIFT_NOTE,
   gcStateFiles,
   readState,

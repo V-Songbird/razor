@@ -98,11 +98,11 @@ In Claude Code and Codex, the checklist arrives when a session starts, resumes, 
 
 In Codex, the file checks preview local `apply_patch` changes without editing your files.
 
-Read-only exploration and planning agents skip the checklist. Writing agents and unknown custom agent types receive it, each with its own new-file budget. `RAZOR_AGENT_SKIP` and `RAZOR_AGENT_INJECT` change that; see [Razor settings](settings.md#agent-lists).
+Read-only exploration and planning agents skip the checklist. Writing agents and unknown custom agent types receive a short form of it, each with its own new-file budget. The short form keeps the same seven lines and the never-cut list. `RAZOR_AGENT_SKIP` and `RAZOR_AGENT_INJECT` change that; see [Razor settings](settings.md#agent-lists).
 
 ## Antigravity
 
-Antigravity has no session, prompt or subagent event. So the checklist and the drift note go with every model call, about 2,500 characters per call.
+Antigravity has no session, prompt or subagent event. So the checklist and the drift note go with every model call, about 2,350 characters per call.
 
 The build check's starting point is taken on the first call of a conversation. When the build check fires, the model answers within the same turn, without the drift note. Subagents there receive no checklist.
 

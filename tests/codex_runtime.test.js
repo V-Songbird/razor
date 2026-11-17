@@ -64,7 +64,7 @@ test('Codex lifecycle preserves original ladder and toggle bytes', () => {
   assert.equal(run(w, 'SessionStart', { source: 'startup' }), original('session-start-startup'));
   assert.equal(run(w, 'SubagentStart', { agent_type: 'worker', agent_id: 'worker-a' }), original('subagent-start-general'));
   assert.equal(run(w, 'SubagentStart', { agent_type: 'explorer', agent_id: 'read-a' }), '');
-  assert.match(run(w, 'UserPromptSubmit', { prompt: 'continue the task', turn_id: 't1' }), /^Stay on the task/);
+  assert.match(run(w, 'UserPromptSubmit', { prompt: 'continue the task', turn_id: 't1' }), /^If a later request has left the first prompt's task/);
   assert.equal(run(w, 'UserPromptSubmit', { prompt: 'razor off', turn_id: 't2' }), original('userpromptsubmit-off'));
   assert.equal(state(w).off, true);
   assert.equal(run(w, 'SessionStart', { source: 'compact' }), '');
