@@ -38,7 +38,7 @@ At the start of every session Razor hands the assistant a short checklist to run
 6. Fits in one line? One line.
 7. Only then: the least code that works.
 
-Most of the time one of the first five lines says yes, so nothing new gets written. In the recorded Claude Code runs, that is where nearly all of Razor's measured effect came from.
+Most of the time one of the first five lines says yes, so nothing new gets written.
 
 The checklist never cuts input validation at a trust boundary, error handling that would lose data, security or accessibility. If you ask for the full version anyway, you get it without an argument.
 
@@ -54,7 +54,7 @@ Behind the checklist sit five checks. Each speaks at most once, as a message to 
 | Import guard | before a file change | an `import`/`require` of a package that is not in your manifest |
 | Manifest guard | before a file change | a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
 | New-file check | before a new file | how many new production files this one turn has already created |
-| Build check | at the end of a turn | whether the session grew a lot with almost no deletions |
+| Build check | at the end of a turn | whether the session grew a lot with almost no deletions, or added many new files |
 
 The first three read your project's own manifests. `optionalDependencies` and `peerDependencies` count, and so do the Python equivalents. A package you already declared is never treated as new.
 
@@ -62,10 +62,11 @@ Each new dependency gets its own reconsideration. A command with several install
 
 ## The new-file check
 
-The new-file check counts production files only. Tests, fixtures, migrations, docs, config and generated output are never charged, so a feature that ships with its tests is not sprawl.
+The new-file check counts production files only. Tests, fixtures, migrations, docs, config, generated output and images, fonts or media are never charged, so a feature that ships with its tests is not sprawl. The default budget is 4 files per turn, and the check speaks once per turn.
 
 Some files are never counted:
 
+- A file that already exists. Edits and overwrites are not new files.
 - A file that Git reports as ignored.
 - Anything under your system temp directory.
 - Anything inside a folder named `scratchpad`, in any letter case, even a real project that sits in such a folder.
@@ -74,15 +75,15 @@ Without Git, outside a repository, or when Git fails or times out, the file is c
 
 ## The build check
 
-The build check needs a Git repository. At the end of a turn it compares the working tree with where the session started. It leaves out Markdown, anything under a `docs/` folder and lockfiles.
+The build check needs a Git repository. At the end of a turn it compares the working tree with where the session started. It leaves out docs files (Markdown, `.txt`, `.rst` and similar, and anything under a `docs/` folder) and lockfiles.
 
-If the session grew a lot with almost nothing deleted, Razor asks once whether all of it is needed. The assistant answers in one short extra reply. Nothing waits for you, and the check stays quiet for the rest of the session.
+It fires when the session added more than 500 net lines while deleting less than a tenth of what it inserted, or when it added more than 8 new files. Then Razor asks once whether all of it is needed. The assistant answers in one short extra reply. Nothing waits for you, and the check stays quiet for the rest of the session.
 
 The check and its two numbers measure the whole working tree. Another session or tool writing in the same checkout can make it fire. Edits inside parts of a file that were already changed at session start are only approximated. The two numbers are set by `RAZOR_LEDGER_LOC` and `RAZOR_LEDGER_FILES`, in [Razor settings](settings.md).
 
 ## The scope-drift note
 
-The scope-drift note adds one line, at most once a session. It appears when a later request has clearly left the task the session started on, and it says that a fresh session would keep things focused.
+The scope-drift note adds one line, at most once a session. Razor sends the assistant an instruction with every prompt. When a later request has clearly left the task the session started on, the assistant does the work and adds a line saying a fresh session would keep things focused.
 
 It never blocks or asks. It stays quiet while you correct the original job. It can miss a drift.
 
@@ -90,7 +91,7 @@ It never blocks or asks. It stays quiet while you correct the original job. It c
 
 Razor never edits your code, manifests or lockfiles. It never asks you anything and makes no network calls.
 
-It runs a few read-only `git` commands in your working directory, so the build check knows what the session added. It keeps a small state file in the plugin data directory the host provides, or in your system temp directory when there is none. Old files clean themselves up, and the plugin cache stays read-only.
+It runs a few read-only `git` commands in your working directory, so the build check knows what the session added. It keeps a small state file in the plugin data directory the host provides, or in your system temp directory when there is none. State files older than seven days are deleted, and the plugin cache stays read-only.
 
 ## Claude Code and Codex
 
@@ -102,7 +103,7 @@ Read-only exploration and planning agents skip the checklist. Writing agents and
 
 ## Antigravity
 
-Antigravity has no session, prompt or subagent event. So the checklist and the drift note go with every model call, about 2,350 characters per call.
+Antigravity has no session, prompt or subagent event. So the checklist and the drift note go with every model call, 2,336 characters per call.
 
 The build check's starting point is taken on the first call of a conversation. When the build check fires, the model answers within the same turn, without the drift note. Subagents there receive no checklist.
 
@@ -128,7 +129,7 @@ Razor stays silent on a Codex patch that needs fuzzy matching, has ambiguous con
 
 ## Pausing the checks
 
-Send `razor off` or `razor on` to pause or resume the checks for the session. In Claude Code, `/razor off` and `/razor on` also work. A Codex client may intercept slash commands before the hooks see them, so use the plain words there.
+Send `razor off` or `razor on` to pause or resume the checks for the session. `stop razor` also pauses them. In Claude Code, `/razor off` and `/razor on` also work. A Codex client may intercept slash commands before the hooks see them, so use the plain words there.
 
 Send the toggle as a message of its own, with nothing else and no formatting. A final period or exclamation mark is fine. The switch is on or off by design; there are no levels.
 

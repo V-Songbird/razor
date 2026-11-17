@@ -24,20 +24,29 @@ plugin.json             # Antigravity metadata and the same version
 hooks.json              # Antigravity event wiring, keyed by the plugin name
 LICENSE                 # MIT
 README.md               # the front page: what it is, install, results
+CONTRIBUTING.md         # this file
+SECURITY.md             # how to report a vulnerability
 assets/                 # README art and the icons the manifests name
 docs/knowledge/         # how it works, settings and benchmarks pages
-skills/                 # skills read by every host
-├── skill-name/
-│   ├── SKILL.md        # skill definition
-│   └── references/     # Reference files loaded by the skill
+skills/
+└── unused/
+    ├── SKILL.md        # the unused-dependency audit, read by every host
+    ├── agents/         # Codex display name and default prompt
+    └── assets/         # the skill's icons
 hooks/
 ├── hooks.json          # Claude Code event wiring
 ├── codex-hooks.json    # Codex event wiring
 ├── codex-hook.js       # Codex event entrypoint
 ├── antigravity-hook.js # Antigravity event entrypoint
+├── *.js                # the checks: each gate, the build check, the toggle
+├── windows-launcher.ps1 # fallback the Codex hooks use on Windows
 └── lib/                # shared runtime and host adapters
-scripts/                # helper CLIs
+scripts/
+├── unused-deps.js      # the audit the unused skill runs
+├── build-windows-launchers.js # checks, or with --write regenerates, the Windows commands in hooks/codex-hooks.json
+└── git-hooks/          # pre-commit and the README navigation check
 tests/                  # Node tests and hook contract fixtures
+.github/workflows/      # CI
 ```
 
 The README and the pages under `docs/knowledge/` name the host beside every host-specific instruction and result. Images come from the brand kit and live in `assets/`. Each result identifies its host, model, date and sample size; keep losses and limits, show `Not measured` where evidence is absent, and never present a Claude Code result as a Codex result.
@@ -48,13 +57,13 @@ The README and the pages under `docs/knowledge/` name the host beside every host
 
 **Skills are instruction files read by every host.** Changes to `SKILL.md` affect how Claude Code, Codex and Antigravity interpret a skill — be precise, and verify the affected skill in a real session of each host before release. Claude Code substitutes `${CLAUDE_PLUGIN_ROOT}` in skill text; Codex and Antigravity do not, so they need a path relative to the skill file.
 
-**Hooks run on matching tool calls and session events.** Keep them fast, keep network calls out, and test on Windows, Linux, and macOS. Shared checks belong outside the host adapters. A new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`; `hooks/antigravity-hook.js` maps that host's three events onto the shared checks.
+**Hooks run on matching tool calls and session events.** Keep them fast, keep network calls out, and test on Windows, Linux, and macOS. Shared checks belong outside the host adapters. A new hook event needs an entry in `hooks/hooks.json`, `hooks/codex-hooks.json` and, when Antigravity has the event, the root `hooks.json`; `hooks/antigravity-hook.js` maps that host's three events onto the shared checks. After changing `hooks/codex-hooks.json`, run `node scripts/build-windows-launchers.js --write` so each Windows command matches; without `--write` the script only checks.
 
 ---
 
 ## Tests
 
-If this plugin has scripted behavior, run its tests before submitting:
+Run the tests before submitting:
 
 ```
 node --test tests/*.test.js
@@ -87,8 +96,8 @@ enabled or trusted the hooks. For Codex, follow [the README's Codex steps](READM
 for that live check; for Antigravity, `agy plugin validate .` checks the package
 shape and a disposable project shows whether the hooks fire.
 
-The recorded Claude Code benchmark figures stay as recorded. Codex results
-come from their own runs.
+A published benchmark figure stays as recorded. Each host's results come from
+that host's own runs.
 
 ---
 
@@ -102,8 +111,8 @@ git config core.hooksPath scripts/git-hooks
 
 This enables the following commit checks:
 
-- `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It no-ops if this plugin has no `tests/` directory. It also blocks a commit that stages a Markdown file while the root `README.md` lacks its navigation line, or while a link to a heading anchor in any tracked Markdown file no longer resolves.
-- The three plugins keep byte-identical copies of `pre-commit`; change them together.
+- `pre-commit` runs `node --test tests/*.test.js` and blocks the commit on failure. It also blocks a commit that stages a Markdown file while the root `README.md` lacks its navigation line, or while a link to a heading anchor in any tracked Markdown file no longer resolves. CI runs the same anchor check.
+- Other Foundry plugins keep byte-identical copies of `pre-commit`; change them together.
 - Public source names and attribution are allowed in documentation and commit messages. Keep credentials and personal session data out of commits.
 
 ---

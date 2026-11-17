@@ -64,7 +64,7 @@ Five checks sit behind it. Each is a hook, a small program the assistant's host 
 | Import guard | Before a file change that imports a package missing from your manifest |
 | Manifest guard | Before a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
 | New-file check | Before a new file, after the turn already created several |
-| Build check | At the end of a turn, when the session grew a lot with almost no deletions |
+| Build check | At the end of a turn, when the session grew a lot with almost no deletions, or added many new files |
 
 Razor never edits your code, manifests or lockfiles, and makes no network calls. [How Razor works](docs/knowledge/how-it-works.md) covers each check.
 
@@ -175,7 +175,7 @@ agy plugin install <path-to-clone>/razor
 | Limit | What it means for you |
 | --- | --- |
 | Your safeguards stay yours | Input validation, security and error handling that protects your work remain necessary. Scope you asked for explicitly stays yours to choose. |
-| File checks see one tool | They see only `Write` and `Edit` in Claude Code, `apply_patch` in Codex, and `write_file` and `edit_file` in Antigravity. |
+| File checks see one tool | They see only `Write` and `Edit` in Claude Code, `apply_patch` in Codex, and Antigravity's file write and edit tools. |
 | Shell-written files skip the file checks | This holds on every host. Shell commands are still checked for dependency installs, and the build check can still notice the growth. |
 | Codex stays silent on some patches | A patch that needs fuzzy matching, has ambiguous context or colliding paths, or targets remote, unreadable or binary content. `write_stdin` gets no check. |
 | The build check reads the whole working tree | Another session or tool writing in the same checkout can make it fire. Edits inside parts of a file already changed at session start are only approximated. |
@@ -187,7 +187,7 @@ agy plugin install <path-to-clone>/razor
 
 Each figure comes from recorded test sessions. The figures describe those runs, not yours, and results vary between runs.
 
-These are a few hundred live sessions, not a powered experiment. Only the Codex run and the Claude Opus 5.5 run measured the checklist's current wording.
+These are a few hundred live sessions, not a powered experiment. The checklist's wording is the same in the Codex run and the Claude Opus 5.5 run as it is today. The Razor revision of the Claude Opus 5 run is not recorded.
 
 ### Claude Code results
 
@@ -201,7 +201,7 @@ The run used Claude Code 2.1.296 on Windows on 2026-10-13, against Razor `a6ecf5
 
 **Razor cost more on four of the 13 jobs,** including the two with no code. Two repetitions are exploratory.
 
-The graphics show an earlier Claude Opus 5 run, published 2026-09-01:
+The graphics below show a Claude Opus 5 run, published 2026-09-01. Its run date is not recorded:
 
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
