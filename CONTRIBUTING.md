@@ -27,7 +27,8 @@ README.md               # the front page: what it is, install, results
 CONTRIBUTING.md         # this file
 SECURITY.md             # how to report a vulnerability
 assets/                 # README art and the icons the manifests name
-docs/knowledge/         # how it works, settings and benchmarks pages
+docs/knowledge/         # how it works, settings and benchmarks pages, with a published run's
+                        # per-session results and the script that prints its table
 skills/
 └── unused/
     ├── SKILL.md        # the unused-dependency audit, read by every host
