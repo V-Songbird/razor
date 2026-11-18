@@ -56,7 +56,7 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 
 Run on 2026-11-17 through the Claude Agent SDK 0.3.303, `claude-opus-5-5` and `claude-sonnet-5` at the default effort, against Razor [1.9.6](https://github.com/V-Songbird/razor/releases/tag/v1.9.6) and [Chisle](https://github.com/JayPokale/Chisle) at commit `cf0b24f` (3.12.1 plus 14 commits), loaded as a local plugin the same way as Razor. The 13 jobs of the full suite ran three times per setup and model: 39 sessions per cell, 234 in all, none failed to run. Lines are averaged over the eleven coding jobs, 33 sessions per cell. The whole run cost $13.38.
 
-The result of each of the 234 sessions is in [`benchmarks/20261117-152649.json`](../../benchmarks/20261117-152649.json), with the local plugin paths replaced by names. `node benchmarks/aggregate.js` prints this table and the differences below from that file. The session transcripts are not published.
+The result of each of the 234 sessions is in [`benchmarks-20261117-152649.json`](benchmarks-20261117-152649.json), with the local plugin paths replaced by names. `node docs/knowledge/benchmarks-aggregate.js` prints this table and the differences below from that file. The session transcripts are not published.
 
 What it shows:
 

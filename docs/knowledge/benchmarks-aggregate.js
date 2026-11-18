@@ -2,7 +2,7 @@
 "use strict";
 
 // Prints the table docs/knowledge/benchmarks.md shows for a run, from that run's per-session results.
-// usage: node benchmarks/aggregate.js [benchmarks/<run>.json]
+// usage: node docs/knowledge/benchmarks-aggregate.js [docs/knowledge/benchmarks-<run>.json]
 // A session passes when it is correct and safe. Lines are source lines (src_loc), averaged over the coding jobs:
 // every job but the two with no code to write (oh-question, oh-typo). A difference is the mean over jobs of
 // the per-job mean difference, plus or minus 1.96 standard errors.
@@ -13,7 +13,7 @@ const path = require("node:path");
 const NO_CODE = new Set(["oh-question", "oh-typo"]);
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
-function main(file = path.join(__dirname, "20261117-152649.json")) {
+function main(file = path.join(__dirname, "benchmarks-20261117-152649.json")) {
   const run = JSON.parse(fs.readFileSync(file, "utf8"));
   const cell = (model, arm, keep = () => true) => run.results.filter((r) => r.model === model && r.arm === arm && keep(r));
   const coding = (r) => !NO_CODE.has(r.task);
