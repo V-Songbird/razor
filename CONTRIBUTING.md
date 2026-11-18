@@ -28,6 +28,7 @@ CONTRIBUTING.md         # this file
 SECURITY.md             # how to report a vulnerability
 assets/                 # README art and the icons the manifests name
 docs/knowledge/         # how it works, settings and benchmarks pages
+benchmarks/             # per-session results of a published run and the script that prints its table
 skills/
 └── unused/
     ├── SKILL.md        # the unused-dependency audit, read by every host

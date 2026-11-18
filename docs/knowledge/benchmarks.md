@@ -52,9 +52,11 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 | Claude Opus 5.5 | chisle | 39/39 | 9.7 | $0.066 |
 | Claude Sonnet 5 | No plugin | 36/39 | 13.9 | $0.050 |
 | Claude Sonnet 5 | razor | 38/39 | 10.5 | $0.048 |
-| Claude Sonnet 5 | chisle | 36/39 | 10.6 | $0.050 |
+| Claude Sonnet 5 | chisle | 36/39 | 10.6 | $0.049 |
 
 Run on 2026-11-17 through the Claude Agent SDK 0.3.303, `claude-opus-5-5` and `claude-sonnet-5` at the default effort, against Razor [1.9.6](https://github.com/V-Songbird/razor/releases/tag/v1.9.6) and [Chisle](https://github.com/JayPokale/Chisle) at commit `cf0b24f` (3.12.1 plus 14 commits), loaded as a local plugin the same way as Razor. The 13 jobs of the full suite ran three times per setup and model: 39 sessions per cell, 234 in all, none failed to run. Lines are averaged over the eleven coding jobs, 33 sessions per cell. The whole run cost $13.38.
+
+The result of each of the 234 sessions is in [`benchmarks/20261117-152649.json`](../../benchmarks/20261117-152649.json), with the local plugin paths replaced by names. `node benchmarks/aggregate.js` prints this table and the differences below from that file. The session transcripts are not published.
 
 What it shows:
 
@@ -64,7 +66,7 @@ What it shows:
 - **New dependencies.** Told to use a library the project does not have, Razor never imported it in six sessions. Chisle imported it in all three Sonnet 5 sessions and none of the three on Opus 5.5. The setup with no plugin imported it in all six.
 - **Razor's one failure.** On Sonnet 5, one of three sessions of the retry-library job delivered code whose `retryCall` was not a function.
 
-The two models disagree on lines and cost against Chisle, so the run does not settle either. Three repetitions are exploratory, not a stable estimate. That Chisle's hooks ran in these sessions is inferred from its results differing from the no-plugin setup; it was not checked directly.
+The two models disagree on lines and cost against Chisle, so the run does not settle either. Three repetitions are exploratory, not a stable estimate. Chisle's hook ran in every one of its sessions. In 78 of 78, the session's event stream records its SessionStart hook ending with exit code 0 and 3,621 characters of output that open with `CHISLE ACTIVE`. Razor's did the same in 78 of 78 of its own, and the 78 sessions with no plugin record no hook. This was read from the streams on 2026-11-17, after the run.
 
 ## Claude Code: Claude Opus 5
 
