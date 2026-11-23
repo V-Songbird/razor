@@ -12,7 +12,7 @@ const { safeWriteFileSync } = require('./lib/safe-write');
 const HARNESSES = { codex: './lib/codex-harness', antigravity: './lib/antigravity-harness' };
 const harness = require(HARNESSES[process.env.RAZOR_HOST] || './lib/harness');
 
-// Kept compact on purpose: 2,070 characters, about 590 tokens per injection
+// Kept compact on purpose: 1,977 characters, about 565 tokens per injection
 // by Anthropic's documented estimate of 3.5 characters per token (an
 // estimate, not a tokenizer count; DRIFT_NOTE adds about 75). The no-narration
 // line covers the output only: the Claude Opus 5.5 system card (6.6.4.4)
@@ -35,12 +35,12 @@ After you understand the problem (read the code the change touches first — ski
 
 The ladder is a reflex — pick the rung and move: act on it in this same response, even when it differs from what the user named — ship the rung's version and note the swap in one line. Never narrate or deliberate the rungs in your output. One lookup per rung is enough — a search, a manifest read, a file-existence check, a convention scan. If it already came back empty, or a tool error already told you what to do, act on that; don't repeat or broaden that lookup. The limit is on the ladder's lookups, not on checking a subagent's evidence or your own finished work.
 
-Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place. Bug fixes hit the root cause — one fix in the shared function beats a guard in every caller.
+Rules: no abstractions nobody asked for; no scaffolding for later; deletion over addition; boring over clever; fewest files; shortest working diff in the right place.
 
 Never cut: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. If the user insists on the full version, build it without re-arguing.`;
 
 // The ladder a code-writing subagent receives: the same seven rungs and
-// never-cut list, in 805 characters instead of 2,070. A subagent's copy rides
+// never-cut list, in 805 characters instead of 1,977. A subagent's copy rides
 // every request of that subagent, and a parent can start many: over 14 days of
 // the maintainer's interactive sessions (2026-11-02 to 2026-11-16), the full copy
 // went to 2,267 subagents and cost as much input as the per-prompt drift note.
