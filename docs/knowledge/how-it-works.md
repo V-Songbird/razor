@@ -10,10 +10,11 @@ related_files:
 
 # How Razor works
 
-This page says what Razor does to a session, part by part. It is for a user who wants to predict what Razor will do. The short form is in the README, under [How it works](../../README.md#how-it-works).
+This page says what Razor does to a session, part by part. It is for a user who wants to predict what Razor will do. The short form is in the README, under [What does it do?](../../README.md#what-does-it-do).
 
 ## Contents
 
+- [What you can do](#what-you-can-do)
 - [The checklist](#the-checklist)
 - [The five checks](#the-five-checks)
 - [The new-file check](#the-new-file-check)
@@ -25,6 +26,34 @@ This page says what Razor does to a session, part by part. It is for a user who 
 - [Checking a Codex install](#checking-a-codex-install)
 - [Pausing the checks](#pausing-the-checks)
 - [The unused-dependency audit](#the-unused-dependency-audit)
+
+## What you can do
+
+Razor does its work on its own. The pause and audit commands are the only things you type.
+
+| You want to | What you get |
+| --- | --- |
+| Keep a small task small | The checklist and checks run on their own |
+| Pause or resume the checks | Send `razor off` or `razor on` |
+| Find unused dependencies | A report from the audit command below |
+| Turn Razor off | Set `RAZOR_DISABLE=1` |
+
+| Claude Code | Codex | Antigravity |
+| --- | --- | --- |
+| `/razor:unused` | `$razor:unused` | `/unused` |
+
+Send the toggle as a message of its own. Antigravity has no toggle.
+
+The audit never edits anything. Codex attaches instructions for `$razor:unused`, but not for a bare `$unused`.
+
+What you get from Razor:
+
+- **Less new code.** The assistant reuses what the project already has.
+- **Fewer packages.** It reconsiders a dependency before installing it.
+- **Growth noticed early.** It speaks up when one turn creates many files.
+- **Dead packages found.** An audit lists dependencies no source file uses.
+
+In one recorded Claude Code session on Claude Opus 5, run date not recorded, the ask "implement `parseQuery` in `query.js`" gave 4 lines built on `Object.fromEntries` and `URLSearchParams`, against 18 without Razor.
 
 ## The checklist
 

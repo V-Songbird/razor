@@ -9,7 +9,7 @@ related_files:
 
 # Razor settings
 
-This page lists every setting a user can change in razor. The three that most people reach for are in the README, under [Settings](../../README.md#settings).
+This page lists every setting a user can change in razor. The three that most people reach for are in the README, under [How to use it](../../README.md#how-to-use-it).
 
 Most people never touch these.
 
