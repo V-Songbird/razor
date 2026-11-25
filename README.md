@@ -25,13 +25,14 @@ Razor is a plugin for Claude Code, an AI coding assistant. It also runs on Codex
 You ask for a small query parser. The assistant reaches for a package, adds helper files, and leaves you more code to maintain.
 
 Razor puts a short checklist before new code. It asks whether the language or your project already has what the task needs.
+
 <p align="center"><img src="assets/mascot.svg" alt="Ember considers additions, learns the Razor checklist and gets to work." width="700"></p>
 
 *Ember is the mascot of the Foundry plugins. The scene is an illustration, not a measurement.*
 
 **You ask:** implement `parseQuery` in `query.js`.
 
-**You get:** 4 lines built on `Object.fromEntries` and `URLSearchParams`, against 18 without Razor. One recorded session each, on Claude Opus 5.
+**You get:** 4 lines built on `Object.fromEntries` and `URLSearchParams`, against 18 without Razor. One recorded Claude Code session each, on Claude Opus 5, run date not recorded.
 
 ## Why you'd want it
 
@@ -65,7 +66,7 @@ Five checks sit behind it. Each is a hook, a small program the assistant's host 
 | New-file check | Before a new file, after the turn already created several |
 | Build check | At the end of a turn, when the session grew a lot with almost no deletions, or added many new files |
 
-Razor never edits your code, manifests or lockfiles. It makes no network calls. [How Razor works](docs/knowledge/how-it-works.md) covers each check.
+Razor never edits your code, manifests or lockfiles. [How Razor works](docs/knowledge/how-it-works.md) has more.
 
 ## What you can do
 
@@ -82,7 +83,7 @@ Razor never edits your code, manifests or lockfiles. It makes no network calls. 
 
 Send the toggle as a message of its own. Antigravity has no toggle.
 
-The audit sorts findings into confirmed, likely and unknown, and never edits anything. Codex attaches instructions for `$razor:unused`, but not for a bare `$unused`.
+The audit never edits anything. Codex attaches instructions for `$razor:unused`, but not for a bare `$unused`.
 
 ### Settings
 
@@ -98,11 +99,9 @@ An environment variable wins over the settings panel.
 
 ## Install
 
-All three hosts need Node.js 22 or later and Git.
-
 ### Claude Code
 
-You need Claude Code 2.1.323 or later.
+You need Claude Code 2.1.323 or later, Node.js 22 or later, and Git.
 
 Inside Claude Code, run:
 
@@ -117,7 +116,7 @@ To check that it worked, run `claude plugin list` in a terminal. The list names 
 
 ### Codex
 
-You need a Codex host with plugin support.
+You need a Codex host with plugin support, Node.js 22 or later, and Git.
 
 In a terminal, run:
 
@@ -126,11 +125,13 @@ codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-Trust the exact hooks through your client's review flow, then start a new Codex session. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install) says what to check.
+Trust the hooks in your client's review flow. Then start a new session. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install).
+
+To check that it worked, run `codex plugin list --marketplace foundry` in a terminal. The list names `razor`.
 
 ### Antigravity
 
-You need the Antigravity CLI. It has no marketplace for third-party plugins, so you install from a copy of the Foundry repository. Replace `<path-to-clone>` with a folder of your choice.
+You need the Antigravity CLI, Node.js 22 or later, and Git. It has no plugin marketplace, so you install from a Foundry clone. Replace `<path-to-clone>` with a folder of your choice.
 
 In a terminal, run:
 
@@ -186,21 +187,25 @@ agy plugin install <path-to-clone>/razor
 
 Each figure comes from recorded test sessions. The figures describe those runs, not yours, and results vary between runs.
 
-These are a few hundred live sessions, not a powered experiment. The Razor revision of the Claude Opus 5 run is not recorded.
+These are a few hundred live sessions, not a powered experiment.
 
 ### Claude Code results
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"source":"docs/knowledge/benchmarks.md","date":"2026-10-13","reviewedAt":"2026-11-14"} -->
-| Model | Setup | Correct and safe | Mean coding lines |
-| --- | --- | --- | --- |
-| Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
-| Claude Opus 5.5 | razor | 26/26 | 8.7 |
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"source":"docs/knowledge/benchmarks.md","date":"2026-11-17","reviewedAt":"2026-11-17"} -->
+| Model | Setup | Correct and safe | Mean coding lines | Mean cost per session |
+| --- | --- | --- | --- | --- |
+| Claude Opus 5.5 | No plugin | 36/39 | 15.5 | $0.070 |
+| Claude Opus 5.5 | razor | 39/39 | 8.4 | $0.060 |
+| Claude Opus 5.5 | chisle | 39/39 | 9.7 | $0.066 |
+| Claude Sonnet 5 | No plugin | 36/39 | 13.9 | $0.050 |
+| Claude Sonnet 5 | razor | 38/39 | 10.5 | $0.048 |
+| Claude Sonnet 5 | chisle | 36/39 | 10.6 | $0.049 |
 
-The run used Claude Code 2.1.296 on Windows on 2026-10-13, against Razor `a6ecf5f`, identical to release [1.8.1](https://github.com/V-Songbird/razor/releases/tag/v1.8.1). It ran 13 jobs twice per setup: 26 sessions each.
+On 2026-11-17, the Claude Agent SDK ran 13 jobs three times per setup against Razor [1.9.6](https://github.com/V-Songbird/razor/releases/tag/v1.9.6) and [Chisle](https://github.com/JayPokale/Chisle): 39 sessions per row.
 
-**Razor cost more on four of the 13 jobs,** including the two with no code. Two repetitions are exploratory.
+**One Claude Sonnet 5 session failed with Razor: 38 of 39 passed.** Against Chisle, the gaps are small and the two models disagree.
 
-The graphics below show a Claude Opus 5 run, published 2026-09-01, with no recorded run date:
+The graphics below show a Claude Opus 5 run of 39 sessions per setup, published 2026-09-01, run date and Razor revision not recorded:
 
 <!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded",
 "revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.",

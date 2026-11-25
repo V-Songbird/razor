@@ -9,7 +9,7 @@ related_files:
 
 # Razor benchmarks
 
-This page holds every measurement Razor publishes, with its method and its limits. The README shows the newest table for each host, under [The numbers](../../README.md#the-numbers).
+This page holds every measurement Razor publishes, with its method and its limits. The README shows, under [The numbers](../../README.md#the-numbers), the three-setups run as Claude Code's lead table, the Claude Opus 5 run with its graphics, and the Codex run.
 
 Each result belongs to the named model and recorded run. Missing measurements stay marked as unmeasured. These are a few hundred sessions against a live model, not a powered experiment. Numbers move between runs, so read the direction, not the decimals.
 
