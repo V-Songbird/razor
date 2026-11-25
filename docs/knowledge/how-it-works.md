@@ -58,6 +58,10 @@ Behind the checklist sit five checks. Each speaks at most once, as a message to 
 
 The first three read your project's own manifests. `optionalDependencies` and `peerDependencies` count, and so do the Python equivalents. A package you already declared is never treated as new.
 
+The install guard also sees installs inside `bash -c`, `sh -c`, `zsh -c`, `pwsh -Command` or `cmd /c`, on later lines of a multi-line command, and behind PowerShell's `&`.
+
+The import guard and the manifest guard never nudge an edit the host itself would refuse, because its target is missing or repeated without replace-all.
+
 Each new dependency gets its own reconsideration. A command with several installs can get another nudge for a different package on a later retry.
 
 ## The new-file check
@@ -104,6 +108,8 @@ Read-only exploration and planning agents skip the checklist. Writing agents and
 ## Antigravity
 
 Antigravity has no session, prompt or subagent event. So the checklist and the drift note go with every model call, 2,336 characters per call.
+
+An edit that changes several parts of a package manifest in one call is checked as one edit.
 
 The build check's starting point is taken on the first call of a conversation. When the build check fires, the model answers within the same turn, without the drift note. Subagents there receive no checklist.
 

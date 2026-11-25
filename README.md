@@ -54,10 +54,9 @@ At the start of every session, Razor hands the assistant a checklist. The assist
 | 6 | Fits in one line? | One line. |
 | 7 | Only then | The least code that works. |
 
-Usually one of the first five says yes, so nothing new gets written. The checklist never cuts validation, error handling, security or accessibility.
+Usually one of the first five says yes. The checklist never cuts validation, error handling, security or accessibility.
 
-Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment. Each speaks once, and the retry always goes through.
-
+Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment.
 | Check | When it runs |
 | --- | --- |
 | Install guard | Before a shell command that adds a named package |
@@ -66,7 +65,7 @@ Five checks sit behind it. Each is a hook, a small program the assistant's host 
 | New-file check | Before a new file, after the turn already created several |
 | Build check | At the end of a turn, when the session grew a lot with almost no deletions, or added many new files |
 
-Razor never edits your code, manifests or lockfiles, and makes no network calls. [How Razor works](docs/knowledge/how-it-works.md) covers each check.
+Razor never edits your code, manifests or lockfiles. It makes no network calls. [How Razor works](docs/knowledge/how-it-works.md) covers each check.
 
 ## What you can do
 
@@ -81,13 +80,13 @@ Razor never edits your code, manifests or lockfiles, and makes no network calls.
 | --- | --- | --- |
 | `/razor:unused` | `$razor:unused` | `/unused` |
 
-Send the toggle as a message of its own, with no formatting. `/razor off` also works in Claude Code; Codex may intercept it. Antigravity has no toggle.
+Send the toggle as a message of its own. Antigravity has no toggle.
 
-The audit sorts findings into confirmed, likely and unknown. It never edits or uninstalls anything. Codex attaches the skill's instructions for `$razor:unused`, but not for a bare `$unused`.
+The audit sorts findings into confirmed, likely and unknown, and never edits anything. Codex attaches instructions for `$razor:unused`, but not for a bare `$unused`.
 
 ### Settings
 
-Most people never change a setting. An environment variable wins over the settings panel.
+An environment variable wins over the settings panel.
 
 | Setting | Values | What it does |
 | --- | --- | --- |
@@ -127,7 +126,7 @@ codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-Trust the exact hooks through your client's review flow, then start a new Codex session. The CLI and the desktop app each need their own review. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install) says what to watch for.
+Trust the exact hooks through your client's review flow, then start a new Codex session. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install) says what to check.
 
 ### Antigravity
 
@@ -152,7 +151,7 @@ In Claude Code, run these. Then start a new session:
 /plugin update razor@foundry
 ```
 
-In Codex, run these. Then start a new session:
+In Codex, run these. Then start a new session. A changed hook stays off until you trust it again in `/hooks`:
 
 ```text
 codex plugin marketplace upgrade
@@ -187,7 +186,7 @@ agy plugin install <path-to-clone>/razor
 
 Each figure comes from recorded test sessions. The figures describe those runs, not yours, and results vary between runs.
 
-These are a few hundred live sessions, not a powered experiment. The checklist's wording is the same in the Codex run and the Claude Opus 5.5 run as it is today. The Razor revision of the Claude Opus 5 run is not recorded.
+These are a few hundred live sessions, not a powered experiment. The Razor revision of the Claude Opus 5 run is not recorded.
 
 ### Claude Code results
 
@@ -201,8 +200,11 @@ The run used Claude Code 2.1.296 on Windows on 2026-10-13, against Razor `a6ecf5
 
 **Razor cost more on four of the 13 jobs,** including the two with no code. Two repetitions are exploratory.
 
-The graphics below show a Claude Opus 5 run, published 2026-09-01. Its run date is not recorded:
+The graphics below show a Claude Opus 5 run, published 2026-09-01, with no recorded run date:
 
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded",
+"revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.",
+"dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5 | No plugin | 35/39 | 18.3 |

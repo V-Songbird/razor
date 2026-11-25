@@ -10,9 +10,9 @@ Please include:
 - Steps to reproduce it
 - The version affected, if known
 
-The [releases page](https://github.com/V-Songbird/razor/releases) lists every version with its release notes.
-
 You can expect an acknowledgement within 7 days.
+
+The [releases page](https://github.com/V-Songbird/razor/releases) lists every version with its release notes.
 
 > [!NOTE]
 > This plugin runs code on your machine, including hooks and helper scripts. Reporting problems privately first gives us time to fix them before others can take advantage of them. Thank you for helping keep users safe.
