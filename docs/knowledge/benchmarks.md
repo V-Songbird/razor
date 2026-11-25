@@ -9,7 +9,7 @@ related_files:
 
 # Razor benchmarks
 
-This page holds every measurement Razor publishes, with its method and its limits. The README shows, under [The numbers](../../README.md#the-numbers), the three-setups run as Claude Code's lead table, the Claude Opus 5 run with its graphics, and the Codex run.
+This page holds every measurement Razor publishes, with its method and its limits. The README shows, under [Does it work?](../../README.md#does-it-work), the lead result of the three-setups run and the Claude Opus 5 graphic.
 
 Each result belongs to the named model and recorded run. Missing measurements stay marked as unmeasured. These are a few hundred sessions against a live model, not a powered experiment. Numbers move between runs, so read the direction, not the decimals.
 
@@ -32,7 +32,7 @@ The benchmark harness and the raw records behind these figures are kept outside 
 
 ## Claude Code: three setups
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"date":"2026-11-17","reviewedAt":"2026-11-17"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"source":"docs/knowledge/benchmarks.md","date":"2026-11-17","reviewedAt":"2026-11-24"} -->
 | Model | Setup | Correct and safe | Mean coding lines | Mean cost per session |
 | --- | --- | --- | --- | --- |
 | Claude Opus 5.5 | No plugin | 36/39 | 15.5 | $0.070 |
@@ -58,7 +58,7 @@ The two models disagree on lines and cost against Chisle, so the run does not se
 
 ## Claude Code: Claude Opus 5.5
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"date":"2026-10-13","reviewedAt":"2026-11-17"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"source":"docs/knowledge/benchmarks.md","date":"2026-10-13","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
@@ -70,7 +70,7 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 
 ## Claude Code: Claude Opus 5
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-17"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded","revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.","dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | Claude Opus 5 | No plugin | 35/39 | 18.3 |
@@ -78,15 +78,22 @@ Mean session cost was $0.086 with Razor and $0.100 without a plugin, a differenc
 
 Claude Code with its CLI version and effort not recorded, Claude Opus 5, 39 sessions per setup in one run; the run date and the Razor revision are not recorded, and the result was published on 2026-09-01 in `cbc92f3`. A clean session completed the job without adding a package. Lines are averaged over the eleven coding jobs. Mean session cost was $0.121 with Razor and $0.155 without a plugin. The runner put this run in a temp folder by default, where Razor's new-file check stays silent, so treat it as measuring Razor's other checks only.
 
-The README shows two graphics from this run. The first covers the 27 no-plugin sessions on the nine dependency jobs: 193 lines above Razor's edge never shipped with razor.
+Two graphics come from this run: the README shows the first, and this page shows both. The first covers the 27 no-plugin sessions on the nine dependency jobs: 193 lines above Razor's edge never shipped with razor.
 
 ![The Razor's edge across 27 columns, one per session without a plugin on the Claude Opus 5 run's nine dependency jobs. Each column is the lines that session added, and the edge sits where Razor's middle session landed on the same job: 193 lines above the edge never shipped with razor.](../../assets/hero.svg)
 
 The second is a recorded Claude Code demo on Claude Opus 5, published September 4, 2026 (run date not recorded). One session each got the same ask, implement `parseQuery` in `query.js`. Without Razor, Claude wrote it in 18 lines. With Razor, it wrote 4 lines built on `Object.fromEntries` and `URLSearchParams`. The averages over 3 sessions each way were the same.
 
+<details>
+<summary>Watch the recorded demo: the same request with and without Razor, on Claude Opus 5</summary>
+
+<p align="center"><img src="../../assets/demo.svg" alt="The same parseQuery ask side by side: 18 lines without razor, 4 lines with razor, built on Object.fromEntries and URLSearchParams." width="700"></p>
+
+</details>
+
 ## Codex: GPT-5.6 Sol
 
-<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"date":"2026-10-09","reviewedAt":"2026-11-17"} -->
+<!-- foundry:evidence {"platform":"Codex","status":"measured","models":["GPT-5.6 Sol"],"source":"docs/knowledge/benchmarks.md","date":"2026-10-09","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
 | --- | --- | --- | --- |
 | GPT-5.6 Sol | No plugin | 19/26 | 18.7 |

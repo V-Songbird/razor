@@ -101,7 +101,7 @@ Hook contract tests check messages, counters and file effects in isolated fixtur
 Validate the package for each host when you can:
 
 - **Claude Code:** `claude plugin validate .`.
-- **Codex:** follow [the README's Codex steps](README.md#codex) for the live check that the hooks are trusted and fire.
+- **Codex:** follow [the Codex install steps](docs/knowledge/install.md#codex) for the live check that the hooks are trusted and fire.
 - **Antigravity:** `agy plugin validate .` checks the package shape, and a disposable project shows whether the hooks fire.
 
 ---
