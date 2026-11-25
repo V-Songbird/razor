@@ -55,18 +55,9 @@ At the start of every session, Razor hands the assistant a checklist. The assist
 | 6 | Fits in one line? | One line. |
 | 7 | Only then | The least code that works. |
 
-Usually one of the first five says yes. The checklist never cuts validation, error handling, security or accessibility.
+The checklist never cuts validation, error handling, security or accessibility.
 
-Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment.
-| Check | When it runs |
-| --- | --- |
-| Install guard | Before a shell command that adds a named package |
-| Import guard | Before a file change that imports a package missing from your manifest |
-| Manifest guard | Before a direct edit to `package.json`, `requirements.txt` or `pyproject.toml` |
-| New-file check | Before a new file, after the turn already created several |
-| Build check | At the end of a turn, when the session grew a lot with almost no deletions, or added many new files |
-
-Razor never edits your code, manifests or lockfiles. [How Razor works](docs/knowledge/how-it-works.md) has more.
+Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment. [The five checks](docs/knowledge/how-it-works.md#the-five-checks) says when each runs. Razor never edits your code, manifests or lockfiles.
 
 ## What you can do
 
@@ -125,7 +116,7 @@ codex plugin marketplace add V-Songbird/foundry
 codex plugin add razor@foundry
 ```
 
-Trust the hooks in your client's review flow. Then start a new session. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install).
+Trust the hooks in your client's review flow. Then start a new session. [Checking a Codex install](docs/knowledge/how-it-works.md#checking-a-codex-install) says what to watch for.
 
 To check that it worked, run `codex plugin list --marketplace foundry` in a terminal. The list names `razor`.
 
@@ -191,7 +182,7 @@ These are a few hundred live sessions, not a powered experiment.
 
 ### Claude Code results
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"source":"docs/knowledge/benchmarks.md","date":"2026-11-17","reviewedAt":"2026-11-17"} -->
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5","Claude Sonnet 5"],"source":"docs/knowledge/benchmarks.md","date":"2026-11-17","reviewedAt":"2026-11-24"} -->
 | Model | Setup | Correct and safe | Mean coding lines | Mean cost per session |
 | --- | --- | --- | --- | --- |
 | Claude Opus 5.5 | No plugin | 36/39 | 15.5 | $0.070 |

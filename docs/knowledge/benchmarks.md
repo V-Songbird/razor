@@ -16,8 +16,8 @@ Each result belongs to the named model and recorded run. Missing measurements st
 ## Contents
 
 - [How to read these results](#how-to-read-these-results)
-- [Claude Code: Claude Opus 5.5](#claude-code-claude-opus-55)
 - [Claude Code: three setups](#claude-code-three-setups)
+- [Claude Code: Claude Opus 5.5](#claude-code-claude-opus-55)
 - [Claude Code: Claude Opus 5](#claude-code-claude-opus-5)
 - [Codex: GPT-5.6 Sol](#codex-gpt-56-sol)
 - [Antigravity](#antigravity)
@@ -29,18 +29,6 @@ Each result belongs to the named model and recorded run. Missing measurements st
 The checklist's wording in the Codex run and the Claude Opus 5.5 run is the wording Razor sends today. The Razor revision of the Claude Opus 5 run is not recorded.
 
 The benchmark harness and the raw records behind these figures are kept outside this repository. They are not distributed with the plugin. [Foundry](https://github.com/V-Songbird/foundry) lists this plugin.
-
-## Claude Code: Claude Opus 5.5
-
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"date":"2026-10-13","reviewedAt":"2026-11-17"} -->
-| Model | Setup | Correct and safe | Mean coding lines |
-| --- | --- | --- | --- |
-| Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
-| Claude Opus 5.5 | razor | 26/26 | 8.7 |
-
-Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against Razor checked out at `a6ecf5f`, whose plugin code is identical to release [1.8.1](https://github.com/V-Songbird/razor/releases/tag/v1.8.1) (`6174db6`): the 13 jobs of the full suite, twice each per setup, 26 sessions per setup, none failed to run. Both no-plugin failures were the same job: told to use axios, it imported axios into a project that does not have it. Lines are averaged over the eleven coding jobs, 22 sessions per setup; Razor wrote fewer lines on ten of them and tied on the eleventh.
-
-Mean session cost was $0.086 with Razor and $0.100 without a plugin, a difference of $0.014 ± $0.013 per job. Razor cost more on four of the 13 jobs: the two with no code, by 17% on the question and 14% on the typo fix, and two coding jobs. Its time saving, 3.2 ± 5.9 seconds per job, is inside the noise. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so Razor's new-file check was active; it did not speak.
 
 ## Claude Code: three setups
 
@@ -67,6 +55,18 @@ What it shows:
 - **Razor's one failure.** On Sonnet 5, one of three sessions of the retry-library job delivered code whose `retryCall` was not a function.
 
 The two models disagree on lines and cost against Chisle, so the run does not settle either. Three repetitions are exploratory, not a stable estimate. Chisle's hook ran in every one of its sessions. In 78 of 78, the session's event stream records its SessionStart hook ending with exit code 0 and 3,621 characters of output that open with `CHISLE ACTIVE`. Razor's did the same in 78 of 78 of its own, and the 78 sessions with no plugin record no hook. This was read from the streams on 2026-11-17, after the run.
+
+## Claude Code: Claude Opus 5.5
+
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5.5"],"date":"2026-10-13","reviewedAt":"2026-11-17"} -->
+| Model | Setup | Correct and safe | Mean coding lines |
+| --- | --- | --- | --- |
+| Claude Opus 5.5 | No plugin | 24/26 | 16.2 |
+| Claude Opus 5.5 | razor | 26/26 | 8.7 |
+
+Claude Code 2.1.296 on Windows, `claude-opus-5-5` at the CLI's default effort, on 2026-10-13 against Razor checked out at `a6ecf5f`, whose plugin code is identical to release [1.8.1](https://github.com/V-Songbird/razor/releases/tag/v1.8.1) (`6174db6`): the 13 jobs of the full suite, twice each per setup, 26 sessions per setup, none failed to run. Both no-plugin failures were the same job: told to use axios, it imported axios into a project that does not have it. Lines are averaged over the eleven coding jobs, 22 sessions per setup; Razor wrote fewer lines on ten of them and tied on the eleventh.
+
+Mean session cost was $0.086 with Razor and $0.100 without a plugin, a difference of $0.014 ± $0.013 per job. Razor cost more on four of the 13 jobs: the two with no code, by 17% on the question and 14% on the typo fix, and two coding jobs. Its time saving, 3.2 ± 5.9 seconds per job, is inside the noise. Two repetitions are exploratory, not a stable estimate. These workspaces sat outside the temp folder, so Razor's new-file check was active; it did not speak.
 
 ## Claude Code: Claude Opus 5
 
