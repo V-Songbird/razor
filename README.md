@@ -202,7 +202,7 @@ The run used Claude Code 2.1.296 on Windows on 2026-10-13, against Razor `a6ecf5
 
 The graphics below show a Claude Opus 5 run, published 2026-09-01, with no recorded run date:
 
-<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"date":"unknown","revision":"not recorded",
+<!-- foundry:evidence {"platform":"Claude","status":"measured","models":["Claude Opus 5"],"source":"docs/knowledge/benchmarks.md","date":"unknown","revision":"not recorded",
 "revisionReason":"The run was published on 2026-09-01 in cbc92f3; the razor revision it measured is not recorded.",
 "dateReason":"The retained source excerpt does not state a run date.","reviewedAt":"2026-11-17"} -->
 | Model | Setup | Correct and safe | Mean coding lines |
