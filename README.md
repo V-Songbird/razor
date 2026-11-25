@@ -55,9 +55,9 @@ At the start of every session, Razor hands the assistant a checklist. The assist
 | 6 | Fits in one line? | One line. |
 | 7 | Only then | The least code that works. |
 
-The checklist never cuts validation, error handling, security or accessibility.
+The checklist never cuts validation, error handling, security or accessibility. Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment. Razor never edits your code, manifests or lockfiles.
 
-Five checks sit behind it. Each is a hook, a small program the assistant's host runs at a set moment. [The five checks](docs/knowledge/how-it-works.md#the-five-checks) says when each runs. Razor never edits your code, manifests or lockfiles.
+[The five checks](docs/knowledge/how-it-works.md#the-five-checks) says when each runs.
 
 ## What you can do
 
